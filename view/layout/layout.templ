@@ -1,0 +1,21 @@
+package layout
+
+templ Layout(title string) {
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link href="public/style.css" rel="stylesheet"/>
+			<title>{ title }</title>
+		</head>
+		<body>
+			<header>
+				<h1>My Site</h1>
+			</header>
+			<main>
+				{ children... }
+			</main>
+			<footer><small>© 2025</small></footer>
+		</body>
+	</html>
+}
