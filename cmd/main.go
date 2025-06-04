@@ -9,11 +9,18 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/handlers"
+	"github.com/json-bateman/jellyfin-grabber/internal/config"
 )
 
 const PORT = 8080
 
 func main() {
+	// Load jellyfin settings and others into memory at the entrypoint of the app
+	err := config.Load("settings.json")
+	if err != nil {
+		fmt.Println("Could not load settings.json file")
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
