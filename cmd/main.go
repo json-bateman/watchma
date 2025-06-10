@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,11 +11,16 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/handlers"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
+	"github.com/json-bateman/jellyfin-grabber/internal/log"
 )
 
 const PORT = 8080
 
 func main() {
+	// Set up Logger
+	sl := log.New(slog.LevelInfo)
+	slog.SetDefault(sl)
+
 	// Load jellyfin settings and others into memory at the entrypoint of the app
 	err := config.Load("settings.json")
 	if err != nil {
