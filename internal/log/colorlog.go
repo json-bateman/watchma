@@ -8,14 +8,15 @@ import (
 	"time"
 )
 
-// ANSI color codes
+// ANSI color codes, bolded
 const (
 	ColorReset  = "\033[0m"
-	ColorRed    = "\033[31m"
-	ColorYellow = "\033[33m"
-	ColorGreen  = "\033[32m"
-	ColorBlue   = "\033[34m"
-	ColorGray   = "\033[90m"
+	ColorBlack  = "\033[1;30m"
+	ColorRed    = "\033[1;31m"
+	ColorYellow = "\033[1;33m"
+	ColorGreen  = "\033[1;32m"
+	ColorBlue   = "\033[1;34m"
+	ColorGray   = "\033[1;90m"
 )
 
 type ColorHandler struct {

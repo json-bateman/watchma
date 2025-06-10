@@ -24,7 +24,7 @@ func main() {
 	// Load jellyfin settings and others into memory at the entrypoint of the app
 	err := config.Load("settings.json")
 	if err != nil {
-		fmt.Println("Could not load settings.json file")
+		slog.Warn("Could not load settings.json file")
 	}
 
 	r := chi.NewRouter()
@@ -32,7 +32,7 @@ func main() {
 
 	// Serve the public/ folder at all times
 	workdir, _ := os.Getwd()
-	fmt.Println("Working dir:", workdir)
+	slog.Info(fmt.Sprintf("\nWorking directory:\n%s\n", workdir))
 	filesDir := http.Dir(filepath.Join(workdir, "public"))
 	handlers.FileServer(r, "/public", filesDir)
 
@@ -40,6 +40,6 @@ func main() {
 	r.Get("/", handlers.IndexHandler{}.Show)
 	r.Get("/home", handlers.HomeHandler{}.Show)
 
-	fmt.Printf("Listening on port :%d\n", PORT)
+	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))
 	http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
 }

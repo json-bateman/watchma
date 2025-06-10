@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func printHtmlRes(resp *http.Response) {
+func printRes(resp *http.Response) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		slog.Error("error reading response body: %v", err)
