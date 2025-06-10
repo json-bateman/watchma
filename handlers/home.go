@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -17,12 +16,14 @@ func (h HomeHandler) Show(w http.ResponseWriter, r *http.Request) {
 
 	allMovies, err := api.FetchJellyfinMovies()
 	if err != nil {
-		fmt.Println("Error fetching jellyfin movies!")
+		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
+		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
+		return
 	}
 
 	items, err := api.FetchJellyfinMovies()
 	if err != nil {
-		log.Printf("fetch failed: %v", err)
+		slog.Error("fetch failed: %v\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
 		return
 	}

@@ -5,30 +5,34 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
+
+	"github.com/json-bateman/jellyfin-grabber/internal/config"
 )
 
 // Sets Jellyfin Token as the header on the request.
-func newJellyfinRequest(method, path string) (*http.Request, error) {
-	token := os.Getenv("JELLYFIN_TOKEN")
-	if token == "" {
-		slog.Warn("Jellyfin token has not been set in settings.json")
-		return nil, fmt.Errorf("Jellyfin token has not been set in settings.json")
+func newJellyfinRequest(method, apiEndpoint string) (*http.Request, error) {
+	apiKey := config.Config.Jellyfin.APIKey
+	baseUrl := config.Config.Jellyfin.BaseURL
+	if apiKey == "" {
+		slog.Warn("Jellyfin api_key has not been set in settings.json")
+		return nil, fmt.Errorf("Jellyfin api_key has not been set in settings.json")
 	}
 
-	fullURL := fmt.Sprintf("http://lilnasx.cloud/%s", path)
+	fullURL := fmt.Sprintf("%s%s", baseUrl, apiEndpoint)
+	fmt.Println(apiKey)
+	fmt.Println(fullURL)
 	req, err := http.NewRequest(method, fullURL, nil)
 	if err != nil {
 		slog.Error("Error Fetching from provided URL")
 		return nil, err
 	}
 
-	req.Header.Set("X-Emby-Token", os.Getenv("JELLYFIN_TOKEN"))
+	req.Header.Set("X-Emby-Token", apiKey)
 	return req, nil
 }
 
 func FetchJellyfinMovies() (*JellyfinItems, error) {
-	req, err := newJellyfinRequest("get", "http://lilnasx.cloud/Items?IncludeItemTypes=Movie&Recursive=true")
+	req, err := newJellyfinRequest("get", "/Items?IncludeItemTypes=Movie&Recursive=true")
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +41,8 @@ func FetchJellyfinMovies() (*JellyfinItems, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	printHtmlRes(resp)
 
 	defer resp.Body.Close()
 
