@@ -1,11 +1,23 @@
 package home
 
+import "github.com/json-bateman/jellyfin-grabber/internal/api"
 import "github.com/json-bateman/jellyfin-grabber/view/layout"
 
-templ Home() {
-	@layout.Layout("Home") {
+templ Home(movies *api.JellyfinItems) {
+	@layout.Layout("Home page") {
 		<section>
-			<h1 class="text-blue-500 w-24">Hello from home!</h1>
+			<h1>Movies</h1>
+			<div class="flex justify-center flex-wrap gap-2 md:gap-4">
+				for _, m := range movies.Items {
+					<div class="w-40 md:w-64 border border-black">
+						<img
+							src={ "https://lilnasx.cloud" + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+							alt="Cover for “{ m.Name }”"
+						/>
+						<p>{ m.Name }</p>
+					</div>
+				}
+			</div>
 		</section>
 	}
 }

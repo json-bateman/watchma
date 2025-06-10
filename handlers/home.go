@@ -31,10 +31,6 @@ func (h HomeHandler) Show(w http.ResponseWriter, r *http.Request) {
 		log.Printf("no movies found")
 	}
 
-	for _, m := range allMovies.Items {
-		slog.Info(m.Name)
-	}
-
-	component := home.Home()
+	component := home.Home(allMovies)
 	templ.Handler(component).ServeHTTP(w, r)
 }
