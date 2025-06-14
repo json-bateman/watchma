@@ -28,3 +28,7 @@ func Load(path string) error {
 
 	return json.NewDecoder(f).Decode(&Config)
 }
+
+func (a *AppConfig) ReturnApiKey() string {
+	return a.Jellyfin.APIKey
+}

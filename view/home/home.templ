@@ -2,22 +2,38 @@ package home
 
 import "github.com/json-bateman/jellyfin-grabber/internal/api"
 import "github.com/json-bateman/jellyfin-grabber/view/layout"
+import "github.com/json-bateman/jellyfin-grabber/internal/config"
 
 templ Home(movies *api.JellyfinItems) {
 	@layout.Layout("Home page") {
-		<section>
-			<h1>Movies</h1>
-			<div class="flex justify-center flex-wrap gap-2 md:gap-4">
-				for _, m := range movies.Items {
-					<div class="w-40 md:w-64 border border-black">
-						<img
-							src={ "https://lilnasx.cloud" + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
-							alt="Cover for “{ m.Name }”"
-						/>
-						<p>{ m.Name }</p>
-					</div>
-				}
-			</div>
-		</section>
+		<div data-signals-selected="{movies:[]}">
+			<section>
+				<h1>Movies</h1>
+				<div class="flex justify-center flex-wrap gap-2 md:gap-4">
+					for _, m := range movies.Items {
+						<label
+							class="block w-40 md:w-64 border cursor-pointer transition-all"
+							data-class-border-green="$selected.includes('{m.Id}')"
+							data-class-bg-green-100="$selected.includes('{m.Id}')"
+						>
+							<input type="checkbox" value={ m.Id } data-bind-selected/>
+							<img
+								src={ config.Config.Jellyfin.BaseURL + "/Items/" + m.Id + "/Images/Primary?tag=" +
+                    m.ImageTags.Primary }
+								alt="Cover for {m.Name}"
+								class="w-full"
+							/>
+							<p class="mt-2 text-center">{ m.Name }</p>
+						</label>
+					}
+				</div>
+				<!--
+				<h2 class="mt-6">Selected:</h2>
+				<ul>
+					<li for="key in Object.keys($selectedMovies)" data-if="$selectedMovies[key]"></li>
+				</ul>
+                -->
+			</section>
+		</div>
 	}
 }
