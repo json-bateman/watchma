@@ -15,9 +15,11 @@ const (
 	ColorRed    = "\033[1;31m"
 	ColorYellow = "\033[1;33m"
 	ColorGreen  = "\033[1;32m"
-	ColorBlue   = "\033[1;34m"
+	ColorBlue   = "\033[34m" // WebSocket non bolded
 	ColorGray   = "\033[1;90m"
 )
+
+const LevelWebSocket slog.Level = slog.Level(2)
 
 type ColorHandler struct {
 	level slog.Level
@@ -33,22 +35,30 @@ func (h *ColorHandler) Enabled(_ context.Context, level slog.Level) bool {
 
 func (h *ColorHandler) Handle(_ context.Context, r slog.Record) error {
 	var color string
+	var levelLabel string
 
 	switch {
+	case r.Level == LevelWebSocket:
+		color = ColorBlue
+		levelLabel = "WS"
 	case r.Level >= slog.LevelError:
 		color = ColorRed
+		levelLabel = "ERROR"
 	case r.Level >= slog.LevelWarn:
 		color = ColorYellow
+		levelLabel = "WARN"
 	case r.Level >= slog.LevelInfo:
 		color = ColorGreen
+		levelLabel = "INFO"
 	default:
 		color = ColorGray
+		levelLabel = "OTHER"
 	}
 
 	timestamp := r.Time.Format(time.RFC3339)
 	msg := r.Message
 
-	fmt.Fprintf(os.Stderr, "%s[%s] [%s] %s%s\n", color, timestamp, r.Level.String(), msg, ColorReset)
+	fmt.Fprintf(os.Stderr, "%s[%s] [%s] %s%s\n", color, timestamp, levelLabel, msg, ColorReset)
 
 	if r.NumAttrs() > 0 {
 		r.Attrs(func(a slog.Attr) bool {

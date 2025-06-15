@@ -1,0 +1,9 @@
+package game
+
+import "github.com/json-bateman/jellyfin-grabber/view/layout"
+
+templ Rooms() {
+	@layout.Layout("Home page") {
+		<div data-signals="{movies: []}"></div>
+	}
+}

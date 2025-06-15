@@ -43,6 +43,9 @@ func main() {
 	r.Get("/movies", components.Movies)
 	r.Post("/api/movies", api.PostMovies)
 
+	// Websocket Connection for the game
+	r.Get("/ws/game", api.GameWebSocket)
+
 	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))
 	http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
 }
