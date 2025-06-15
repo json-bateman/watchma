@@ -1,4 +1,4 @@
-package handlers
+package components
 
 import (
 	"log"
@@ -6,22 +6,20 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
-	"github.com/json-bateman/jellyfin-grabber/internal/api"
-	"github.com/json-bateman/jellyfin-grabber/view/home"
+	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+	"github.com/json-bateman/jellyfin-grabber/view/movies"
 )
 
-type HomeHandler struct{}
+func Movies(w http.ResponseWriter, r *http.Request) {
 
-func (h HomeHandler) Show(w http.ResponseWriter, r *http.Request) {
-
-	allMovies, err := api.FetchJellyfinMovies()
+	allMovies, err := jellyfin.FetchJellyfinMovies()
 	if err != nil {
 		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
 		return
 	}
 
-	items, err := api.FetchJellyfinMovies()
+	items, err := jellyfin.FetchJellyfinMovies()
 	if err != nil {
 		slog.Error("fetch failed: %v\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
@@ -31,6 +29,6 @@ func (h HomeHandler) Show(w http.ResponseWriter, r *http.Request) {
 		log.Printf("no movies found")
 	}
 
-	component := home.Home(allMovies)
+	component := movies.Movies(allMovies)
 	templ.Handler(component).ServeHTTP(w, r)
 }

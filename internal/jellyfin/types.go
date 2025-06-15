@@ -1,4 +1,4 @@
-package api
+package jellyfin
 
 type JellyfinItem struct {
 	Name            string  `json:"Name"`

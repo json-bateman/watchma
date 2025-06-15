@@ -10,6 +10,8 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/handlers"
+	"github.com/json-bateman/jellyfin-grabber/handlers/api"
+	"github.com/json-bateman/jellyfin-grabber/handlers/components"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/log"
 )
@@ -37,8 +39,9 @@ func main() {
 	handlers.FileServer(r, "/public", filesDir)
 
 	// Routes
-	r.Get("/", handlers.IndexHandler{}.Show)
-	r.Get("/home", handlers.HomeHandler{}.Show)
+	r.Get("/", components.Index)
+	r.Get("/movies", components.Movies)
+	r.Post("/api/movies", api.PostMovies)
 
 	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))
 	http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)

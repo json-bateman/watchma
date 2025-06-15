@@ -1,22 +1,21 @@
-package home
+package movies
 
-import "github.com/json-bateman/jellyfin-grabber/internal/api"
 import "github.com/json-bateman/jellyfin-grabber/view/layout"
 import "github.com/json-bateman/jellyfin-grabber/internal/config"
+import "github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
 
-templ Home(movies *api.JellyfinItems) {
+// data-on-change="$movies.includes(evt.target.value) ? $movies = $movies.filter((m) => m !== evt.target.value) :
+// $movies.push(evt.target.value); console.log($movies)"
+templ Movies(movies *jellyfin.JellyfinItems) {
 	@layout.Layout("Home page") {
 		<div data-signals="{movies: []}">
 			<section>
 				<h1>Movies</h1>
+				<button data-on-click="@post('/api/movies')">Submit Choices</button>
 				<div class="flex justify-center flex-wrap gap-2 md:gap-4">
 					for _, m := range movies.Items {
 						<label class="block w-40 md:w-64 border cursor-pointer transition-all">
-							<input
-								type="checkbox"
-								value={ m.Id }
-								data-on-change="$movies.push(evt.target.value); console.log($movies)"
-							/>
+							<input type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
 							<img
 								src={ config.Config.Jellyfin.BaseURL + "/Items/" + m.Id + "/Images/Primary?tag=" +
                     m.ImageTags.Primary }

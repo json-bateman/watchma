@@ -1,4 +1,4 @@
-package handlers
+package components
 
 import (
 	"net/http"
@@ -7,9 +7,7 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/view"
 )
 
-type IndexHandler struct{}
-
-func (h IndexHandler) Show(w http.ResponseWriter, r *http.Request) {
+func Index(w http.ResponseWriter, r *http.Request) {
 	component := view.Index("Sup wit it")
 	templ.Handler(component).ServeHTTP(w, r)
 }
