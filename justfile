@@ -12,6 +12,8 @@ generate: tailwind
 run: generate
     go run ./cmd
 
+watch:
+    {{tailwindcss}} -i ./public/.tailwind.css -o ./public/style.css --watch
 # Format Go and Templ files (optional bonus)
 fmt:
     go fmt ./...

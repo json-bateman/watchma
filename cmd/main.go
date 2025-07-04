@@ -47,5 +47,11 @@ func main() {
 	r.Get("/ws/game", api.GameWebSocket)
 
 	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))
-	http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
+
+	err = http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
+	if err != nil {
+		slog.Error("server exited with error", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
 }

@@ -14,6 +14,7 @@ type movieReq struct {
 
 func PostMovies(w http.ResponseWriter, r *http.Request) {
 	var movies movieReq
+	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&movies); err != nil {
 		internal.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
 		return
