@@ -8,12 +8,12 @@ package movies
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/json-bateman/jellyfin-grabber/view/layout"
-import "github.com/json-bateman/jellyfin-grabber/internal/config"
-import "github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+import (
+	"github.com/json-bateman/jellyfin-grabber/internal/config"
+	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+	"github.com/json-bateman/jellyfin-grabber/view/layout"
+)
 
-// data-on-change="$movies.includes(evt.target.value) ? $movies = $movies.filter((m) => m !== evt.target.value) :
-// $movies.push(evt.target.value); console.log($movies)"
 func Movies(movies *jellyfin.JellyfinItems) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -47,12 +47,12 @@ func Movies(movies *jellyfin.JellyfinItems) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-signals=\"{movies: []}\"><section><h1>Movies</h1><button class=\"border border-green-500 cursor-pointer\" data-on-click=\"@post(&#39;/api/movies&#39;)\">Submit Choices</button><div class=\"flex justify-center flex-wrap gap-2 md:gap-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-signals=\"{movies: []}\"><section class=\"text-text flex flex-col items-center justify-center\"><span class=\"text-3xl\">Movies</span> <button class=\"border-3 w-60 bg-secondary cursor-pointer mb-6\" data-on-click=\"@post(&#39;/api/movies&#39;)\">Submit Choices</button><div class=\"flex justify-center flex-wrap gap-2 md:gap-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, m := range movies.Items {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<label class=\"block w-40 md:w-64 border border-3 cursor-pointer has-[input:checked]:border-orange-500 has-[input:checked]:border-5\"><input class=\"hidden\" type=\"checkbox\" value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<label class=\"block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4\"><input class=\"hidden\" type=\"checkbox\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

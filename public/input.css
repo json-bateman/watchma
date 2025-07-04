@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* Generated from https://www.realtimecolors.com/ */
+@theme {
+  --color-text: oklch(var(--text));
+  --color-background: oklch(var(--background));
+  --color-primary: oklch(var(--primary));
+  --color-secondary: oklch(var(--secondary));
+  --color-accent: oklch(var(--accent));
+}
+
+@layer base {
+  html[data-theme="light"] {
+    --text: 19.5% 0.011 284.2;
+    --background: 91.2% 0.014 284.2;
+    --primary: 35.8% 0.063 284.2;
+    --secondary: 69.1% 0.053 284.2;
+    --accent: 52.4% 0.088 284.2;
+  }
+  
+  html[data-theme="dark"] {
+    --text: 92.8% 0.009 284.2;
+    --background: 20.7% 0.014 284.2;
+    --primary: 72.8% 0.063 284.2;
+    --secondary: 38.7% 0.053 284.2;
+    --accent: 52.4% 0.088 284.2;
+  }
+}

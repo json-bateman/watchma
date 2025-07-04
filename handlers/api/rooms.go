@@ -5,13 +5,13 @@ func Game() {
 
 func (s GameStep) String() string {
 	switch s {
-	case StepLobby:
+	case Lobby:
 		return "lobby"
-	case StepVoting:
+	case Voting:
 		return "voting"
-	case StepResults:
+	case Results:
 		return "results"
-	case StepFinished:
+	case Finished:
 		return "finished"
 	default:
 		return "unknown"

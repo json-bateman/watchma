@@ -3,10 +3,10 @@ package api
 type GameStep int
 
 const (
-	StepLobby GameStep = iota
-	StepVoting
-	StepResults
-	StepFinished
+	Lobby GameStep = iota
+	Voting
+	Results
+	Finished
 )
 
 type GameSession struct {

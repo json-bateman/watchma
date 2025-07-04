@@ -43,20 +43,7 @@ func Index(name string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-2xl flex flex-col w-24 border-black border\">Hello, ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(name)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/index.templ`, Line: 7, Col: 76}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><script>\n    const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n    ws.onopen = () => {\n        ws.send(\"Hello from client!\");\n    };\n    ws.onmessage = (event) => {\n        console.log(\"Received from server:\", event.data);\n    };\n</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-10 text-2xl bg-primary flex flex-col w-24 border-black border\"></div><div class=\"h-10 text-2xl text-text flex flex-col w-24 border-black border\"></div><div class=\"h-10 text-2xl bg-secondary flex flex-col w-24 border-black border\"></div><script>\n            const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n            ws.onopen = () => {\n                ws.send(\"Hello from client!\");\n            };\n            ws.onmessage = (event) => {\n                console.log(\"Received from server:\", event.data);\n            };\n        </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
