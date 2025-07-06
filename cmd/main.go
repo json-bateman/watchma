@@ -48,7 +48,6 @@ func main() {
 	r.Post("/api/movies", api.PostMovies)
 	r.Post("/api/host", api.HostForm)
 
-	// Websocket Connection for the game
 	r.Get("/ws/game", api.GameWebSocket)
 
 	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))

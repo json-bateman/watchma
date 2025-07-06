@@ -60,10 +60,56 @@
   @apply flex justify-center py-1 border-3 w-60 bg-secondary cursor-pointer mb-6 hover:bg-secondary/75;
 }
 
+.btn-success {
+  @apply flex justify-center py-1 border-3 w-60 bg-green-400 cursor-pointer mb-6 hover:bg-green-400/75;
+}
+
 .input {
   @apply border-3 pl-1 py-1 text-lg h-9
 }
 
 .select {
   @apply border-3 pl-1 py-1 text-lg h-9
+}
+
+
+/* ---------------
+Regular CSS Styles
+--------------- */
+
+.loader {
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  position: relative;
+}
+
+.loader::after,
+.loader::before {
+  content: '';
+  box-sizing: border-box;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #FFF;
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: animloader 2s linear infinite;
+}
+
+.loader::after {
+  animation-delay: 1s;
+}
+
+@keyframes animloader {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }

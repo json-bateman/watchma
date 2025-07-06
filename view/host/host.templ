@@ -5,7 +5,7 @@ import "github.com/json-bateman/jellyfin-grabber/view/common"
 templ HostPage() {
 	@common.Layout("Home page") {
 		<section class="text-text flex flex-col items-center justify-center">
-			<form action="/api/host" method="POST" class="flex flex-col gap-2">
+			<form class="flex flex-col gap-2">
 				<div class="flex flex-col">
 					<label for="room-name">Room Name</label>
 					<input id="room-name" class="input" name="roomName" required placeholder="Room Name..."/>
@@ -19,8 +19,12 @@ templ HostPage() {
 						<option value="200">200</option>
 					</select>
 				</div>
-				<button class="btn" type="submit">Submit</button>
+				<button id="hostSubmit" type="button" data-on-click="@post('/api/host', {contentType: 'form'})" class="btn">Submit</button>
 			</form>
 		</section>
 	}
+}
+
+templ SubmitButton() {
+	<button type="button" id="hostSubmit" class="btn-success">Room Hosted Successfully!</button>
 }
