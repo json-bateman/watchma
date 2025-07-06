@@ -3,11 +3,11 @@ package movies
 import (
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
-	"github.com/json-bateman/jellyfin-grabber/view/layout"
+	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-templ Movies(movies *jellyfin.JellyfinItems) {
-	@layout.Layout("Home page") {
+templ MoviesPage(movies *jellyfin.JellyfinItems) {
+	@common.Layout("Home page") {
 		<div data-signals="{movies: []}">
 			<section class="text-text flex flex-col items-center justify-center">
 				<span class="text-3xl">Movies</span>

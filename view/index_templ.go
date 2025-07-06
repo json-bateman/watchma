@@ -8,9 +8,9 @@ package view
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/json-bateman/jellyfin-grabber/view/layout"
+import "github.com/json-bateman/jellyfin-grabber/view/common"
 
-func Index(name string) templ.Component {
+func IndexPage(name string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,13 +43,13 @@ func Index(name string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-10 text-2xl bg-primary flex flex-col w-24 border-black border\"></div><div class=\"h-10 text-2xl text-text flex flex-col w-24 border-black border\"></div><div class=\"h-10 text-2xl bg-secondary flex flex-col w-24 border-black border\"></div><script>\n            const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n            ws.onopen = () => {\n                ws.send(\"Hello from client!\");\n            };\n            ws.onmessage = (event) => {\n                console.log(\"Received from server:\", event.data);\n            };\n        </script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-7xl text-text font-serif\">Welcome to the Movie Showdown</div><div class=\"flex\"><a href=\"host\" class=\"flex justify-center border-3 w-60 bg-primary cursor-pointer mb-6\">Host Room</a> <button class=\"flex justify-center border-3 w-60 bg-secondary cursor-pointer mb-6\">Join Room</button></div><script>\n            const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n            ws.onopen = () => {\n                ws.send(\"Hello from client!\");\n            };\n            ws.onmessage = (event) => {\n                console.log(\"Received from server:\", event.data);\n            };\n        </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layout.Layout("index page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Layout("index page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

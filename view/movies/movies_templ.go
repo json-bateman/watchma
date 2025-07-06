@@ -11,10 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
-	"github.com/json-bateman/jellyfin-grabber/view/layout"
+	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-func Movies(movies *jellyfin.JellyfinItems) templ.Component {
+func MoviesPage(movies *jellyfin.JellyfinItems) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -103,7 +103,7 @@ func Movies(movies *jellyfin.JellyfinItems) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layout.Layout("Home page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Layout("Home page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

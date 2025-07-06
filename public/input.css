@@ -7,6 +7,8 @@
   --color-primary: oklch(var(--primary));
   --color-secondary: oklch(var(--secondary));
   --color-accent: oklch(var(--accent));
+  --font-serif: var(--ff-serif);
+  --font-sans: var(--ff-sans);
 }
 
 @layer base {
@@ -17,7 +19,7 @@
     --secondary: 69.1% 0.053 284.2;
     --accent: 52.4% 0.088 284.2;
   }
-  
+
   html[data-theme="dark"] {
     --text: 92.8% 0.009 284.2;
     --background: 20.7% 0.014 284.2;
@@ -25,4 +27,27 @@
     --secondary: 38.7% 0.053 284.2;
     --accent: 52.4% 0.088 284.2;
   }
+
+  html[data-theme="burgundy-light"] {
+    --text: 17, 47%, 6%;
+    --background: 10, 60%, 98%;
+    --primary: 18, 51%, 51%;
+    --secondary: 19, 53%, 75%;
+    --accent: 18, 57%, 64%;
+  }
+
+  html[data-theme="burgundy-dark"] {
+    --text: 17, 47%, 94%;
+    --background: 10, 60%, 2%;
+    --primary: 18, 51%, 49%;
+    --secondary: 19, 53%, 25%;
+    --accent: 18, 57%, 36%;
+  }
+
+  :root {
+    /* font-families */
+    --ff-serif: "IBM Plex Serif", serif;
+    --ff-sans: "Mulish", sans-serif;
+  }
+
 }

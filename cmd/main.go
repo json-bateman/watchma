@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/handlers"
 	"github.com/json-bateman/jellyfin-grabber/handlers/api"
-	"github.com/json-bateman/jellyfin-grabber/handlers/components"
+	"github.com/json-bateman/jellyfin-grabber/handlers/pages"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/log"
 )
@@ -39,8 +39,9 @@ func main() {
 	handlers.FileServer(r, "/public", filesDir)
 
 	// Routes
-	r.Get("/", components.Index)
-	r.Get("/movies", components.Movies)
+	r.Get("/", pages.Index)
+	r.Get("/movies", pages.Movies)
+	r.Get("/host", pages.Host)
 	r.Post("/api/movies", api.PostMovies)
 
 	// Websocket Connection for the game

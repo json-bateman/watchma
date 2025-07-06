@@ -1,12 +1,14 @@
 package view
 
-import "github.com/json-bateman/jellyfin-grabber/view/layout"
+import "github.com/json-bateman/jellyfin-grabber/view/common"
 
-templ Index(name string) {
-	@layout.Layout("index page") {
-		<div class="h-10 text-2xl bg-primary flex flex-col w-24 border-black border"></div>
-		<div class="h-10 text-2xl text-text flex flex-col w-24 border-black border"></div>
-		<div class="h-10 text-2xl bg-secondary flex flex-col w-24 border-black border"></div>
+templ IndexPage(name string) {
+	@common.Layout("index page") {
+		<div class="text-7xl text-text font-serif">Welcome to the Movie Showdown</div>
+		<div class="flex">
+			<a href="host" class="flex justify-center border-3 w-60 bg-primary cursor-pointer mb-6">Host Room</a>
+			<button class="flex justify-center border-3 w-60 bg-secondary cursor-pointer mb-6">Join Room</button>
+		</div>
 		<script>
             const ws = new WebSocket("ws://localhost:8080/ws/game");
             ws.onopen = () => {
