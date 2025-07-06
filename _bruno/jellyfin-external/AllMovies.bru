@@ -1,0 +1,20 @@
+meta {
+  name: AllMovies
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://lilnasx.cloud/Items?IncludeItemTypes=Movie&Recursive=true
+  body: none
+  auth: inherit
+}
+
+params:query {
+  IncludeItemTypes: Movie
+  Recursive: true
+}
+
+headers {
+  X-Emby-Token: {{JELLYFIN_API_KEY}}
+}

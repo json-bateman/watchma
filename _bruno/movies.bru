@@ -1,0 +1,15 @@
+meta {
+  name: movies
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/movies
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {"movies": ["44ec42326d1c995e14894f1fbe90e58e"]}
+}

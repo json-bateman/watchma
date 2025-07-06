@@ -1,0 +1,15 @@
+meta {
+  name: MediaFolders
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://lilnasx.cloud/Library/MediaFolders
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-Emby-Token: {{JELLYFIN_API_KEY}}
+}

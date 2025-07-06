@@ -17,3 +17,10 @@ other, `air` will rebuild the go files on save, `just watch` will recompile the 
 - templ `go install github.com/a-h/templ/cmd/templ@latest`
 - tailwindcss [The CLI tool is
 here](https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.1.8)
+
+### Using Bruno (basically offline postman)
+I have all the api endpoints saved in the _bruno folder [install bruno](https://www.usebruno.com/)
+if you want to use these endpoints. Make sure to copy your `.env` file in the root of the `_bruno` 
+directory so the endpoints can use the environment variables in their requests.
+[here's](https://docs.usebruno.com/secrets-management/dotenv-file) some info on how to store bruno
+secrets.

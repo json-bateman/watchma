@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "name": "Jellyfin-Grabber",
+  "type": "collection",
+  "ignore": [
+    ".git"
+  ]
+}
