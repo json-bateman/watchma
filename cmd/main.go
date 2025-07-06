@@ -18,19 +18,18 @@ import (
 
 const PORT = 8080
 
+type AppConfig struct {
+	JellyfinApiKey string
+	BaseUrl        string
+}
+
 func main() {
-	// Set up Logger
-	sl := log.New(slog.LevelInfo)
-	slog.SetDefault(sl)
-
-	// Load jellyfin settings and others into memory at the entrypoint of the app
-	err := config.Load("settings.json")
-	if err != nil {
-		slog.Warn("Could not load settings.json file")
-	}
-
+	// Chi Router for endpoint hits
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	// Go Logger for everything else
+	sl := log.New(slog.LevelInfo)
+	slog.SetDefault(sl)
 
 	// Serve the public/ folder at all times
 	workdir, _ := os.Getwd()
@@ -38,18 +37,23 @@ func main() {
 	filesDir := http.Dir(filepath.Join(workdir, "public"))
 	handlers.FileServer(r, "/public", filesDir)
 
+	// Load config from environment or .env
+	config.LoadConfig()
+
 	// Routes
 	r.Get("/", pages.Index)
 	r.Get("/movies", pages.Movies)
 	r.Get("/host", pages.Host)
+
 	r.Post("/api/movies", api.PostMovies)
+	r.Post("/api/host", api.HostForm)
 
 	// Websocket Connection for the game
 	r.Get("/ws/game", api.GameWebSocket)
 
 	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))
 
-	err = http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), r)
 	if err != nil {
 		slog.Error("server exited with error", slog.String("error", err.Error()))
 		os.Exit(1)

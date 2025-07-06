@@ -10,7 +10,9 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true }, // For dev only! Lock down in prod.
+	// For dev only. CORS stuff.
+	// TODO: change this by prod.
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
 func GameWebSocket(w http.ResponseWriter, r *http.Request) {

@@ -17,10 +17,10 @@ templ MoviesPage(movies *jellyfin.JellyfinItems) {
 						<label class="block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4">
 							<input class="hidden" type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
 							<img
-								src={ config.Config.Jellyfin.BaseURL + "/Items/" + m.Id + "/Images/Primary?tag=" +
+								src={ config.Config.BaseUrl + "/Items/" + m.Id + "/Images/Primary?tag=" +
                     m.ImageTags.Primary }
 								alt={ "Cover for " + m.Name }
-								class="w-full"
+								class="w-full h-full object-cover"
 							/>
 						</label>
 					}

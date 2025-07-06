@@ -43,7 +43,7 @@ func HostPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text flex flex-col items-center justify-center\"><form><label>Room Name</label></form></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text flex flex-col items-center justify-center\"><form action=\"/api/host\" method=\"POST\" class=\"flex flex-col gap-2\"><div class=\"flex flex-col\"><label for=\"room-name\">Room Name</label> <input id=\"room-name\" class=\"input\" name=\"roomName\" required placeholder=\"Room Name...\"></div><div class=\"flex flex-col\"><label for=\"movies\">Movie Count</label> <select id=\"movies\" name=\"movies\" class=\"select\"><option value=\"20\">20</option> <option value=\"50\">50</option> <option value=\"100\">100</option> <option value=\"200\">200</option></select></div><button class=\"btn\" type=\"submit\">Submit</button></form></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

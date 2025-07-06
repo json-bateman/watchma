@@ -10,8 +10,8 @@ import (
 
 // Sets Jellyfin Token as the header on the request.
 func newJellyfinRequest(method, apiEndpoint string) (*http.Request, error) {
-	apiKey := config.Config.Jellyfin.APIKey
-	baseUrl := config.Config.Jellyfin.BaseURL
+	apiKey := config.Config.JellyfinApiKey
+	baseUrl := config.Config.BaseUrl
 	if apiKey == "" {
 		return nil, fmt.Errorf("Jellyfin api_key has not been set in settings.json")
 	}

@@ -6,8 +6,8 @@ templ IndexPage(name string) {
 	@common.Layout("index page") {
 		<div class="text-7xl text-text font-serif">Welcome to the Movie Showdown</div>
 		<div class="flex">
-			<a href="host" class="flex justify-center border-3 w-60 bg-primary cursor-pointer mb-6">Host Room</a>
-			<button class="flex justify-center border-3 w-60 bg-secondary cursor-pointer mb-6">Join Room</button>
+			<a href="host" class="btn">Host Room</a>
+			<button class="btn-secondary">Join Room</button>
 		</div>
 		<script>
             const ws = new WebSocket("ws://localhost:8080/ws/game");

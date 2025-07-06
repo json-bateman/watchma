@@ -70,7 +70,7 @@ func MoviesPage(movies *jellyfin.JellyfinItems) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(config.Config.Jellyfin.BaseURL + "/Items/" + m.Id + "/Images/Primary?tag=" +
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(config.Config.BaseUrl + "/Items/" + m.Id + "/Images/Primary?tag=" +
 					m.ImageTags.Primary)
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/movies/movies.templ`, Line: 21, Col: 39}
@@ -92,7 +92,7 @@ func MoviesPage(movies *jellyfin.JellyfinItems) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full\"></label>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-full h-full object-cover\"></label>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
