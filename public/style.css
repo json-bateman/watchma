@@ -15,6 +15,8 @@
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-xl: 1.25rem;
     --text-xl--line-height: calc(1.75 / 1.25);
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
     --text-3xl: 1.875rem;
     --text-3xl--line-height: calc(2.25 / 1.875);
     --text-7xl: 4.5rem;
@@ -181,6 +183,9 @@
   .visible {
     visibility: visible;
   }
+  .z-7 {
+    z-index: 7;
+  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
@@ -198,6 +203,9 @@
     @media (width >= 96rem) {
       max-width: 96rem;
     }
+  }
+  .m-7 {
+    margin: calc(var(--spacing) * 7);
   }
   .mb-6 {
     margin-bottom: calc(var(--spacing) * 6);
@@ -220,8 +228,17 @@
   .table {
     display: table;
   }
+  .h-7 {
+    height: calc(var(--spacing) * 7);
+  }
   .h-full {
     height: 100%;
+  }
+  .min-h-full {
+    min-height: 100%;
+  }
+  .min-h-svh {
+    min-height: 100svh;
   }
   .w-40 {
     width: calc(var(--spacing) * 40);
@@ -256,6 +273,12 @@
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
+  .self-end {
+    align-self: flex-end;
+  }
+  .justify-self-end {
+    justify-self: flex-end;
+  }
   .truncate {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -265,9 +288,28 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-2 {
+    border-style: var(--tw-border-style);
+    border-width: 2px;
+  }
   .border-3 {
     border-style: var(--tw-border-style);
     border-width: 3px;
+  }
+  .border-t-2 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 2px;
+  }
+  .border-t-3 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 3px;
+  }
+  .border-t-4 {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 4px;
+  }
+  .border-orange-400 {
+    border-color: var(--color-orange-400);
   }
   .bg-background {
     background-color: var(--color-background);
@@ -281,8 +323,21 @@
   .p-5 {
     padding: calc(var(--spacing) * 5);
   }
+  .p-7 {
+    padding: calc(var(--spacing) * 7);
+  }
+  .pt-2 {
+    padding-top: calc(var(--spacing) * 2);
+  }
+  .text-center {
+    text-align: center;
+  }
   .font-serif {
     font-family: var(--font-serif);
+  }
+  .text-2xl {
+    font-size: var(--text-2xl);
+    line-height: var(--tw-leading, var(--text-2xl--line-height));
   }
   .text-3xl {
     font-size: var(--text-3xl);

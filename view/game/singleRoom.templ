@@ -1,0 +1,15 @@
+package game
+
+import "github.com/json-bateman/jellyfin-grabber/view/common"
+
+templ SingleRoom(name string) {
+	@common.Layout("name") {
+		<section>
+			<div>Room Name: { name }</div>
+			<div>Players: </div>
+			<span>1.</span>
+			<span>2.</span>
+			<span>3.</span>
+		</section>
+	}
+}

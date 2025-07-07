@@ -7,25 +7,31 @@ import (
 )
 
 templ MoviesPage(movies *jellyfin.JellyfinItems) {
-	@common.Layout("Home page") {
+	@common.Layout("Movies page") {
 		<div data-signals="{movies: []}">
-			<section class="text-text flex flex-col items-center justify-center">
+			<section class="flex flex-col justify-center items-center">
 				<span class="text-3xl">Movies</span>
-				<button class="border-3 w-60 bg-secondary cursor-pointer mb-6" data-on-click="@post('/api/movies')">Submit Choices</button>
-				<div class="flex justify-center flex-wrap gap-2 md:gap-4">
-					for _, m := range movies.Items {
-						<label class="block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4">
-							<input class="hidden" type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
-							<img
-								src={ config.Config.BaseUrl + "/Items/" + m.Id + "/Images/Primary?tag=" +
+				<div class="text-text flex flex-col items-center justify-center" id="moviesSubmit">
+					<button class="btn mb-6" data-on-click="@post('/api/movies')">Submit Choices</button>
+					<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
+						for _, m := range movies.Items {
+							<label class="block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4">
+								<input class="hidden" type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
+								<img
+									src={ config.Config.BaseUrl + "/Items/" + m.Id + "/Images/Primary?tag=" +
                     m.ImageTags.Primary }
-								alt={ "Cover for " + m.Name }
-								class="w-full h-full object-cover"
-							/>
-						</label>
-					}
+									alt={ "Cover for " + m.Name }
+									class="w-full h-full object-cover"
+								/>
+							</label>
+						}
+					</div>
 				</div>
 			</section>
 		</div>
 	}
+}
+
+templ SubmitButton() {
+	<button type="button" id="moviesSubmit" class="btn-success">Movies Submitted!</button>
 }

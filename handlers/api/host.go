@@ -3,13 +3,14 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
-	"github.com/json-bateman/jellyfin-grabber/view/host"
-	"github.com/starfederation/datastar/sdk/go"
+	"github.com/json-bateman/jellyfin-grabber/internal/rooms"
 )
 
 func HostForm(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(1 << 15) // 32KB
+	err := r.ParseForm()
+	// err := r.ParseMultipartForm(1 << 15) // 32KB
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
 		return
@@ -20,12 +21,17 @@ func HostForm(w http.ResponseWriter, r *http.Request) {
 	// Access fields by name
 	// TODO: Something with this data, maybe put it in a room struct
 	roomName := r.FormValue("roomName")
-	movies := r.FormValue("movies")
+	moviesStr := r.FormValue("movies")
+	movies, err := strconv.Atoi(moviesStr)
+	if err != nil {
+		http.Error(w, "Movies must be a number", http.StatusBadRequest)
+	}
+	if rooms.AllRooms.RoomExists(roomName) {
+		http.Error(w, "This room name already exists", http.StatusBadRequest)
+		return
+	}
+	rooms.AllRooms.AddRoom(roomName, &rooms.GameSession{MovieNumber: movies})
 
-	// TODO: Maybe delete this and just redirect user to the room
-	sse := datastar.NewSSE(w, r)
-	sse.MergeFragmentTempl(host.SubmitButton())
-
-	fmt.Printf("Room Name: %s\nmovies: %s\n", roomName, movies)
-	fmt.Fprintf(w, "Room Name: %s\nmovies: %s", roomName, movies)
+	// Redirect to /host/room after POST
+	http.Redirect(w, r, fmt.Sprintf("/room?name=%s", roomName), http.StatusSeeOther)
 }
