@@ -8,9 +8,12 @@ package game
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/json-bateman/jellyfin-grabber/view/common"
+import (
+	"github.com/json-bateman/jellyfin-grabber/internal/rooms"
+	"github.com/json-bateman/jellyfin-grabber/view/common"
+)
 
-func SingleRoom(name string) templ.Component {
+func SingleRoom(room *rooms.Room) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,21 +51,21 @@ func SingleRoom(name string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/game/singleRoom.templ`, Line: 8, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/game/singleRoom.templ`, Line: 11, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div>Players: </div><span>1.</span> <span>2.</span> <span>3.</span></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div>Players: </div><span>1.</span> <span>2.</span> <span>3.</span></section><script>\n        const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n        ws.onopen = () => {\n            ws.send(\"Hello from client!\");\n        };\n        ws.onmessage = (event) => {\n            console.log(\"Received from server:\", event.data);\n        };\n    </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.Layout("name").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Layout(room.Name).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

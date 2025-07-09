@@ -43,7 +43,7 @@ func IndexPage(name string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-7xl text-text font-serif\">Welcome to the Movie Showdown</div><div class=\"flex\"><a href=\"host\" class=\"btn\">Host Room</a> <button class=\"btn-secondary\">Join Room</button></div><script>\n            const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n            ws.onopen = () => {\n                ws.send(\"Hello from client!\");\n            };\n            ws.onmessage = (event) => {\n                console.log(\"Received from server:\", event.data);\n            };\n        </script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-5xl mb-4 text-text font-serif\">Welcome to the Movie Showdown</div><div class=\"flex gap-2\"><a href=\"host\" class=\"btn\">Host Room</a> <a href=\"join\" class=\"btn-secondary\">Join Room</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

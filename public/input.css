@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Tag styles */
+table {
+  width: 100%;
+}
+
+th,
+td {
+  padding: 4px 8px;
+}
+
+
 /* Generated from https://www.realtimecolors.com/ */
 @theme {
   --color-text: oklch(var(--text));
@@ -51,6 +62,7 @@
   }
 
 }
+
 
 .btn {
   @apply flex justify-center py-1 border-3 border-text text-background w-60 bg-primary cursor-pointer mb-6 hover:bg-primary/75;

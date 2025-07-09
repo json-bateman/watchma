@@ -33,5 +33,5 @@ func HostForm(w http.ResponseWriter, r *http.Request) {
 	rooms.AllRooms.AddRoom(roomName, &rooms.GameSession{MovieNumber: movies})
 
 	// Redirect to /host/room after POST
-	http.Redirect(w, r, fmt.Sprintf("/room?name=%s", roomName), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
 }

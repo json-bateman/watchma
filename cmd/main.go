@@ -44,7 +44,8 @@ func main() {
 	r.Get("/", pages.Index)
 	r.Get("/movies", pages.Movies)
 	r.Get("/host", pages.Host)
-	r.Get("/room", pages.SingleRoom)
+	r.Get("/join", pages.Join)
+	r.Get("/room/{roomName}", pages.SingleRoom)
 
 	r.Post("/api/movies", api.PostMovies)
 	r.Post("/api/host", api.HostForm)

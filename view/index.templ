@@ -4,19 +4,10 @@ import "github.com/json-bateman/jellyfin-grabber/view/common"
 
 templ IndexPage(name string) {
 	@common.Layout("Index Page") {
-		<div class="text-7xl text-text font-serif">Welcome to the Movie Showdown</div>
-		<div class="flex">
+		<div class="text-5xl mb-4 text-text font-serif">Welcome to the Movie Showdown</div>
+		<div class="flex gap-2">
 			<a href="host" class="btn">Host Room</a>
-			<button class="btn-secondary">Join Room</button>
+			<a href="join" class="btn-secondary">Join Room</a>
 		</div>
-		<script>
-            const ws = new WebSocket("ws://localhost:8080/ws/game");
-            ws.onopen = () => {
-                ws.send("Hello from client!");
-            };
-            ws.onmessage = (event) => {
-                console.log("Received from server:", event.data);
-            };
-        </script>
 	}
 }

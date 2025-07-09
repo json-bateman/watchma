@@ -1,0 +1,39 @@
+package join 
+
+import (
+	"github.com/json-bateman/jellyfin-grabber/internal/rooms"
+	"github.com/json-bateman/jellyfin-grabber/view/common"
+)
+
+templ JoinPage(rooms map[string]*rooms.Room) {
+	@common.Layout("Join Page") {
+		<section class="text-text flex flex-col items-center justify-center">
+			if len(rooms) > 0 {
+				<span class="text-3xl mb-6">Join Room</span>
+				<div class="shadow-lg overflow-auto w-full min-w-80 max-w-[900px] gap-2">
+					<table class="border-collapse [&>tbody>*:nth-child(odd)]:bg-background [&>tbody>*:nth-child(even)]:bg-primary/20">
+						<thead class="bg-primary/40 shadow-md text-left">
+							<tr>
+								<th>Room Name</th>
+								<th>Number of Movies</th>
+								<th>Number of Players</th>
+							</tr>
+						</thead>
+						<tbody class="w-full">
+							for _, room := range rooms {
+								<tr>
+									<td><a class="text-accent" href={ templ.SafeURL("room/" + room.Name) }>{ room.Name }</a></td>
+									<td>{ room.Game.MovieNumber }</td>
+									<td>5</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			} else {
+				<span class="text-2xl mb-4 text-primary">No Rooms have been created!</span>
+				<a href="/host" class="btn">Host Room</a>
+			}
+		</section>
+	}
+}

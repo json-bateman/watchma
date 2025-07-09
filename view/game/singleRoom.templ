@@ -1,15 +1,27 @@
 package game
 
-import "github.com/json-bateman/jellyfin-grabber/view/common"
+import (
+	"github.com/json-bateman/jellyfin-grabber/internal/rooms"
+	"github.com/json-bateman/jellyfin-grabber/view/common"
+)
 
-templ SingleRoom(name string) {
-	@common.Layout("name") {
+templ SingleRoom(room *rooms.Room) {
+	@common.Layout(room.Name) {
 		<section>
-			<div>Room Name: { name }</div>
+			<div>Room Name: { room.Name }</div>
 			<div>Players: </div>
 			<span>1.</span>
 			<span>2.</span>
 			<span>3.</span>
 		</section>
+		<script>
+        const ws = new WebSocket("ws://localhost:8080/ws/game");
+        ws.onopen = () => {
+            ws.send("Hello from client!");
+        };
+        ws.onmessage = (event) => {
+            console.log("Received from server:", event.data);
+        };
+    </script>
 	}
 }

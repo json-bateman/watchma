@@ -1,4 +1,0 @@
-package api
-
-func Game() {
-}
