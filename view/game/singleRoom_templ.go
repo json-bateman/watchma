@@ -59,7 +59,20 @@ func SingleRoom(room *rooms.Room) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div>Players: </div><span>1.</span> <span>2.</span> <span>3.</span></section><script>\n        const ws = new WebSocket(\"ws://localhost:8080/ws/game\");\n        ws.onopen = () => {\n            ws.send(\"Hello from client!\");\n        };\n        ws.onmessage = (event) => {\n            console.log(\"Received from server:\", event.data);\n        };\n    </script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div id=\"inputs\"><div class=\"flex flex-col\"><label for=\"username\">Username:</label> <input data-bind-roomname class=\"input\" type=\"hidden\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(room.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/game/singleRoom.templ`, Line: 15, Col: 76}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"> <input data-bind-username class=\"input\" type=\"text\" name=\"username\" id=\"username\" placeholder=\"Enter your username\" required></div><button data-on-click=\"@post(&#39;/api/username&#39;)\" class=\"btn\" type=\"submit\">Set Username</button><div id=\"error\" class=\"hidden\"></div></div></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

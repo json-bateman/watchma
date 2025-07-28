@@ -7,7 +7,7 @@ import (
 
 	"github.com/json-bateman/jellyfin-grabber/internal"
 	"github.com/json-bateman/jellyfin-grabber/view/movies"
-	datastar "github.com/starfederation/datastar/sdk/go"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 type movieReq struct {
@@ -29,7 +29,7 @@ func PostMovies(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Maybe delete this and just redirect user to the room
 	sse := datastar.NewSSE(w, r)
-	sse.MergeFragmentTempl(movies.SubmitButton())
+	sse.PatchElementTempl(movies.SubmitButton())
 
 	fmt.Println(moviesReq.MoviesReq)
 }

@@ -9,19 +9,19 @@ templ SingleRoom(room *rooms.Room) {
 	@common.Layout(room.Name) {
 		<section>
 			<div>Room Name: { room.Name }</div>
-			<div>Players: </div>
-			<span>1.</span>
-			<span>2.</span>
-			<span>3.</span>
+			<div id="inputs">
+				<div class="flex flex-col">
+					<label for="username">Username:</label>
+					<input data-bind-roomname class="input" type="hidden" value={ room.Name }/>
+					<input data-bind-username class="input" type="text" name="username" id="username" placeholder="Enter your username" required/>
+				</div>
+				<button
+					data-on-click="@post('/api/username')"
+					class="btn"
+					type="submit"
+				>Set Username</button>
+				<div id="error" class="hidden"></div>
+			</div>
 		</section>
-		<script>
-        const ws = new WebSocket("ws://localhost:8080/ws/game");
-        ws.onopen = () => {
-            ws.send("Hello from client!");
-        };
-        ws.onmessage = (event) => {
-            console.log("Received from server:", event.data);
-        };
-    </script>
 	}
 }
