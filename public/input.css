@@ -23,7 +23,7 @@ td {
 }
 
 @layer base {
-  html[data-theme="light"] {
+  :root:has(body[data-theme="light"]) {
     --text: 19.5% 0.011 284.2;
     --background: 91.2% 0.014 284.2;
     --primary: 35.8% 0.063 284.2;
@@ -31,7 +31,7 @@ td {
     --accent: 52.4% 0.088 284.2;
   }
 
-  html[data-theme="dark"] {
+  :root:has(body[data-theme="dark"]) {
     --text: 92.8% 0.009 284.2;
     --background: 20.7% 0.014 284.2;
     --primary: 72.8% 0.063 284.2;
@@ -39,20 +39,20 @@ td {
     --accent: 52.4% 0.088 284.2;
   }
 
-  html[data-theme="burgundy-light"] {
-    --text: 17, 47%, 6%;
-    --background: 10, 60%, 98%;
-    --primary: 18, 51%, 51%;
-    --secondary: 19, 53%, 75%;
-    --accent: 18, 57%, 64%;
+  :root:has(body[data-theme="burgundy-light"]) {
+    --text: 16.7% 0.0195 43.33;
+    --background: 98.27% 0.0055 31.05;
+    --primary: 61.54% 0.1255 43.54;
+    --secondary: 80.24% 0.0618 46.87;
+    --accent: 71.46% 0.1005 43.45;
   }
 
-  html[data-theme="burgundy-dark"] {
-    --text: 17, 47%, 94%;
-    --background: 10, 60%, 2%;
-    --primary: 18, 51%, 49%;
-    --secondary: 19, 53%, 25%;
-    --accent: 18, 57%, 36%;
+  :root:has(body[data-theme="burgundy-dark"]) {
+    --text: 95.28% 0.0121 43.28;
+    --background: 10.81% 0.0154 37.87;
+    --primary: 59.8% 0.1269 42.74;
+    --secondary: 37.7% 0.0752 43.97;
+    --accent: 48.36% 0.1086 43.1;
   }
 
   :root {
@@ -65,7 +65,7 @@ td {
 
 
 .btn {
-  @apply flex justify-center py-1 border-3 border-text text-background w-60 bg-primary cursor-pointer mb-6 hover:bg-primary/75;
+  @apply flex justify-center py-1 border-3 border-primary/80 text-background w-60 bg-accent cursor-pointer mb-6 hover:bg-primary/75;
 }
 
 .btn-secondary {
@@ -77,11 +77,11 @@ td {
 }
 
 .input {
-  @apply border-3 w-60 pl-1 py-1 text-lg h-9
+  @apply border-3 w-60 pl-1 py-1 border-secondary h-9
 }
 
 .select {
-  @apply border-3 pl-1 py-1 text-lg h-9
+  @apply border-3 border-secondary text-primary pl-1 py-1 text-lg h-9
 }
 
 

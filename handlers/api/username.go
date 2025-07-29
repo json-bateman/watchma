@@ -22,7 +22,7 @@ func SetUsername(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if u.Username == "" || u.Roomname == "" {
+	if u.Username == "" {
 		SendSSEError(w, r, "Please Enter a Username", http.StatusBadRequest)
 		return
 	}

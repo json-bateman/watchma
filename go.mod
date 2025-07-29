@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.5
 
 require (
-	github.com/a-h/templ v0.3.906
+	github.com/a-h/templ v0.3.924
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/gorilla/websocket v1.5.3

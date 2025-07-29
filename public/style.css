@@ -184,6 +184,9 @@
   .relative {
     position: relative;
   }
+  .z-2 {
+    z-index: 2;
+  }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
   }
@@ -201,9 +204,6 @@
   }
   .table {
     display: table;
-  }
-  .h-1 {
-    height: calc(var(--spacing) * 1);
   }
   .h-full {
     height: 100%;
@@ -226,9 +226,6 @@
   .min-w-80 {
     min-width: calc(var(--spacing) * 80);
   }
-  .flex-grow {
-    flex-grow: 1;
-  }
   .grow {
     flex-grow: 1;
   }
@@ -240,9 +237,6 @@
   }
   .cursor-pointer {
     cursor: pointer;
-  }
-  .resize {
-    resize: both;
   }
   .flex-col {
     flex-direction: column;
@@ -288,9 +282,6 @@
   .bg-background {
     background-color: var(--color-background);
   }
-  .bg-primary {
-    background-color: var(--color-primary);
-  }
   .bg-primary\/40 {
     background-color: color-mix(in srgb, oklch(var(--primary)) 40%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -299,9 +290,6 @@
   }
   .object-cover {
     object-fit: cover;
-  }
-  .p-0 {
-    padding: calc(var(--spacing) * 0);
   }
   .p-4 {
     padding: calc(var(--spacing) * 4);
@@ -352,9 +340,6 @@
   .text-text {
     color: var(--color-text);
   }
-  .underline {
-    text-decoration-line: underline;
-  }
   .shadow-lg {
     --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -366,10 +351,6 @@
   .ring-0 {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-  .outline {
-    outline-style: var(--tw-outline-style);
-    outline-width: 1px;
   }
   .has-\[input\:checked\]\:border-orange-500 {
     &:has(*:is(input:checked)) {
@@ -418,33 +399,33 @@ th, td {
   padding: 4px 8px;
 }
 @layer base {
-  html[data-theme="light"] {
+  :root:has(body[data-theme="light"]) {
     --text: 19.5% 0.011 284.2;
     --background: 91.2% 0.014 284.2;
     --primary: 35.8% 0.063 284.2;
     --secondary: 69.1% 0.053 284.2;
     --accent: 52.4% 0.088 284.2;
   }
-  html[data-theme="dark"] {
+  :root:has(body[data-theme="dark"]) {
     --text: 92.8% 0.009 284.2;
     --background: 20.7% 0.014 284.2;
     --primary: 72.8% 0.063 284.2;
     --secondary: 38.7% 0.053 284.2;
     --accent: 52.4% 0.088 284.2;
   }
-  html[data-theme="burgundy-light"] {
-    --text: 17, 47%, 6%;
-    --background: 10, 60%, 98%;
-    --primary: 18, 51%, 51%;
-    --secondary: 19, 53%, 75%;
-    --accent: 18, 57%, 64%;
+  :root:has(body[data-theme="burgundy-light"]) {
+    --text: 16.7% 0.0195 43.33;
+    --background: 98.27% 0.0055 31.05;
+    --primary: 61.54% 0.1255 43.54;
+    --secondary: 80.24% 0.0618 46.87;
+    --accent: 71.46% 0.1005 43.45;
   }
-  html[data-theme="burgundy-dark"] {
-    --text: 17, 47%, 94%;
-    --background: 10, 60%, 2%;
-    --primary: 18, 51%, 49%;
-    --secondary: 19, 53%, 25%;
-    --accent: 18, 57%, 36%;
+  :root:has(body[data-theme="burgundy-dark"]) {
+    --text: 95.28% 0.0121 43.28;
+    --background: 10.81% 0.0154 37.87;
+    --primary: 59.8% 0.1269 42.74;
+    --secondary: 37.7% 0.0752 43.97;
+    --accent: 48.36% 0.1086 43.1;
   }
   :root {
     --ff-serif: "IBM Plex Serif", serif;
@@ -459,8 +440,11 @@ th, td {
   justify-content: center;
   border-style: var(--tw-border-style);
   border-width: 3px;
-  border-color: var(--color-text);
-  background-color: var(--color-primary);
+  border-color: color-mix(in srgb, oklch(var(--primary)) 80%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    border-color: color-mix(in oklab, var(--color-primary) 80%, transparent);
+  }
+  background-color: var(--color-accent);
   padding-block: calc(var(--spacing) * 1);
   color: var(--color-background);
   &:hover {
@@ -515,19 +499,20 @@ th, td {
   width: calc(var(--spacing) * 60);
   border-style: var(--tw-border-style);
   border-width: 3px;
+  border-color: var(--color-secondary);
   padding-block: calc(var(--spacing) * 1);
   padding-left: calc(var(--spacing) * 1);
-  font-size: var(--text-lg);
-  line-height: var(--tw-leading, var(--text-lg--line-height));
 }
 .select {
   height: calc(var(--spacing) * 9);
   border-style: var(--tw-border-style);
   border-width: 3px;
+  border-color: var(--color-secondary);
   padding-block: calc(var(--spacing) * 1);
   padding-left: calc(var(--spacing) * 1);
   font-size: var(--text-lg);
   line-height: var(--tw-leading, var(--text-lg--line-height));
+  color: var(--color-primary);
 }
 .loader {
   width: 48px;
@@ -650,11 +635,6 @@ th, td {
   inherits: false;
   initial-value: 0 0 #0000;
 }
-@property --tw-outline-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
@@ -678,7 +658,6 @@ th, td {
       --tw-ring-offset-width: 0px;
       --tw-ring-offset-color: #fff;
       --tw-ring-offset-shadow: 0 0 #0000;
-      --tw-outline-style: solid;
     }
   }
 }
