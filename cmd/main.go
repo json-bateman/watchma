@@ -11,21 +11,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/handlers"
 	"github.com/json-bateman/jellyfin-grabber/handlers/api"
-	"github.com/json-bateman/jellyfin-grabber/handlers/pages"
+	"github.com/json-bateman/jellyfin-grabber/handlers/web"
+	"github.com/json-bateman/jellyfin-grabber/handlers/websocket"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/log"
 )
 
-const PORT = 8080
-
-type AppConfig struct {
-	JellyfinApiKey string
-	BaseUrl        string
-}
+const PORT = 8888
 
 func main() {
-	// Chi Router for endpoint hits
 	r := chi.NewRouter()
+	// Chi Router Logger for endpoint hits
 	r.Use(middleware.Logger)
 	// Go Logger for everything else
 	sl := log.New(slog.LevelInfo)
@@ -40,20 +36,21 @@ func main() {
 	// Load config from environment or .env
 	config.LoadConfig()
 
-	// Routes
-	r.Get("/", pages.Index)
-	r.Get("/movies", pages.Movies)
-	r.Get("/host", pages.Host)
-	r.Get("/join", pages.Join)
-	r.Get("/room/{roomName}", pages.SingleRoom)
-	r.Get("/testSSE", pages.TestSSE)
-
+	// Api
 	r.Post("/api/movies", api.PostMovies)
 	r.Post("/api/host", api.HostForm)
 	r.Post("/api/username", api.SetUsername)
 
-	// r.Get("/sse/room/{roomName}", api.RoomSSE)
-	r.Get("/ws/game", api.GameWebSocket)
+	// Web
+	r.Get("/", web.Index)
+	r.Get("/movies", web.Movies)
+	r.Get("/host", web.Host)
+	r.Get("/join", web.Join)
+	r.Get("/room/{roomName}", web.SingleRoom)
+	r.Get("/testSSE", web.TestSSE)
+
+	// Websocket
+	r.Get("/ws/game", websocket.GameWebSocket)
 
 	slog.Info(fmt.Sprintf("\nListening on port :%d\n", PORT))
 

@@ -9,7 +9,7 @@ templ Layout(title string) {
 			<link href="/public/favicon.png" rel="icon" type="image/png"/>
 			<title>{ title }</title>
 		</head>
-		<body data-theme="light" data-attr="{['data-theme']: $theme || localStorage.getItem('theme') || 'light'}" class="bg-background min-h-svh">
+		<body class="bg-background min-h-svh">
 			<main class="min-h-full flex flex-col p-4">
 				<header class="mb-4 flex justify-between">
 					@homeIcon()
@@ -19,8 +19,23 @@ templ Layout(title string) {
 				<div class="grow text-text">
 					{ children... }
 				</div>
-				<footer class="border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl">© vSaucy 2025</footer>
+				<footer class="border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl">© Blovio 2025</footer>
 			</main>
+			<script>
+                function getSystemTheme() {
+                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark'
+                  }
+                  return 'burgundy-light'
+                }
+                
+                const currentTheme = localStorage.getItem('theme')
+                if (!currentTheme) {
+                  const systemTheme = getSystemTheme()
+                  localStorage.setItem("theme", systemTheme)
+                }
+                document.querySelector('html').setAttribute('data-theme', localStorage.getItem("theme"))
+            </script>
 			<!-- Datastar -->
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
 		</body>
@@ -30,15 +45,17 @@ templ Layout(title string) {
 templ themeToggle() {
 	<select
 		id="theme-toggler"
-		class="select"
+		class="select shadow-xl shadow-hard"
 		data-bind-theme
-		data-attr="{value: $theme || localStorage.getItem('theme') }"
-		data-on-change="localStorage.setItem('theme', event.target.value);"
+		data-on-change="
+            localStorage.setItem('theme', event.target.value);
+            document.querySelector('html').setAttribute('data-theme', $theme)
+        "
 	>
-		<option value="light" data-attr="{selected: ($theme || localStorage.getItem('theme') || $theme == '' ) === 'light'}">Light</option>
-		<option value="dark" data-attr="{selected: ($theme || localStorage.getItem('theme') ) === 'dark'}">Dark</option>
-		<option value="burgundy-light" data-attr="{selected: ($theme || localStorage.getItem('theme') ) === 'burgundy-light'}">Burgundy</option>
-		<option value="burgundy-dark" data-attr="{selected: ($theme || localStorage.getItem('theme') ) === 'burgundy-dark'}">Burgundy Dark</option>
+		<option value="light" data-attr="{selected: localStorage.getItem('theme') === 'light'}">Light</option>
+		<option value="dark" data-attr="{selected: localStorage.getItem('theme') === 'dark'}">Dark</option>
+		<option value="burgundy-light" data-attr="{selected: localStorage.getItem('theme') === 'burgundy-light'}">Burgundy</option>
+		<option value="burgundy-dark" data-attr="{selected: localStorage.getItem('theme') === 'burgundy-dark'}">Burgundy Dark</option>
 	</select>
 }
 

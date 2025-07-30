@@ -42,7 +42,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title></head><body data-theme=\"light\" data-attr=\"{['data-theme']: $theme || localStorage.getItem('theme') || 'light'}\" class=\"bg-background min-h-svh\"><main class=\"min-h-full flex flex-col p-4\"><header class=\"mb-4 flex justify-between\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title></head><body class=\"bg-background min-h-svh\"><main class=\"min-h-full flex flex-col p-4\"><header class=\"mb-4 flex justify-between\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -62,7 +62,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl\">© vSaucy 2025</footer></main><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl\">© Blovio 2025</footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n                \n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -91,7 +91,7 @@ func themeToggle() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<select id=\"theme-toggler\" class=\"select\" data-bind-theme data-attr=\"{value: $theme || localStorage.getItem('theme') }\" data-on-change=\"localStorage.setItem('theme', event.target.value);\"><option value=\"light\" data-attr=\"{selected: ($theme || localStorage.getItem('theme') || $theme == '' ) === 'light'}\">Light</option> <option value=\"dark\" data-attr=\"{selected: ($theme || localStorage.getItem('theme') ) === 'dark'}\">Dark</option> <option value=\"burgundy-light\" data-attr=\"{selected: ($theme || localStorage.getItem('theme') ) === 'burgundy-light'}\">Burgundy</option> <option value=\"burgundy-dark\" data-attr=\"{selected: ($theme || localStorage.getItem('theme') ) === 'burgundy-dark'}\">Burgundy Dark</option></select>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<select id=\"theme-toggler\" class=\"select shadow-xl shadow-hard\" data-bind-theme data-on-change=\"\n            localStorage.setItem('theme', event.target.value);\n            document.querySelector('html').setAttribute('data-theme', $theme)\n        \"><option value=\"light\" data-attr=\"{selected: localStorage.getItem('theme') === 'light'}\">Light</option> <option value=\"dark\" data-attr=\"{selected: localStorage.getItem('theme') === 'dark'}\">Dark</option> <option value=\"burgundy-light\" data-attr=\"{selected: localStorage.getItem('theme') === 'burgundy-light'}\">Burgundy</option> <option value=\"burgundy-dark\" data-attr=\"{selected: localStorage.getItem('theme') === 'burgundy-dark'}\">Burgundy Dark</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

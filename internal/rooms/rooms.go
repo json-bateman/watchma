@@ -2,40 +2,31 @@ package rooms
 
 import (
 	"sync"
+	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type GameStep int
 
-const (
-	Lobby GameStep = iota
-	Voting
-	Results
-	Finished
-)
-
-func (s GameStep) String() string {
-	switch s {
-	case Lobby:
-		return "lobby"
-	case Voting:
-		return "voting"
-	case Results:
-		return "results"
-	case Finished:
-		return "finished"
-	default:
-		return "unknown"
-	}
+type User struct {
+	ID       string
+	Name     string
+	Conn     *websocket.Conn
+	JoinedAt time.Time
 }
 
-// type User struct {
-// 	ID   string
-// 	Name string
-// }
+type Message struct {
+	Type      string                 `json:"type"`
+	Data      map[string]interface{} `json:"data"`
+	Timestamp time.Time              `json:"timestamp"`
+}
 
 type Room struct {
-	Name string
-	Game *GameSession
+	Name  string
+	Game  *GameSession
+	Users map[string]*User
+	mu    sync.RWMutex
 }
 
 type GameSession struct {
@@ -56,11 +47,14 @@ var AllRooms = &RoomManager{
 	Rooms: make(map[string]*Room),
 }
 
-// Mutexes for concurrency, might be a pre-optimization tbh
 func (rm *RoomManager) AddRoom(name string, game *GameSession) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	rm.Rooms[name] = &Room{Name: name, Game: game}
+	rm.Rooms[name] = &Room{
+		Name:  name,
+		Game:  game,
+		Users: make(map[string]*User),
+	}
 }
 
 func (rm *RoomManager) RoomExists(name string) bool {
