@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/json-bateman/jellyfin-grabber/internal/rooms"
+	"github.com/json-bateman/jellyfin-grabber/internal/game"
 )
 
 func HostForm(w http.ResponseWriter, r *http.Request) {
@@ -26,11 +26,11 @@ func HostForm(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Movies must be a number", http.StatusBadRequest)
 	}
-	if rooms.AllRooms.RoomExists(roomName) {
+	if game.AllRooms.RoomExists(roomName) {
 		http.Error(w, "This room name already exists", http.StatusBadRequest)
 		return
 	}
-	rooms.AllRooms.AddRoom(roomName, &rooms.GameSession{MovieNumber: movies})
+	game.AllRooms.AddRoom(roomName, &game.GameSession{MovieNumber: movies})
 
 	// Redirect to /host/room after POST
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)

@@ -9,9 +9,9 @@ import (
 )
 
 // Sets Jellyfin Token as the header on the request.
-func newJellyfinRequest(method, apiEndpoint string) (*http.Request, error) {
-	apiKey := config.Config.JellyfinApiKey
-	baseUrl := config.Config.BaseUrl
+func newJellyfinRequest(cfg *config.Config, method, apiEndpoint string) (*http.Request, error) {
+	apiKey := cfg.JellyfinApiKey
+	baseUrl := cfg.JellyfinBaseURL
 	if apiKey == "" {
 		return nil, fmt.Errorf("Jellyfin api_key has not been set in settings.json")
 	}
@@ -26,8 +26,8 @@ func newJellyfinRequest(method, apiEndpoint string) (*http.Request, error) {
 	return req, nil
 }
 
-func FetchJellyfinMovies() (*JellyfinItems, error) {
-	req, err := newJellyfinRequest("GET", "/Items?IncludeItemTypes=Movie&Recursive=true")
+func FetchJellyfinMovies(cfg *config.Config) (*JellyfinItems, error) {
+	req, err := newJellyfinRequest(cfg, "GET", "/Items?IncludeItemTypes=Movie&Recursive=true")
 	if err != nil {
 		return nil, err
 	}
