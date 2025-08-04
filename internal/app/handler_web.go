@@ -1,14 +1,13 @@
 package app
 
 import (
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/internal/game"
 	"github.com/json-bateman/jellyfin-grabber/view"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
@@ -50,8 +49,6 @@ func (a *App) Movies(w http.ResponseWriter, r *http.Request) {
 
 // --- view/rooms ---//
 func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL.Query())
-
 	roomName := chi.URLParam(r, "roomName")
 
 	var myRoom *game.Room

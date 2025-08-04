@@ -20,8 +20,6 @@ func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("%+v", r.Form)
-
 	// Access fields by name
 	// TODO: Something with this data, maybe put it in a room struct
 	roomName := r.FormValue("roomName")

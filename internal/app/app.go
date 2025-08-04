@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -66,8 +67,9 @@ func (a *App) setupFileServer() {
 }
 
 func (a *App) Run() error {
-	a.Logger.Info("Starting server", "port", 8888)
-	return http.ListenAndServe(":8888", a.Router)
+	a.Logger.Info("Starting server", "port", a.Config.Port)
+	port := fmt.Sprintf(":%d", a.Config.Port)
+	return http.ListenAndServe(port, a.Router)
 }
 
 func (a *App) setupRoutes() {
