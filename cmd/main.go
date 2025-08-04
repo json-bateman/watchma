@@ -17,4 +17,3 @@ func main() {
 		log.Fatal("App failed:", err)
 	}
 }
-
