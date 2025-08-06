@@ -1,0 +1,21 @@
+package messing 
+
+import "github.com/json-bateman/jellyfin-grabber/view/common"
+
+templ Test() {
+	@common.Layout("Host Page") {
+		<div>hi</div>
+		<div>sup</div>
+		<button
+			data-on-click="sendMsg('yolo', true)"
+			class="btn"
+		>
+			Send some WS
+		</button>
+		<script src="/public/js/websocket.js"></script>
+		<script>
+        const ws = new GameWebSocket();
+        ws.connect();
+        </script>
+	}
+}

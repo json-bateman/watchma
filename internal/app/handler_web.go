@@ -12,6 +12,7 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/view"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
 	"github.com/json-bateman/jellyfin-grabber/view/join"
+	"github.com/json-bateman/jellyfin-grabber/view/messing"
 	"github.com/json-bateman/jellyfin-grabber/view/movies"
 	"github.com/json-bateman/jellyfin-grabber/view/rooms"
 	"github.com/starfederation/datastar-go/datastar"
@@ -65,6 +66,12 @@ func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
 // --- view/join ---//
 func (a *App) Join(w http.ResponseWriter, r *http.Request) {
 	component := join.JoinPage(game.AllRooms.Rooms)
+	templ.Handler(component).ServeHTTP(w, r)
+}
+
+// --- view/messing ---//
+func (a *App) Messing(w http.ResponseWriter, r *http.Request) {
+	component := messing.Test()
 	templ.Handler(component).ServeHTTP(w, r)
 }
 

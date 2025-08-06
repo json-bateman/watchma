@@ -85,7 +85,8 @@ func (a *App) setupRoutes() {
 	a.Router.Get("/room/{roomName}", a.SingleRoom)
 	a.Router.Get("/testSSE", a.TestSSE)
 	a.Router.Get("/movies", a.Movies)
+	a.Router.Get("/messing", a.Messing)
 
 	// Websocket
-	a.Router.Get("/ws/game", a.GameWebSocket)
+	a.Router.Get("/ws", a.Websocket)
 }
