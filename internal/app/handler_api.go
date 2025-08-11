@@ -104,3 +104,38 @@ func ClearSSEError(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 	sse.PatchElements(`<div id="error" class="hidden"></div>`)
 }
+
+// PublishToNATS publishes a JSON payload {"subject": string, "message": string} to the configured NATS server.
+type natsPublishRequest struct {
+	Subject string `json:"subject"`
+	Message string `json:"message"`
+}
+
+func (a *App) PublishToNATS(w http.ResponseWriter, r *http.Request) {
+	if a.Nats == nil {
+		internal.WriteJSONError(w, http.StatusServiceUnavailable, "NATS connection not initialized")
+		return
+	}
+
+	var req natsPublishRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		internal.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
+		return
+	}
+	if req.Subject == "" {
+		internal.WriteJSONError(w, http.StatusBadRequest, "Missing subject")
+		return
+	}
+
+	if err := a.Nats.Publish(req.Subject, []byte(req.Message)); err != nil {
+		internal.WriteJSONError(w, http.StatusBadGateway, fmt.Sprintf("Publish failed: %v", err))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"ok":      true,
+		"subject": req.Subject,
+	})
+}

@@ -12,6 +12,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+	"github.com/json-bateman/jellyfin-grabber/internal/natty"
+	"github.com/nats-io/nats.go"
 	"github.com/quic-go/webtransport-go"
 )
 
@@ -20,6 +22,7 @@ type App struct {
 	Logger   *slog.Logger
 	Router   *chi.Mux
 	Jellyfin *jellyfin.Client
+	Nats     *nats.Conn
 
 	// RoomService *services.RoomService
 	// UserService *services.UserService
@@ -49,6 +52,8 @@ func (a *App) Initialize() error {
 	a.setupFileServer()
 	a.setupRoutes()
 
+	a.Nats = natty.Connect()
+
 	return nil
 }
 
@@ -77,6 +82,8 @@ func (a *App) setupRoutes() {
 	a.Router.Post("/api/movies", a.PostMovies)
 	a.Router.Post("/api/host", a.HostForm)
 	a.Router.Post("/api/username", a.SetUsername)
+	// NATS publish route
+	a.Router.Post("/api/nats/publish", a.PublishToNATS)
 
 	// Web
 	a.Router.Get("/", a.Index)
