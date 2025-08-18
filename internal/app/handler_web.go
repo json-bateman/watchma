@@ -3,12 +3,14 @@ package app
 import (
 	"log"
 	"log/slog"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/internal/game"
+	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
 	"github.com/json-bateman/jellyfin-grabber/view"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
 	"github.com/json-bateman/jellyfin-grabber/view/join"
@@ -44,7 +46,19 @@ func (a *App) Movies(w http.ResponseWriter, r *http.Request) {
 		log.Printf("no movies found")
 	}
 
-	component := movies.MoviesPage(items, a.Config.JellyfinBaseURL)
+	// TODO: Improve this ranomizer for number of items after room is made
+	rand.Shuffle(len(items.Items), func(i, j int) {
+		items.Items[i], items.Items[j] = items.Items[j], items.Items[i]
+	})
+
+	var randMovies []jellyfin.JellyfinItem
+	if len(items.Items) >= 8 {
+		randMovies = items.Items[:8]
+	} else {
+		randMovies = items.Items // fallback if fewer than 8 items
+	}
+
+	component := movies.MoviesPage(randMovies, a.Config.JellyfinBaseURL)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 

@@ -5,7 +5,7 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-templ MoviesPage(movies *jellyfin.JellyfinItems, baseURL string) {
+templ MoviesPage(movies []jellyfin.JellyfinItem, baseURL string) {
 	@common.Layout("Movies page") {
 		<div data-signals="{movies: []}">
 			<section class="flex flex-col justify-center items-center">
@@ -13,7 +13,7 @@ templ MoviesPage(movies *jellyfin.JellyfinItems, baseURL string) {
 				<div class="text-text flex flex-col items-center justify-center" id="moviesSubmit">
 					<button class="btn mb-6" data-on-click="@post('/api/movies')">Submit Choices</button>
 					<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
-						for _, m := range movies.Items {
+						for _, m := range movies {
 							<label class="block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4">
 								<input class="hidden" type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
 								<img

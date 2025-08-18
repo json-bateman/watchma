@@ -13,7 +13,7 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-func MoviesPage(movies *jellyfin.JellyfinItems, baseURL string) templ.Component {
+func MoviesPage(movies []jellyfin.JellyfinItem, baseURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -50,7 +50,7 @@ func MoviesPage(movies *jellyfin.JellyfinItems, baseURL string) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, m := range movies.Items {
+			for _, m := range movies {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<label class=\"block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4\"><input class=\"hidden\" type=\"checkbox\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
