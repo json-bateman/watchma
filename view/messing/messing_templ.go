@@ -43,13 +43,13 @@ func Test() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div>hi</div><div>sup</div><button data-on-click=\"sendMsg('yolo', true)\" class=\"btn\">Send to NATS</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div data-signals=\"{message: 'yolo', subject: 'subjectify'}\">hi</div><div data-bind-hi>yo</div><div data-bind-yo>hi</div><button data-on-click=\"@post('/api/nats/publish')\" class=\"btn\">Send to NATS</button><script>\n         const es = new EventSource('/chat/room1');\n  es.onmessage = e => console.log('Got:', e.data);\n        </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.Layout("Host Page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Layout("Messing Page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

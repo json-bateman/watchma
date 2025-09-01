@@ -1,0 +1,35 @@
+package chat 
+
+import (
+	"github.com/json-bateman/jellyfin-grabber/view/common"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+templ Chat() {
+	@common.Layout("Chat Page") {
+		<div data-signals="{message: 'yolo', subject: 'subjectify'}">hi</div>
+		<div data-bind-hi>yo</div>
+		<div data-bind-yo>hi</div>
+		<button
+			data-on-click="@post('/api/nats/publish')"
+			class="btn"
+		>
+			Send to NATS
+		</button>
+		<div
+			id="container"
+			data-on-load={ datastar.GetSSE("/chat/room1") }
+			data-signals="{messages: ''}"
+		>
+			<div class="chat-messages h-96 overflow-y-auto border p-4">
+				<span data-text="$message"></span>
+			</div>
+			<button
+				data-on-click="@post('/api/nats/publish')"
+				class="btn"
+			>
+				Send to NATS
+			</button>
+		</div>
+	}
+}

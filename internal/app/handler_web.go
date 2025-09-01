@@ -12,6 +12,7 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/internal/game"
 	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
 	"github.com/json-bateman/jellyfin-grabber/view"
+	"github.com/json-bateman/jellyfin-grabber/view/chat"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
 	"github.com/json-bateman/jellyfin-grabber/view/join"
 	"github.com/json-bateman/jellyfin-grabber/view/messing"
@@ -98,7 +99,67 @@ func (a *App) TestSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		default:
 			sse.Send("ping", []string{`<div class="text-blue-300">yolo</div>`})
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+
+func (a *App) Chat(w http.ResponseWriter, r *http.Request) {
+	component := chat.Chat()
+	templ.Handler(component).ServeHTTP(w, r)
+}
+
+// TODO: maybe change wildcard matching on chat rooms
+func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
+	room := chi.URLParam(r, "room")
+	sse := datastar.NewSSE(w, r)
+	client := make(chan string, 100) // Buffered channel to prevent blocking
+
+	// Add client to room with proper synchronization
+	a.mu.Lock()
+	if a.gameClients[room] == nil {
+		a.gameClients[room] = make(map[chan string]bool)
+	}
+	a.gameClients[room][client] = true
+
+	// Send existing message history to new client
+	if roomHistory := a.roomMessages[room]; len(roomHistory) > 0 {
+		if err := sse.MarshalAndPatchSignals(map[string][]string{
+			"message": roomHistory,
+		}); err != nil {
+			a.mu.Unlock()
+			return
+		}
+	}
+	a.mu.Unlock()
+
+	// Cleanup when connection closes
+	defer func() {
+		a.mu.Lock()
+		delete(a.gameClients[room], client)
+		if len(a.gameClients[room]) == 0 {
+			delete(a.gameClients, room)
+		}
+		a.mu.Unlock()
+		close(client)
+	}()
+
+	for {
+		select {
+		case <-client:
+			// Get current room messages and send to client
+			a.mu.RLock()
+			currentMessages := make([]string, len(a.roomMessages[room]))
+			copy(currentMessages, a.roomMessages[room])
+			a.mu.RUnlock()
+
+			if err := sse.MarshalAndPatchSignals(map[string][]string{
+				"message": currentMessages,
+			}); err != nil {
+				return
+			}
+		case <-r.Context().Done():
+			return
 		}
 	}
 }

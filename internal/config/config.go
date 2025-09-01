@@ -16,11 +16,6 @@ const (
 	PORT       = "PORT"
 	LOG_LEVEL  = "LOG_LEVEL"
 	ENV        = "ENVIRONMENT"
-
-	// WebTransport specific
-	WT_CERT_FILE = "WT_CERT_FILE"
-	WT_KEY_FILE  = "WT_KEY_FILE"
-	WT_PORT      = "WT_PORT"
 )
 
 type Config struct {
@@ -32,13 +27,7 @@ type Config struct {
 	LogLevel slog.Level
 	Env      string
 
-	// WebTransport
-	WTCertFile string
-	WTKeyFile  string
-	WTPort     int
-
-	EnableWebTransport bool
-	SessionTimeout     time.Duration
+	SessionTimeout time.Duration
 }
 
 func LoadConfig() *Config {
@@ -51,13 +40,9 @@ func LoadConfig() *Config {
 		JellyfinBaseURL: os.Getenv(J_BASE_URL),
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
 
-		Port:               getEnvAsInt(PORT, 8080),
-		Env:                getEnvAsString(ENV, "development"),
-		WTPort:             getEnvAsInt(WT_PORT, 4433),
-		WTCertFile:         getEnvAsString(WT_CERT_FILE, "cert.pem"),
-		WTKeyFile:          getEnvAsString(WT_KEY_FILE, "key.pem"),
-		EnableWebTransport: getEnvAsBool("ENABLE_WEBTRANSPORT", true),
-		SessionTimeout:     getEnvAsDuration("SESSION_TIMEOUT", 30*time.Minute),
+		Port:           getEnvAsInt(PORT, 8080),
+		Env:            getEnvAsString(ENV, "development"),
+		SessionTimeout: getEnvAsDuration("SESSION_TIMEOUT", 30*time.Minute),
 	}
 
 	if err := config.Validate(); err != nil {
@@ -89,8 +74,6 @@ func (c *Config) logConfig() {
 		"port", c.Port,
 		"log_level", c.LogLevel,
 		"environment", c.Env,
-		"wt_enabled", c.EnableWebTransport,
-		"wt_port", c.WTPort,
 	)
 	fmt.Println("---------------------------------------")
 }
@@ -106,15 +89,6 @@ func getEnvAsInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intVal, err := strconv.Atoi(value); err == nil {
 			return intVal
-		}
-	}
-	return defaultValue
-}
-
-func getEnvAsBool(key string, defaultValue bool) bool {
-	if value := os.Getenv(key); value != "" {
-		if boolVal, err := strconv.ParseBool(value); err == nil {
-			return boolVal
 		}
 	}
 	return defaultValue
