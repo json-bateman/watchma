@@ -43,7 +43,7 @@ func Test() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div>hi</div><div>sup</div><button data-on-click=\"sendMsg('yolo', true)\" class=\"btn\">Send some WS</button><script src=\"/public/js/websocket.js\"></script> <script>\n        const ws = new GameWebSocket();\n        ws.connect();\n        </script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div>hi</div><div>sup</div><button data-on-click=\"sendMsg('yolo', true)\" class=\"btn\">Send to NATS</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

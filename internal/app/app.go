@@ -93,7 +93,4 @@ func (a *App) setupRoutes() {
 	a.Router.Get("/testSSE", a.TestSSE)
 	a.Router.Get("/movies", a.Movies)
 	a.Router.Get("/messing", a.Messing)
-
-	// Websocket
-	a.Router.Get("/ws", a.Websocket)
 }
