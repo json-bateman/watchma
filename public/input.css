@@ -77,19 +77,19 @@ td {
 }
 
 .input {
-  @apply border-3 w-60 pl-1 py-1 border-secondary h-9
+  @apply border-3 w-60 pl-1 py-1 border-primary h-9
 }
 
 .select {
-  @apply border-3 border-secondary text-primary pl-1 py-1 text-lg h-9
+  @apply border-3 border-primary text-primary pl-1 py-1 text-lg h-9
 }
 
 .shadow-brutalist {
-  box-shadow: 8px 8px 0px var(--color-primary), 16px 16px 0px var(--color-secondary);
+  box-shadow: 3px 3px 0px var(--color-secondary), 7px 7px 0px var(--color-accent);
 }
 
 .shadow-hard {
-  box-shadow: 6px 6px 0px var(--color-primary);
+  box-shadow: 3px 3px 0px var(--color-secondary);
 }
 
 

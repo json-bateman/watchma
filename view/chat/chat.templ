@@ -1,29 +1,27 @@
 package chat 
 
 import (
+	"fmt"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-templ Chat() {
+templ Chat(room string) {
 	@common.Layout("Chat Page") {
-		<div data-signals="{message: 'yolo', subject: 'subjectify'}">hi</div>
-		<div data-bind-hi>yo</div>
+		<div data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room) }>yo</div>
 		<div data-bind-yo>hi</div>
-		<button
+		<input
 			data-on-click="@post('/api/nats/publish')"
-			class="btn"
-		>
-			Send to NATS
-		</button>
+			class="input"
+			placeholder="chat message..."
+			data-bind-message
+			data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
+		/>
 		<div
 			id="container"
-			data-on-load={ datastar.GetSSE("/chat/room1") }
-			data-signals="{messages: ''}"
+			data-on-load={ datastar.GetSSE(fmt.Sprintf("/message/%s", room)) }
 		>
-			<div class="chat-messages h-96 overflow-y-auto border p-4">
-				<span data-text="$message"></span>
-			</div>
+			<div id="chat" class="chat-messages h-64 overflow-y-auto border p-4"></div>
 			<button
 				data-on-click="@post('/api/nats/publish')"
 				class="btn"
@@ -32,4 +30,12 @@ templ Chat() {
 			</button>
 		</div>
 	}
+}
+
+templ ChatBox(messages []string) {
+	<div id="chat" class="chat-messages h-64 overflow-y-auto border p-4">
+		for _, m := range messages {
+			<p>{ m }</p>
+		}
+	</div>
 }

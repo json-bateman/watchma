@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 	"math/rand"
@@ -105,7 +106,8 @@ func (a *App) TestSSE(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) Chat(w http.ResponseWriter, r *http.Request) {
-	component := chat.Chat()
+	room := chi.URLParam(r, "room")
+	component := chat.Chat(room)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -124,9 +126,9 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 
 	// Send existing message history to new client
 	if roomHistory := a.roomMessages[room]; len(roomHistory) > 0 {
-		if err := sse.MarshalAndPatchSignals(map[string][]string{
-			"message": roomHistory,
-		}); err != nil {
+		chat := chat.ChatBox(a.roomMessages[room])
+		if err := sse.PatchElementTempl(chat); err != nil {
+			a.Logger.Error("Error Patching chatbox on load")
 			a.mu.Unlock()
 			return
 		}
@@ -153,11 +155,18 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 			copy(currentMessages, a.roomMessages[room])
 			a.mu.RUnlock()
 
-			if err := sse.MarshalAndPatchSignals(map[string][]string{
-				"message": currentMessages,
-			}); err != nil {
+			chat := chat.ChatBox(currentMessages)
+
+			if err := sse.PatchElementTempl(chat); err != nil {
+				fmt.Println("Error patching message from client")
 				return
 			}
+			// if err := sse.MarshalAndPatchSignals(map[string][]string{
+			// 	"message": currentMessages,
+			// }); err != nil {
+			// 	fmt.Println("err2")
+			// 	return
+			// }
 		case <-r.Context().Done():
 			return
 		}

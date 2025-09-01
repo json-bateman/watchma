@@ -33,9 +33,9 @@ type App struct {
 	wg       sync.WaitGroup
 
 	// players / game clients
-	gameClients map[string]map[chan string]bool
+	gameClients  map[string]map[chan string]bool
 	roomMessages map[string][]string
-	mu          sync.RWMutex
+	mu           sync.RWMutex
 }
 
 func New() *App {
@@ -65,7 +65,6 @@ func (a *App) setupRoutes() {
 	a.Router.Post("/api/movies", a.PostMovies)
 	a.Router.Post("/api/host", a.HostForm)
 	a.Router.Post("/api/username", a.SetUsername)
-	// NATS publish route
 	a.Router.Post("/api/nats/publish", a.PublishToNATS)
 
 	// Web
@@ -76,24 +75,12 @@ func (a *App) setupRoutes() {
 	a.Router.Get("/testSSE", a.TestSSE)
 	a.Router.Get("/movies", a.Movies)
 	a.Router.Get("/messing", a.Messing)
-	a.Router.Get("/chat", a.Chat)
-	a.Router.Get("/chat/{room}", a.ChatSSE)
+	a.Router.Get("/chat/{room}", a.Chat)
+	a.Router.Get("/message/{room}", a.ChatSSE)
 }
 
-func (a *App) Initialize() error {
-	a.Logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
-	slog.SetDefault(a.Logger)
-
-	a.Router = chi.NewRouter()
-	a.Router.Use(middleware.Logger)
-
-	a.Jellyfin = jellyfin.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
-
-	a.setupFileServer()
-	a.setupRoutes()
-
+func (a *App) setupNats() {
 	a.Nats = natty.Connect()
-
 	a.Nats.Subscribe("chat.*", func(m *nats.Msg) {
 		room := strings.TrimPrefix(m.Subject, "chat.")
 		message := string(m.Data)
@@ -111,6 +98,20 @@ func (a *App) Initialize() error {
 			}
 		}
 	})
+}
+
+func (a *App) Initialize() error {
+	a.Logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(a.Logger)
+
+	a.Router = chi.NewRouter()
+	a.Router.Use(middleware.Logger)
+
+	a.Jellyfin = jellyfin.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
+
+	a.setupFileServer()
+	a.setupRoutes()
+	a.setupNats()
 
 	return nil
 }

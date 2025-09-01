@@ -184,9 +184,6 @@
   .relative {
     position: relative;
   }
-  .z-5 {
-    z-index: 5;
-  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
@@ -223,8 +220,8 @@
   .table {
     display: table;
   }
-  .h-96 {
-    height: calc(var(--spacing) * 96);
+  .h-64 {
+    height: calc(var(--spacing) * 64);
   }
   .h-full {
     height: 100%;
@@ -314,12 +311,6 @@
   }
   .object-cover {
     object-fit: cover;
-  }
-  .p-1 {
-    padding: calc(var(--spacing) * 1);
-  }
-  .p-2 {
-    padding: calc(var(--spacing) * 2);
   }
   .p-4 {
     padding: calc(var(--spacing) * 4);
@@ -536,7 +527,7 @@ th, td {
   width: calc(var(--spacing) * 60);
   border-style: var(--tw-border-style);
   border-width: 3px;
-  border-color: var(--color-secondary);
+  border-color: var(--color-primary);
   padding-block: calc(var(--spacing) * 1);
   padding-left: calc(var(--spacing) * 1);
 }
@@ -544,7 +535,7 @@ th, td {
   height: calc(var(--spacing) * 9);
   border-style: var(--tw-border-style);
   border-width: 3px;
-  border-color: var(--color-secondary);
+  border-color: var(--color-primary);
   padding-block: calc(var(--spacing) * 1);
   padding-left: calc(var(--spacing) * 1);
   font-size: var(--text-lg);
@@ -552,10 +543,10 @@ th, td {
   color: var(--color-primary);
 }
 .shadow-brutalist {
-  box-shadow: 8px 8px 0px var(--color-primary), 16px 16px 0px var(--color-secondary);
+  box-shadow: 3px 3px 0px var(--color-secondary), 7px 7px 0px var(--color-accent);
 }
 .shadow-hard {
-  box-shadow: 6px 6px 0px var(--color-primary);
+  box-shadow: 3px 3px 0px var(--color-secondary);
 }
 .loader {
   width: 48px;
