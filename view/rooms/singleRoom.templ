@@ -1,27 +1,79 @@
 package rooms 
 
 import (
+	"fmt"
 	"github.com/json-bateman/jellyfin-grabber/internal/game"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 templ SingleRoom(room *game.Room) {
 	@common.Layout(room.Name) {
-		<section>
-			<div>Room Name: { room.Name }</div>
-			<div id="inputs">
-				<div class="flex flex-col">
-					<label for="username">Username:</label>
-					<input data-bind-roomname class="input" type="hidden" value={ room.Name }/>
-					<input data-bind-username class="input" type="text" name="username" id="username" placeholder="Enter your username" required/>
+		<!-- janky way to set the subject field for the NATS payload
+    TODO: make this not janky -->
+		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s', username: '%s'}", room.Name) }></span>
+		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room.Name) }></span>
+		<section class="flex flex-col justify-between grow">
+			<div>
+				<div>Room Name: { room.Name }</div>
+			</div>
+			<div>
+				<div class="flex gap-2">
+					<input
+						class="input"
+						placeholder="chat message..."
+						data-bind-message
+						data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
+					/>
+					<button
+						data-on-click="@post('/api/nats/publish');$message='';"
+						class="btn !w-16"
+					>
+						Send
+					</button>
 				</div>
-				<button
-					data-on-click="@post('/api/username')"
-					class="btn"
-					type="submit"
-				>Set Username</button>
-				<div id="error" class="hidden"></div>
+				<div
+					id="container"
+					data-on-load={ datastar.GetSSE(fmt.Sprintf("/message/%s", room.Name)) }
+				>
+					<div id="chat" class="chat-messages h-96 overflow-y-auto border p-4"></div>
+				</div>
 			</div>
 		</section>
+	}
+}
+
+templ ChatBox(messages []string) {
+	<div id="chat" class="chat-messages h-96 overflow-y-auto border p-4">
+		for _, m := range messages {
+			<p>{ m }</p>
+		}
+	</div>
+}
+
+templ UsernameForm(room *game.Room) {
+	@common.Layout("username") {
+		<div id="inputs">
+			<div class="flex flex-col">
+				<label for="username">Username:</label>
+				<input data-bind-roomname class="input" type="hidden" value={ room.Name }/>
+				<input
+					data-bind-username
+					class="input"
+					type="text"
+					name="username"
+					id="username"
+					placeholder="Enter your username"
+					required
+					data-on-keydown="if (evt.key !== 'Enter' || !$username.trim().length) return; @post('/api/username');"
+				/>
+			</div>
+			<button
+				data-on-click="@post('/api/username')"
+				class="btn"
+				type="submit"
+			>Set Username</button>
+			<div id="error" class="hidden"></div>
+		</div>
 	}
 }

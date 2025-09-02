@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/a-h/templ"
@@ -34,7 +35,43 @@ func (a *App) Host(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-// --- view/movies ---//
+// --- view/shuffle ---//
+func (a *App) Shuffle(w http.ResponseWriter, r *http.Request) {
+	number := chi.URLParam(r, "number")
+
+	intVal, err := strconv.Atoi(number)
+	if err != nil {
+		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
+		http.Error(w, "param must be a number", http.StatusBadRequest)
+		return
+	}
+
+	items, err := a.Jellyfin.FetchJellyfinMovies()
+	if err != nil {
+		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
+		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
+		return
+	}
+
+	if items == nil || len(items.Items) == 0 {
+		log.Printf("no movies found")
+	}
+
+	rand.Shuffle(len(items.Items), func(i, j int) {
+		items.Items[i], items.Items[j] = items.Items[j], items.Items[i]
+	})
+
+	var randMovies []jellyfin.JellyfinItem
+	if len(items.Items) >= intVal {
+		randMovies = items.Items[:intVal]
+	} else {
+		randMovies = items.Items // fallback if fewer than 8 items
+	}
+
+	component := movies.Shuffle(randMovies, a.Config.JellyfinBaseURL)
+	templ.Handler(component).ServeHTTP(w, r)
+}
+
 func (a *App) Movies(w http.ResponseWriter, r *http.Request) {
 
 	items, err := a.Jellyfin.FetchJellyfinMovies()
@@ -126,7 +163,7 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 
 	// Send existing message history to new client
 	if roomHistory := a.roomMessages[room]; len(roomHistory) > 0 {
-		chat := chat.ChatBox(a.roomMessages[room])
+		chat := rooms.ChatBox(a.roomMessages[room])
 		if err := sse.PatchElementTempl(chat); err != nil {
 			a.Logger.Error("Error Patching chatbox on load")
 			a.mu.Unlock()
@@ -155,7 +192,7 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 			copy(currentMessages, a.roomMessages[room])
 			a.mu.RUnlock()
 
-			chat := chat.ChatBox(currentMessages)
+			chat := rooms.ChatBox(currentMessages)
 
 			if err := sse.PatchElementTempl(chat); err != nil {
 				fmt.Println("Error patching message from client")

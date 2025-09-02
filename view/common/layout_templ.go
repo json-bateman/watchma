@@ -8,6 +8,8 @@ package common
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "time"
+
 func Layout(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -36,7 +38,7 @@ func Layout(title string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 10, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 12, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -54,7 +56,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</header><!-- Here's where the pages are injected --><div class=\"grow text-text\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</header><!-- Here's where the pages are injected --><div class=\"grow flex flex-col text-text\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -62,7 +64,20 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl\">© JsonB 2025</footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n                \n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl\">© JsonB ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Year())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 24, Col: 139}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n                \n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,12 +101,12 @@ func themeToggle() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<select id=\"theme-toggler\" class=\"select shadow-xl shadow-brutalist\" data-bind-theme data-on-change=\"\n            localStorage.setItem('theme', event.target.value);\n            document.querySelector('html').setAttribute('data-theme', $theme)\n        \"><option value=\"light\" data-attr=\"{selected: localStorage.getItem('theme') === 'light'}\">Light</option> <option value=\"dark\" data-attr=\"{selected: localStorage.getItem('theme') === 'dark'}\">Dark</option> <option value=\"burgundy-light\" data-attr=\"{selected: localStorage.getItem('theme') === 'burgundy-light'}\">Burgundy</option> <option value=\"burgundy-dark\" data-attr=\"{selected: localStorage.getItem('theme') === 'burgundy-dark'}\">Burgundy Dark</option></select>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<select id=\"theme-toggler\" class=\"select shadow-xl shadow-brutalist\" data-bind-theme data-on-change=\"\n            localStorage.setItem('theme', event.target.value);\n            document.querySelector('html').setAttribute('data-theme', $theme)\n        \"><option value=\"light\" data-attr=\"{selected: localStorage.getItem('theme') === 'light'}\">Light</option> <option value=\"dark\" data-attr=\"{selected: localStorage.getItem('theme') === 'dark'}\">Dark</option> <option value=\"burgundy-light\" data-attr=\"{selected: localStorage.getItem('theme') === 'burgundy-light'}\">Burgundy</option> <option value=\"burgundy-dark\" data-attr=\"{selected: localStorage.getItem('theme') === 'burgundy-dark'}\">Burgundy Dark</option></select>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -115,12 +130,12 @@ func homeIcon() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<a href=\"/\" class=\"text-primary\"><svg fill=\"currentColor\" version=\"1.1\" id=\"Capa_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"30px\" height=\"30px\" viewBox=\"0 0 495.398 495.398\" xml:space=\"preserve\"><path d=\"M487.083,225.514l-75.08-75.08V63.704c0-15.682-12.708-28.391-28.413-28.391c-15.669,0-28.377,12.709-28.377,28.391\n\t\t\t\tv29.941L299.31,37.74c-27.639-27.624-75.694-27.575-103.27,0.05L8.312,225.514c-11.082,11.104-11.082,29.071,0,40.158\n\t\t\t\tc11.087,11.101,29.089,11.101,40.172,0l187.71-187.729c6.115-6.083,16.893-6.083,22.976-0.018l187.742,187.747\n\t\t\t\tc5.567,5.551,12.825,8.312,20.081,8.312c7.271,0,14.541-2.764,20.091-8.312C498.17,254.586,498.17,236.619,487.083,225.514z\"></path> <path d=\"M257.561,131.836c-5.454-5.451-14.285-5.451-19.723,0L72.712,296.913c-2.607,2.606-4.085,6.164-4.085,9.877v120.401\n\t\t\t\tc0,28.253,22.908,51.16,51.16,51.16h81.754v-126.61h92.299v126.61h81.755c28.251,0,51.159-22.907,51.159-51.159V306.79\n\t\t\t\tc0-3.713-1.465-7.271-4.085-9.877L257.561,131.836z\"></path></svg></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a href=\"/\" class=\"text-primary\"><svg fill=\"currentColor\" version=\"1.1\" id=\"Capa_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"30px\" height=\"30px\" viewBox=\"0 0 495.398 495.398\" xml:space=\"preserve\"><path d=\"M487.083,225.514l-75.08-75.08V63.704c0-15.682-12.708-28.391-28.413-28.391c-15.669,0-28.377,12.709-28.377,28.391\n\t\t\t\tv29.941L299.31,37.74c-27.639-27.624-75.694-27.575-103.27,0.05L8.312,225.514c-11.082,11.104-11.082,29.071,0,40.158\n\t\t\t\tc11.087,11.101,29.089,11.101,40.172,0l187.71-187.729c6.115-6.083,16.893-6.083,22.976-0.018l187.742,187.747\n\t\t\t\tc5.567,5.551,12.825,8.312,20.081,8.312c7.271,0,14.541-2.764,20.091-8.312C498.17,254.586,498.17,236.619,487.083,225.514z\"></path> <path d=\"M257.561,131.836c-5.454-5.451-14.285-5.451-19.723,0L72.712,296.913c-2.607,2.606-4.085,6.164-4.085,9.877v120.401\n\t\t\t\tc0,28.253,22.908,51.16,51.16,51.16h81.754v-126.61h92.299v126.61h81.755c28.251,0,51.159-22.907,51.159-51.159V306.79\n\t\t\t\tc0-3.713-1.465-7.271-4.085-9.877L257.561,131.836z\"></path></svg></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

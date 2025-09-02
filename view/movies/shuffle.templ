@@ -1,0 +1,23 @@
+package movies
+
+import "github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+import "github.com/json-bateman/jellyfin-grabber/view/common"
+
+templ Shuffle(movies []jellyfin.JellyfinItem, baseURL string) {
+	@common.Layout("Movies page") {
+		<section class="flex flex-col justify-center items-center">
+			<span class="text-3xl mb-4">Shuffled Movies</span>
+			<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
+				for _, m := range movies {
+					<label class="block w-40 md:w-64 border border-3 ring-0">
+						<img
+							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+							alt={ "Cover for " + m.Name }
+							class="w-full h-full object-cover"
+						/>
+					</label>
+				}
+			</div>
+		</section>
+	}
+}

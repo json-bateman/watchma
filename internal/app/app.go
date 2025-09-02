@@ -74,6 +74,7 @@ func (a *App) setupRoutes() {
 	a.Router.Get("/room/{roomName}", a.SingleRoom)
 	a.Router.Get("/testSSE", a.TestSSE)
 	a.Router.Get("/movies", a.Movies)
+	a.Router.Get("/shuffle/{number}", a.Shuffle)
 	a.Router.Get("/messing", a.Messing)
 	a.Router.Get("/chat/{room}", a.Chat)
 	a.Router.Get("/message/{room}", a.ChatSSE)

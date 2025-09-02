@@ -65,15 +65,19 @@ td {
 
 
 .btn {
-  @apply flex justify-center py-1 border-3 border-primary/80 text-background w-60 bg-accent cursor-pointer mb-6 hover:bg-primary/75;
+  @apply flex justify-center py-1 border-3 border-primary/80 text-background w-60 bg-accent cursor-pointer hover:bg-primary/75 h-9;
 }
 
 .btn-secondary {
-  @apply flex justify-center py-1 border-3 w-60 bg-secondary cursor-pointer mb-6 hover:bg-secondary/75;
+  @apply flex justify-center py-1 border-3 w-60 bg-secondary cursor-pointer hover:bg-secondary/75 h-9;
+}
+
+.btn-accent {
+  @apply flex border-transparent justify-center py-1 border-3 w-60 bg-accent cursor-pointer hover:bg-secondary/75 h-9;
 }
 
 .btn-success {
-  @apply flex justify-center py-1 border-3 w-60 bg-green-400 cursor-pointer mb-6 hover:bg-green-400/75;
+  @apply flex justify-center py-1 border-3 w-60 bg-green-400 cursor-pointer hover:bg-green-400/75 h-9;
 }
 
 .input {
@@ -85,7 +89,7 @@ td {
 }
 
 .shadow-brutalist {
-  box-shadow: 3px 3px 0px var(--color-secondary), 7px 7px 0px var(--color-accent);
+  box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
 }
 
 .shadow-hard {

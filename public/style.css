@@ -184,6 +184,9 @@
   .relative {
     position: relative;
   }
+  .z-0 {
+    z-index: 0;
+  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
@@ -201,6 +204,9 @@
     @media (width >= 96rem) {
       max-width: 96rem;
     }
+  }
+  .mt-24 {
+    margin-top: calc(var(--spacing) * 24);
   }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
@@ -223,6 +229,9 @@
   .h-64 {
     height: calc(var(--spacing) * 64);
   }
+  .h-96 {
+    height: calc(var(--spacing) * 96);
+  }
   .h-full {
     height: 100%;
   }
@@ -231,6 +240,9 @@
   }
   .min-h-svh {
     min-height: 100svh;
+  }
+  .\!w-16 {
+    width: calc(var(--spacing) * 16) !important;
   }
   .w-40 {
     width: calc(var(--spacing) * 40);
@@ -461,8 +473,8 @@ th, td {
   }
 }
 .btn {
-  margin-bottom: calc(var(--spacing) * 6);
   display: flex;
+  height: calc(var(--spacing) * 9);
   width: calc(var(--spacing) * 60);
   cursor: pointer;
   justify-content: center;
@@ -485,8 +497,8 @@ th, td {
   }
 }
 .btn-secondary {
-  margin-bottom: calc(var(--spacing) * 6);
   display: flex;
+  height: calc(var(--spacing) * 9);
   width: calc(var(--spacing) * 60);
   cursor: pointer;
   justify-content: center;
@@ -503,9 +515,29 @@ th, td {
     }
   }
 }
-.btn-success {
-  margin-bottom: calc(var(--spacing) * 6);
+.btn-accent {
   display: flex;
+  height: calc(var(--spacing) * 9);
+  width: calc(var(--spacing) * 60);
+  cursor: pointer;
+  justify-content: center;
+  border-style: var(--tw-border-style);
+  border-width: 3px;
+  border-color: transparent;
+  background-color: var(--color-accent);
+  padding-block: calc(var(--spacing) * 1);
+  &:hover {
+    @media (hover: hover) {
+      background-color: color-mix(in srgb, oklch(var(--secondary)) 75%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        background-color: color-mix(in oklab, var(--color-secondary) 75%, transparent);
+      }
+    }
+  }
+}
+.btn-success {
+  display: flex;
+  height: calc(var(--spacing) * 9);
   width: calc(var(--spacing) * 60);
   cursor: pointer;
   justify-content: center;
@@ -543,7 +575,7 @@ th, td {
   color: var(--color-primary);
 }
 .shadow-brutalist {
-  box-shadow: 3px 3px 0px var(--color-secondary), 7px 7px 0px var(--color-accent);
+  box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
 }
 .shadow-hard {
   box-shadow: 3px 3px 0px var(--color-secondary);

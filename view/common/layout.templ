@@ -1,5 +1,7 @@
 package common 
 
+import "time"
+
 templ Layout(title string) {
 	<html lang="en">
 		<head>
@@ -16,10 +18,10 @@ templ Layout(title string) {
 					@themeToggle()
 				</header>
 				<!-- Here's where the pages are injected -->
-				<div class="grow text-text">
+				<div class="grow flex flex-col text-text">
 					{ children... }
 				</div>
-				<footer class="border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl">© JsonB 2025</footer>
+				<footer class="border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl">© JsonB { time.Now().Year() }</footer>
 			</main>
 			<script>
                 function getSystemTheme() {

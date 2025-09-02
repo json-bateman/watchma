@@ -24,6 +24,8 @@ func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 	// TODO: Something with this data, maybe put it in a room struct
 	roomName := r.FormValue("roomName")
 	moviesStr := r.FormValue("movies")
+	username := r.FormValue("username")
+
 	movies, err := strconv.Atoi(moviesStr)
 	if err != nil {
 		http.Error(w, "Movies must be a number", http.StatusBadRequest)
@@ -33,9 +35,11 @@ func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	game.AllRooms.AddRoom(roomName, &game.GameSession{MovieNumber: movies})
+	room, _ := game.AllRooms.GetRoom(roomName)
+	room.AddUser(username)
 
 	// Redirect to /host/room after POST
-	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/room/%s?username=%s", roomName, username), http.StatusSeeOther)
 }
 
 type movieReq struct {
@@ -67,8 +71,6 @@ type Username struct {
 	Roomname string `json:"roomname"`
 }
 
-var userSessions = make(map[string]string)
-
 func (a *App) SetUsername(w http.ResponseWriter, r *http.Request) {
 	var u Username
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -81,9 +83,16 @@ func (a *App) SetUsername(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userSessions[u.Username] = u.Roomname
+	room, exists := game.AllRooms.GetRoom(u.Roomname)
+	if !exists {
+		SendSSEError(w, r, "Room does not exist", http.StatusNotFound)
+		return
+	}
 
-	fmt.Printf("User %s joined room %s\n", u.Username, u.Roomname)
+	if _, userExists := room.GetUser(u.Username); userExists {
+		SendSSEError(w, r, "Username already taken in this room", http.StatusConflict)
+		return
+	}
 
 	ClearSSEError(w, r)
 	sse := datastar.NewSSE(w, r)
@@ -107,8 +116,9 @@ func ClearSSEError(w http.ResponseWriter, r *http.Request) {
 
 // PublishToNATS publishes a JSON payload {"subject": string, "message": string} to the configured NATS server.
 type natsPublishRequest struct {
-	Subject string `json:"subject"`
-	Message string `json:"message"`
+	Subject  string `json:"subject"`
+	Message  string `json:"message"`
+	Usernmae string `json:"username"`
 }
 
 func (a *App) PublishToNATS(w http.ResponseWriter, r *http.Request) {

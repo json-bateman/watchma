@@ -8,34 +8,26 @@ import (
 
 templ Chat(room string) {
 	@common.Layout("Chat Page") {
-		<div data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room) }>yo</div>
-		<div data-bind-yo>hi</div>
-		<input
-			data-on-click="@post('/api/nats/publish')"
-			class="input"
-			placeholder="chat message..."
-			data-bind-message
-			data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
-		/>
+		<div data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room) }></div>
+		<div class="flex gap-2">
+			<input
+				class="input"
+				placeholder="chat message..."
+				data-bind-message
+				data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
+			/>
+			<button
+				data-on-click="@post('/api/nats/publish');$message='';"
+				class="btn !w-16"
+			>
+				Send
+			</button>
+		</div>
 		<div
 			id="container"
 			data-on-load={ datastar.GetSSE(fmt.Sprintf("/message/%s", room)) }
 		>
 			<div id="chat" class="chat-messages h-64 overflow-y-auto border p-4"></div>
-			<button
-				data-on-click="@post('/api/nats/publish')"
-				class="btn"
-			>
-				Send to NATS
-			</button>
 		</div>
 	}
-}
-
-templ ChatBox(messages []string) {
-	<div id="chat" class="chat-messages h-64 overflow-y-auto border p-4">
-		for _, m := range messages {
-			<p>{ m }</p>
-		}
-	</div>
 }
