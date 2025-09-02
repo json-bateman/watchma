@@ -4,12 +4,12 @@ import "github.com/json-bateman/jellyfin-grabber/view/common"
 
 templ IndexPage(name string) {
 	@common.Layout("Index Page") {
-		<div class="text-5xl mb-4 text-text font-serif">Welcome to the Movie Showdown</div>
-		<div class="flex justify-center gap-2">
+		<div class="text-5xl flex text-text font-serif justify-center">Welcome to the Movie Showdown</div>
+		<div class="flex justify-center gap-2 my-16">
 			<a href="host" class="btn">Host Room</a>
 			<a href="join" class="btn-secondary">Join Room</a>
 		</div>
-		<div class="flex justify-center gap-2 mt-24">
+		<div class="flex justify-center">
 			<a href="shuffle/8" class="btn-accent">Shuffle 8</a>
 		</div>
 	}

@@ -20,6 +20,7 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/view/messing"
 	"github.com/json-bateman/jellyfin-grabber/view/movies"
 	"github.com/json-bateman/jellyfin-grabber/view/rooms"
+	"github.com/json-bateman/jellyfin-grabber/view/username"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -31,7 +32,8 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 
 // --- view/host ---//
 func (a *App) Host(w http.ResponseWriter, r *http.Request) {
-	component := host.HostPage()
+	j, _ := r.Cookie("jelly_user")
+	component := host.HostPage(j.Value)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -118,7 +120,22 @@ func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
 
 // --- view/join ---//
 func (a *App) Join(w http.ResponseWriter, r *http.Request) {
+	// Check if user has username cookie
+	_, err := r.Cookie("jelly_user")
+	if err != nil {
+		// No username cookie, redirect to username form
+		http.Redirect(w, r, "/username", http.StatusSeeOther)
+		return
+	}
+
+	// User has username, show join page
 	component := join.JoinPage(game.AllRooms.Rooms)
+	templ.Handler(component).ServeHTTP(w, r)
+}
+
+// --- view/username ---//
+func (a *App) Username(w http.ResponseWriter, r *http.Request) {
+	component := username.UsernameForm()
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -128,6 +145,7 @@ func (a *App) Messing(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
+// --- view/testSSE ---//
 func (a *App) TestSSE(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 

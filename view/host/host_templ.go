@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/json-bateman/jellyfin-grabber/view/common"
 
-func HostPage() templ.Component {
+func HostPage(username string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +43,20 @@ func HostPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text flex flex-col items-center justify-center\"><form action=\"/api/host\" method=\"POST\" class=\"flex flex-col gap-2\"><div class=\"flex flex-col\"><label for=\"room-name\">Room Name</label> <input id=\"room-name\" class=\"input\" name=\"roomName\" required placeholder=\"Room Name...\"></div><div class=\"flex flex-col\"><label for=\"movies\">Movie Count</label> <select id=\"movies\" name=\"movies\" class=\"select\"><option value=\"20\">20</option> <option value=\"50\">50</option> <option value=\"100\">100</option> <option value=\"200\">200</option></select></div><div class=\"flex flex-col\"><label for=\"username\">Username</label> <input id=\"username\" class=\"input\" name=\"username\" required placeholder=\"Username...\"></div><button type=\"submit\" class=\"btn\">Host Room</button></form></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text flex flex-col items-center justify-center\"><form action=\"/api/host\" method=\"POST\" class=\"flex flex-col gap-2\"><div class=\"flex flex-col\"><label for=\"room-name\">Room Name</label> <input id=\"room-name\" class=\"input\" name=\"roomName\" required placeholder=\"Room Name...\"></div><div class=\"flex flex-col\"><label for=\"movies\">Movie Count</label> <select id=\"movies\" name=\"movies\" class=\"select\"><option value=\"20\">20</option> <option value=\"50\">50</option> <option value=\"100\">100</option> <option value=\"200\">200</option></select></div><div class=\"flex flex-col\"><label for=\"username\">Username</label> <input id=\"username\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/host/host.templ`, Line: 24, Col: 42}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"input\" name=\"username\" required placeholder=\"Username...\"></div><button type=\"submit\" class=\"btn\">Host Room</button></form></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,11 +1,18 @@
 package rooms 
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/json-bateman/jellyfin-grabber/internal/game"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"github.com/starfederation/datastar-go/datastar"
+	"strings"
 )
+
+type ChatMessage struct {
+	Username string `json:"username"`
+	Message  string `json:"message"`
+}
 
 templ SingleRoom(room *game.Room) {
 	@common.Layout(room.Name) {
@@ -46,34 +53,27 @@ templ SingleRoom(room *game.Room) {
 templ ChatBox(messages []string) {
 	<div id="chat" class="chat-messages h-96 overflow-y-auto border p-4">
 		for _, m := range messages {
-			<p>{ m }</p>
+			@chatMessage(m)
 		}
 	</div>
 }
 
-templ UsernameForm(room *game.Room) {
-	@common.Layout("username") {
-		<div id="inputs">
-			<div class="flex flex-col">
-				<label for="username">Username:</label>
-				<input data-bind-roomname class="input" type="hidden" value={ room.Name }/>
-				<input
-					data-bind-username
-					class="input"
-					type="text"
-					name="username"
-					id="username"
-					placeholder="Enter your username"
-					required
-					data-on-keydown="if (evt.key !== 'Enter' || !$username.trim().length) return; @post('/api/username');"
-				/>
-			</div>
-			<button
-				data-on-click="@post('/api/username')"
-				class="btn"
-				type="submit"
-			>Set Username</button>
-			<div id="error" class="hidden"></div>
+templ chatMessage(jsonMsg string) {
+	if msg := parseMessage(jsonMsg); msg != nil {
+		<div class="mb-2 flex">
+			<span class="font-bold text-accent">{ strings.Trim(msg.Username," ") }</span>
+			<span class="text-gray-600">:&nbsp;</span>
+			<span>{ msg.Message }</span>
 		</div>
+	} else {
+		<p class="text-red-500">Invalid message format</p>
 	}
+}
+
+func parseMessage(jsonStr string) *ChatMessage {
+	var msg ChatMessage
+	if err := json.Unmarshal([]byte(jsonStr), &msg); err != nil {
+		return nil
+	}
+	return &msg
 }

@@ -38,8 +38,18 @@ func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 	room, _ := game.AllRooms.GetRoom(roomName)
 	room.AddUser(username)
 
-	// Redirect to /host/room after POST
-	http.Redirect(w, r, fmt.Sprintf("/room/%s?username=%s", roomName, username), http.StatusSeeOther)
+	// Set username cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jelly_user",
+		Value:    username,
+		Path:     "/",
+		MaxAge:   30 * 24 * 60 * 60, // 30 days
+		HttpOnly: false,
+		Secure:   false,
+	})
+
+	// Redirect to room (no username in URL needed)
+	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
 }
 
 type movieReq struct {
@@ -71,37 +81,12 @@ type Username struct {
 	Roomname string `json:"roomname"`
 }
 
-func (a *App) SetUsername(w http.ResponseWriter, r *http.Request) {
-	var u Username
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-		SendSSEError(w, r, "Bad request", http.StatusBadRequest)
-		return
+func getUsernameFromCookie(r *http.Request) string {
+	cookie, err := r.Cookie("jelly_user")
+	if err != nil {
+		return ""
 	}
-
-	if u.Username == "" {
-		SendSSEError(w, r, "Please Enter a Username", http.StatusBadRequest)
-		return
-	}
-
-	room, exists := game.AllRooms.GetRoom(u.Roomname)
-	if !exists {
-		SendSSEError(w, r, "Room does not exist", http.StatusNotFound)
-		return
-	}
-
-	if _, userExists := room.GetUser(u.Username); userExists {
-		SendSSEError(w, r, "Username already taken in this room", http.StatusConflict)
-		return
-	}
-
-	ClearSSEError(w, r)
-	sse := datastar.NewSSE(w, r)
-	if err := sse.PatchElementf(
-		`<div id="inputs"> <p>Welcome, %s! You've joined room %s.</p> </div>`, u.Username, u.Roomname,
-	); err != nil {
-		fmt.Println("there was an error afoot", err)
-		return
-	}
+	return cookie.Value
 }
 
 func SendSSEError(w http.ResponseWriter, r *http.Request, message string, statusCode int) {
@@ -114,11 +99,42 @@ func ClearSSEError(w http.ResponseWriter, r *http.Request) {
 	sse.PatchElements(`<div id="error" class="hidden"></div>`)
 }
 
+func (a *App) SetUsername(w http.ResponseWriter, r *http.Request) {
+	var u Username
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		SendSSEError(w, r, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	if u.Username == "" {
+		SendSSEError(w, r, "Please Enter a Username", http.StatusBadRequest)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jelly_user",
+		Value:    u.Username,
+		Path:     "/",
+		MaxAge:   30 * 24 * 60 * 60, // 30 days
+		HttpOnly: false,             // Allow JS to read if needed
+		Secure:   false,             // Set to true in production with HTTPS
+	})
+
+	ClearSSEError(w, r)
+
+	http.Redirect(w, r, "/join", http.StatusSeeOther)
+}
+
 // PublishToNATS publishes a JSON payload {"subject": string, "message": string} to the configured NATS server.
 type natsPublishRequest struct {
 	Subject  string `json:"subject"`
 	Message  string `json:"message"`
-	Usernmae string `json:"username"`
+	Username string `json:"username"`
+}
+
+type ChatMessage struct {
+	Username string `json:"username"`
+	Message  string `json:"message"`
 }
 
 func (a *App) PublishToNATS(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +153,27 @@ func (a *App) PublishToNATS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.Nats.Publish(req.Subject, []byte(req.Message)); err != nil {
+	// Get username from cookie instead of request body
+	username := getUsernameFromCookie(r)
+	if username == "" {
+		internal.WriteJSONError(w, http.StatusBadRequest, "Username not found in cookie")
+		return
+	}
+
+	// Create structured chat message
+	chatMsg := ChatMessage{
+		Username: username,
+		Message:  req.Message,
+	}
+
+	// Marshal to JSON
+	msgBytes, err := json.Marshal(chatMsg)
+	if err != nil {
+		internal.WriteJSONError(w, http.StatusInternalServerError, "Failed to encode message")
+		return
+	}
+
+	if err := a.Nats.Publish(req.Subject, msgBytes); err != nil {
 		internal.WriteJSONError(w, http.StatusBadGateway, fmt.Sprintf("Publish failed: %v", err))
 		return
 	}

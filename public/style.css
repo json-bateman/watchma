@@ -12,6 +12,7 @@
     --color-orange-500: oklch(70.5% 0.213 47.604);
     --color-green-400: oklch(79.2% 0.209 151.711);
     --color-blue-300: oklch(80.9% 0.105 251.813);
+    --color-gray-600: oklch(44.6% 0.03 256.802);
     --spacing: 0.25rem;
     --text-lg: 1.125rem;
     --text-lg--line-height: calc(1.75 / 1.125);
@@ -23,6 +24,7 @@
     --text-5xl--line-height: 1;
     --text-7xl: 4.5rem;
     --text-7xl--line-height: 1;
+    --font-weight-bold: 700;
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
     --color-text: oklch(var(--text));
@@ -184,9 +186,6 @@
   .relative {
     position: relative;
   }
-  .z-0 {
-    z-index: 0;
-  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
@@ -205,8 +204,11 @@
       max-width: 96rem;
     }
   }
-  .mt-24 {
-    margin-top: calc(var(--spacing) * 24);
+  .my-16 {
+    margin-block: calc(var(--spacing) * 16);
+  }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
   }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
@@ -324,6 +326,9 @@
   .object-cover {
     object-fit: cover;
   }
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
   .p-4 {
     padding: calc(var(--spacing) * 4);
   }
@@ -355,11 +360,18 @@
     font-size: var(--text-7xl);
     line-height: var(--tw-leading, var(--text-7xl--line-height));
   }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
+  }
   .text-accent {
     color: var(--color-accent);
   }
   .text-blue-300 {
     color: var(--color-blue-300);
+  }
+  .text-gray-600 {
+    color: var(--color-gray-600);
   }
   .text-orange-400 {
     color: var(--color-orange-400);
@@ -636,6 +648,10 @@ th, td {
   inherits: false;
   initial-value: solid;
 }
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
 @property --tw-shadow {
   syntax: "*";
   inherits: false;
@@ -763,6 +779,7 @@ th, td {
       --tw-skew-x: initial;
       --tw-skew-y: initial;
       --tw-border-style: solid;
+      --tw-font-weight: initial;
       --tw-shadow: 0 0 #0000;
       --tw-shadow-color: initial;
       --tw-shadow-alpha: 100%;

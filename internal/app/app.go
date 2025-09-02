@@ -71,6 +71,7 @@ func (a *App) setupRoutes() {
 	a.Router.Get("/", a.Index)
 	a.Router.Get("/host", a.Host)
 	a.Router.Get("/join", a.Join)
+	a.Router.Get("/username", a.Username)
 	a.Router.Get("/room/{roomName}", a.SingleRoom)
 	a.Router.Get("/testSSE", a.TestSSE)
 	a.Router.Get("/movies", a.Movies)
