@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/json-bateman/jellyfin-grabber/internal"
-	"github.com/json-bateman/jellyfin-grabber/internal/game"
+	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/view/movies"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -30,12 +30,12 @@ func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Movies must be a number", http.StatusBadRequest)
 	}
-	if game.AllRooms.RoomExists(roomName) {
+	if services.AllRooms.RoomExists(roomName) {
 		http.Error(w, "This room name already exists", http.StatusBadRequest)
 		return
 	}
-	game.AllRooms.AddRoom(roomName, &game.GameSession{MovieNumber: movies})
-	room, _ := game.AllRooms.GetRoom(roomName)
+	services.AllRooms.AddRoom(roomName, &services.GameSession{MovieNumber: movies})
+	room, _ := services.AllRooms.GetRoom(roomName)
 	room.AddUser(username)
 
 	// Set username cookie

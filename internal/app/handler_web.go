@@ -11,8 +11,8 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
-	"github.com/json-bateman/jellyfin-grabber/internal/game"
 	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/view"
 	"github.com/json-bateman/jellyfin-grabber/view/chat"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
@@ -32,8 +32,9 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 
 // --- view/host ---//
 func (a *App) Host(w http.ResponseWriter, r *http.Request) {
-	j, _ := r.Cookie("jelly_user")
-	component := host.HostPage(j.Value)
+	username := getUsernameFromCookie(r)
+
+	component := host.HostPage(username)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -106,30 +107,38 @@ func (a *App) Movies(w http.ResponseWriter, r *http.Request) {
 // --- view/rooms ---//
 func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
+	username := getUsernameFromCookie(r)
 
-	var myRoom *game.Room
-	for a, b := range game.AllRooms.Rooms {
+	var myRoom *services.Room
+	for a, b := range services.AllRooms.Rooms {
 		if roomName == a {
 			myRoom = b
 		}
 	}
 
+	// OK to overwrite when host joins, just updates the timestamp
+	myRoom.AddUser(username)
+
+	// Broadcast user list update to all clients in the room
+	// a.broadcastUserUpdate(roomName)
+
 	component := rooms.SingleRoom(myRoom)
 	templ.Handler(component).ServeHTTP(w, r)
+
 }
 
 // --- view/join ---//
 func (a *App) Join(w http.ResponseWriter, r *http.Request) {
 	// Check if user has username cookie
-	_, err := r.Cookie("jelly_user")
-	if err != nil {
-		// No username cookie, redirect to username form
+	username := getUsernameFromCookie(r)
+	if username == "" {
+		// No username, redirect to username form
 		http.Redirect(w, r, "/username", http.StatusSeeOther)
 		return
 	}
 
 	// User has username, show join page
-	component := join.JoinPage(game.AllRooms.Rooms)
+	component := join.JoinPage(services.AllRooms.Rooms)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -166,7 +175,6 @@ func (a *App) Chat(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-// TODO: maybe change wildcard matching on chat rooms
 func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 	room := chi.URLParam(r, "room")
 	sse := datastar.NewSSE(w, r)
@@ -225,5 +233,25 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 		case <-r.Context().Done():
 			return
 		}
+	}
+}
+
+// sends an update to everyone in that room, saying who joined and updates the new playercount
+func (a *App) RoomSSE(w http.ResponseWriter, r *http.Request) {
+	room := chi.URLParam(r, "room")
+	sse := datastar.NewSSE(w, r)
+
+	var myRoom *services.Room
+	for a, b := range services.AllRooms.Rooms {
+		if room == a {
+			myRoom = b
+		}
+	}
+
+	userBox := rooms.UserBox(myRoom)
+
+	if err := sse.PatchElementTempl(userBox); err != nil {
+		fmt.Println("Error patching message from client")
+		return
 	}
 }

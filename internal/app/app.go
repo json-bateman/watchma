@@ -24,9 +24,6 @@ type App struct {
 	Jellyfin *jellyfin.Client
 	Nats     *nats.Conn
 
-	// RoomService *services.RoomService
-	// UserService *services.UserService
-
 	HTTPServer *http.Server
 
 	shutdown chan os.Signal

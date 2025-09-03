@@ -3,7 +3,7 @@ package rooms
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/json-bateman/jellyfin-grabber/internal/game"
+	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"github.com/starfederation/datastar-go/datastar"
 	"strings"
@@ -14,12 +14,18 @@ type ChatMessage struct {
 	Message  string `json:"message"`
 }
 
-templ SingleRoom(room *game.Room) {
+templ SingleRoom(room *services.Room) {
 	@common.Layout(room.Name) {
 		<!-- janky way to set the subject field for the NATS payload
     TODO: make this not janky -->
-		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s', username: '%s'}", room.Name) }></span>
 		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room.Name) }></span>
+		<button
+			class="btn-primary"
+			data-on-click={ fmt.Sprintf("@post('/rooms/%s')", room.Name) }
+		>
+			Ready Up!
+		</button>
+		<div id="users" class="flex flex-col h-24 overflow-y-auto border p-4"></div>
 		<section class="flex flex-col justify-between grow">
 			<div>
 				<div>Room Name: { room.Name }</div>
@@ -43,7 +49,7 @@ templ SingleRoom(room *game.Room) {
 					id="container"
 					data-on-load={ datastar.GetSSE(fmt.Sprintf("/message/%s", room.Name)) }
 				>
-					<div id="chat" class="chat-messages h-96 overflow-y-auto border p-4"></div>
+					<div id="chat" class="h-96 overflow-y-auto border p-4"></div>
 				</div>
 			</div>
 		</section>
@@ -68,6 +74,18 @@ templ chatMessage(jsonMsg string) {
 	} else {
 		<p class="text-red-500">Invalid message format</p>
 	}
+}
+
+templ UserBox(room *services.Room) {
+	<div id="users" class="flex flex-col h-24 overflow-y-auto border p-4">
+		<div>
+			<span>Users:&nbsp</span>
+			<span>{ len(room.Users) }</span>
+		</div>
+		for _, user := range room.Users {
+			<p>{ user.Name }</p>
+		}
+	</div>
 }
 
 func parseMessage(jsonStr string) *ChatMessage {

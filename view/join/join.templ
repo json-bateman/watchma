@@ -1,11 +1,11 @@
 package join 
 
 import (
-	"github.com/json-bateman/jellyfin-grabber/internal/game"
+	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-templ JoinPage(rooms map[string]*game.Room) {
+templ JoinPage(rooms map[string]*services.Room) {
 	@common.Layout("Join Page") {
 		<section class="text-text flex flex-col items-center justify-center">
 			if len(rooms) > 0 {
