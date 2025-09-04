@@ -19,37 +19,48 @@ templ SingleRoom(room *services.Room) {
 		<!-- janky way to set the subject field for the NATS payload
     TODO: make this not janky -->
 		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room.Name) }></span>
-		<button
-			class="btn-primary"
-			data-on-click={ fmt.Sprintf("@post('/rooms/%s')", room.Name) }
-		>
-			Ready Up!
-		</button>
-		<div id="users" class="flex flex-col h-24 overflow-y-auto border p-4"></div>
-		<section class="flex flex-col justify-between grow">
-			<div>
-				<div>Room Name: { room.Name }</div>
-			</div>
-			<div>
-				<div class="flex gap-2">
-					<input
-						class="input"
-						placeholder="chat message..."
-						data-bind-message
-						data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
-					/>
-					<button
-						data-on-click="@post('/api/nats/publish');$message='';"
-						class="btn !w-16"
-					>
-						Send
-					</button>
+		<section class="flex justify-center grow">
+			<div class="flex max-w-[800px] flex-col justify-between grow">
+				<div>
+					<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">
+						<div class="text-text text-4xl font-black uppercase tracking-widest mb-4 border-b-4 border-white pb-2">
+							{ room.Name }
+						</div>
+						<div class="grid grid-cols-2 gap-4">
+							<div class="bg-white text-black p-3 border-2 border-black">
+								<div class="text-xs font-black uppercase tracking-wide">MOVIES</div>
+								<div class="text-3xl font-black">{ room.Game.MovieNumber }</div>
+							</div>
+							<div class="bg-white text-black p-3 border-2 border-black">
+								<div class="text-xs font-black uppercase tracking-wide">MAX PLAYERS</div>
+								<div class="text-3xl font-black">{ room.Game.MaxPlayers }</div>
+							</div>
+						</div>
+					</div>
+					@UserBox(room)
 				</div>
-				<div
-					id="container"
-					data-on-load={ datastar.GetSSE(fmt.Sprintf("/message/%s", room.Name)) }
-				>
-					<div id="chat" class="h-96 overflow-y-auto border p-4"></div>
+				<!-- Chatbox -->
+				<div class="mb-6">
+					<div class="flex gap-2">
+						<input
+							class="input"
+							placeholder="chat message..."
+							data-bind-message
+							data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
+						/>
+						<button
+							data-on-click="@post('/api/nats/publish');$message='';"
+							class="btn !w-16"
+						>
+							Send
+						</button>
+					</div>
+					<div
+						id="container"
+						data-on-load={ datastar.GetSSE(fmt.Sprintf("/message/%s", room.Name)) }
+					>
+						<div id="chat" class="h-96 overflow-y-auto border p-4"></div>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -57,34 +68,42 @@ templ SingleRoom(room *services.Room) {
 }
 
 templ ChatBox(messages []string) {
-	<div id="chat" class="chat-messages h-96 overflow-y-auto border p-4">
+	<div id="chat" class="h-96 overflow-y-auto border p-4">
 		for _, m := range messages {
-			@chatMessage(m)
+			if msg := parseMessage(m); msg != nil {
+				<div class="mb-2 flex">
+					<span class="font-bold text-accent">{ strings.Trim(msg.Username," ") }</span>
+					<span class="text-gray-600">:&nbsp;</span>
+					<span>{ msg.Message }</span>
+				</div>
+			} else {
+				<p class="text-red-500">Invalid message format</p>
+			}
 		}
 	</div>
 }
 
-templ chatMessage(jsonMsg string) {
-	if msg := parseMessage(jsonMsg); msg != nil {
-		<div class="mb-2 flex">
-			<span class="font-bold text-accent">{ strings.Trim(msg.Username," ") }</span>
-			<span class="text-gray-600">:&nbsp;</span>
-			<span>{ msg.Message }</span>
-		</div>
-	} else {
-		<p class="text-red-500">Invalid message format</p>
-	}
-}
-
 templ UserBox(room *services.Room) {
-	<div id="users" class="flex flex-col h-24 overflow-y-auto border p-4">
-		<div>
-			<span>Users:&nbsp</span>
-			<span>{ len(room.Users) }</span>
+	<div id="users" class="flex flex-col">
+		<div class="flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4">
+			<div class="text-white text-xl font-black uppercase tracking-wider">
+				<span>Players:&nbsp</span>
+				<span class="text-2xl">{ len(room.Users) }</span>
+			</div>
+			<button
+				class="btn"
+				data-on-click={ fmt.Sprintf("@post('/rooms/%s')", room.Name) }
+			>
+				Ready Up!
+			</button>
 		</div>
-		for _, user := range room.Users {
-			<p>{ user.Name }</p>
-		}
+		<div class="flex flex-wrap gap-4">
+			for user := range room.Users {
+				<div class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex" style={ getUserColor(user) }>
+					<span>{ user }</span>
+				</div>
+			}
+		</div>
 	</div>
 }
 
@@ -94,4 +113,33 @@ func parseMessage(jsonStr string) *ChatMessage {
 		return nil
 	}
 	return &msg
+}
+
+var availableColors = []string{
+	"background-color: #ef4444;", // red
+	"background-color: #f97316;", // orange
+	"background-color: #eab308;", // yellow
+	"background-color: #22c55e;", // green
+	"background-color: #3b82f6;", // blue
+	"background-color: #8b5cf6;", // violet
+	"background-color: #ec4899;", // pink
+	"background-color: #06b6d4;", // cyan
+}
+
+var userColors = make(map[string]string)
+
+func getUserColor(username string) templ.SafeCSS {
+	if color, exists := userColors[username]; exists {
+		return templ.SafeCSS(color)
+	}
+
+	if len(availableColors) > 0 {
+		color := availableColors[0]
+		availableColors = availableColors[1:]
+		userColors[username] = color
+		return templ.SafeCSS(color)
+	}
+
+	// Fallback if no colors left
+	return templ.SafeCSS("background-color: #6b7280; border-color: #4b5563;") // gray
 }

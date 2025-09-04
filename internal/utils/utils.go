@@ -1,4 +1,4 @@
-package internal
+package utils
 
 import (
 	"encoding/json"
@@ -29,4 +29,12 @@ func WriteJSONResponse(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
+}
+
+func GetUsernameFromCookie(r *http.Request) string {
+	cookie, err := r.Cookie("jelly_user")
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
 }

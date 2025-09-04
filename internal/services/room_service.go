@@ -12,13 +12,10 @@ const (
 	Movies
 )
 
-var AllRooms = &RoomManager{
-	Rooms: make(map[string]*Room),
-}
-
 type GameSession struct {
 	Movies      []string
 	MovieNumber int
+	MaxPlayers  int
 	Votes       map[string]int // Movie -> vote count
 	Step        GameStep
 }
@@ -28,7 +25,7 @@ type User struct {
 	JoinedAt time.Time
 }
 
-// Structs with Methods
+// ----- Structs with Methods -----
 type RoomManager struct {
 	mu    sync.RWMutex
 	Rooms map[string]*Room
@@ -39,6 +36,10 @@ type Room struct {
 	Game  *GameSession
 	Users map[string]*User // username -> User
 	mu    sync.RWMutex
+}
+
+var AllRooms = &RoomManager{
+	Rooms: make(map[string]*Room),
 }
 
 func (rm *RoomManager) AddRoom(name string, game *GameSession) {

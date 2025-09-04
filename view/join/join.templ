@@ -21,7 +21,7 @@ templ JoinPage(rooms map[string]*services.Room) {
 						</thead>
 						<tbody class="w-full">
 							for _, room := range rooms {
-								<tr>
+								<tr class="text-text">
 									<td><a class="text-accent" href={ templ.SafeURL("room/" + room.Name) }>{ room.Name }</a></td>
 									<td>{ room.Game.MovieNumber }</td>
 									<td>5</td>

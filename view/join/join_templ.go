@@ -56,7 +56,7 @@ func JoinPage(rooms map[string]*services.Room) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				for _, room := range rooms {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<tr><td><a class=\"text-accent\" href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<tr class=\"text-text\"><td><a class=\"text-accent\" href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

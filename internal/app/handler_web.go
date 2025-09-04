@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
+	"github.com/json-bateman/jellyfin-grabber/internal/utils"
 	"github.com/json-bateman/jellyfin-grabber/view"
-	"github.com/json-bateman/jellyfin-grabber/view/chat"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
 	"github.com/json-bateman/jellyfin-grabber/view/join"
 	"github.com/json-bateman/jellyfin-grabber/view/messing"
@@ -24,6 +24,8 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
+const JOIN_MSG = "JOINED-ROOM-xD"
+
 // --- view ---//
 func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 	component := view.IndexPage("Sup wit it")
@@ -32,7 +34,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 
 // --- view/host ---//
 func (a *App) Host(w http.ResponseWriter, r *http.Request) {
-	username := getUsernameFromCookie(r)
+	username := utils.GetUsernameFromCookie(r)
 
 	component := host.HostPage(username)
 	templ.Handler(component).ServeHTTP(w, r)
@@ -107,7 +109,7 @@ func (a *App) Movies(w http.ResponseWriter, r *http.Request) {
 // --- view/rooms ---//
 func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	username := getUsernameFromCookie(r)
+	username := utils.GetUsernameFromCookie(r)
 
 	var myRoom *services.Room
 	for a, b := range services.AllRooms.Rooms {
@@ -120,17 +122,16 @@ func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	myRoom.AddUser(username)
 
 	// Broadcast user list update to all clients in the room
-	// a.broadcastUserUpdate(roomName)
+	a.Nats.Publish(JOIN_MSG+"."+roomName, nil)
 
 	component := rooms.SingleRoom(myRoom)
 	templ.Handler(component).ServeHTTP(w, r)
-
 }
 
 // --- view/join ---//
 func (a *App) Join(w http.ResponseWriter, r *http.Request) {
 	// Check if user has username cookie
-	username := getUsernameFromCookie(r)
+	username := utils.GetUsernameFromCookie(r)
 	if username == "" {
 		// No username, redirect to username form
 		http.Redirect(w, r, "/username", http.StatusSeeOther)
@@ -169,19 +170,13 @@ func (a *App) TestSSE(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) Chat(w http.ResponseWriter, r *http.Request) {
-	room := chi.URLParam(r, "room")
-	component := chat.Chat(room)
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
-func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
+func (a *App) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	room := chi.URLParam(r, "room")
 	sse := datastar.NewSSE(w, r)
-	client := make(chan string, 100) // Buffered channel to prevent blocking
+	client := make(chan string, 100)
 
-	// Add client to room with proper synchronization
 	a.mu.Lock()
+	// Register for chat updates
 	if a.gameClients[room] == nil {
 		a.gameClients[room] = make(map[chan string]bool)
 	}
@@ -194,6 +189,21 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 			a.Logger.Error("Error Patching chatbox on load")
 			a.mu.Unlock()
 			return
+		}
+	}
+
+	// Send existing user list
+	var myRoom *services.Room
+	for name, r := range services.AllRooms.Rooms {
+		if name == room {
+			myRoom = r
+			break
+		}
+	}
+	if myRoom != nil {
+		userBox := rooms.UserBox(myRoom)
+		if err := sse.PatchElementTempl(userBox); err != nil {
+			a.Logger.Error("Error patching initial user list")
 		}
 	}
 	a.mu.Unlock()
@@ -211,47 +221,39 @@ func (a *App) ChatSSE(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case <-client:
-			// Get current room messages and send to client
-			a.mu.RLock()
-			currentMessages := make([]string, len(a.roomMessages[room]))
-			copy(currentMessages, a.roomMessages[room])
-			a.mu.RUnlock()
+		case message := <-client:
+			if message == JOIN_MSG {
+				// Handle user join/leave updates
+				var myRoom *services.Room
+				for name, r := range services.AllRooms.Rooms {
+					if name == room {
+						myRoom = r
+						break
+					}
+				}
+				if myRoom != nil {
+					userBox := rooms.UserBox(myRoom)
+					if err := sse.PatchElementTempl(userBox); err != nil {
+						fmt.Println("Error patching user list")
+						return
+					}
+				}
+			} else {
+				// Handle chat message updates
+				a.mu.RLock()
+				currentMessages := make([]string, len(a.roomMessages[room]))
+				copy(currentMessages, a.roomMessages[room])
+				a.mu.RUnlock()
 
-			chat := rooms.ChatBox(currentMessages)
-
-			if err := sse.PatchElementTempl(chat); err != nil {
-				fmt.Println("Error patching message from client")
-				return
+				chat := rooms.ChatBox(currentMessages)
+				if err := sse.PatchElementTempl(chat); err != nil {
+					fmt.Println("Error patching chat message")
+					return
+				}
 			}
-			// if err := sse.MarshalAndPatchSignals(map[string][]string{
-			// 	"message": currentMessages,
-			// }); err != nil {
-			// 	fmt.Println("err2")
-			// 	return
-			// }
+
 		case <-r.Context().Done():
 			return
 		}
-	}
-}
-
-// sends an update to everyone in that room, saying who joined and updates the new playercount
-func (a *App) RoomSSE(w http.ResponseWriter, r *http.Request) {
-	room := chi.URLParam(r, "room")
-	sse := datastar.NewSSE(w, r)
-
-	var myRoom *services.Room
-	for a, b := range services.AllRooms.Rooms {
-		if room == a {
-			myRoom = b
-		}
-	}
-
-	userBox := rooms.UserBox(myRoom)
-
-	if err := sse.PatchElementTempl(userBox); err != nil {
-		fmt.Println("Error patching message from client")
-		return
 	}
 }

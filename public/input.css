@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-/* Tag styles */
+/* ------------
+HTML Tag Styles
+------------ */
 table {
   width: 100%;
 }
@@ -10,6 +12,18 @@ td {
   padding: 4px 8px;
 }
 
+/* When chrome autofills it changes input styling, this resets that */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+}
+
+/* ------------
+Theme Variables
+------------ */
 
 /* Generated from https://www.realtimecolors.com/ */
 @theme {
@@ -63,6 +77,9 @@ td {
 
 }
 
+/* --------------------
+Applied Tailwind Styles
+-------------------- */
 
 .btn {
   @apply flex justify-center py-1 border-3 border-primary/80 text-background w-60 bg-accent cursor-pointer hover:bg-primary/75 h-9;
@@ -80,13 +97,22 @@ td {
   @apply flex justify-center py-1 border-3 w-60 bg-green-400 cursor-pointer hover:bg-green-400/75 h-9;
 }
 
+.label {
+  @apply text-primary
+}
+
 .input {
-  @apply border-3 w-60 pl-1 py-1 border-primary h-9
+  @apply bg-background text-text/95 border-3 w-60 pl-1 py-1 border-primary h-9
 }
 
 .select {
-  @apply border-3 border-primary text-primary pl-1 py-1 text-lg h-9
+  @apply border-3 border-primary text-text/95 pl-1 py-1 text-lg h-9
 }
+
+
+/* ---------------
+Regular CSS Styles
+--------------- */
 
 .shadow-brutalist {
   box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
@@ -96,10 +122,9 @@ td {
   box-shadow: 3px 3px 0px var(--color-secondary);
 }
 
-
-/* ---------------
-Regular CSS Styles
---------------- */
+.shadow-hard-text {
+  box-shadow: 4px 4px 0px var(--color-text);
+}
 
 .loader {
   width: 48px;

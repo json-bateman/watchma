@@ -41,3 +41,21 @@ clients that are subscribed.
 
 NATS Publish → Subscription Callback → Room History Storage → Client Channels → SSE Response → Browser Update
 
+### Here's how live chat works
+
+Setup:
+  - Gets the room name from URL parameters
+  - Creates an SSE connection and a buffered channel for the client
+  - Registers this client in a.gameClients[room] map
+  - Sends existing chat history to the new client immediately
+
+  Main Loop:
+  - Listens for messages on the client channel
+  - When a message arrives, it fetches the current room's message history
+  - Renders the messages using rooms.ChatBox() template
+  - Sends the updated chat box to the client's browser via SSE
+
+  Cleanup:
+  - When the connection closes (user leaves page), removes the client from the room's
+   client list
+  - Closes the channel to prevent memory leaks

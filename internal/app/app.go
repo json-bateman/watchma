@@ -70,12 +70,11 @@ func (a *App) setupRoutes() {
 	a.Router.Get("/join", a.Join)
 	a.Router.Get("/username", a.Username)
 	a.Router.Get("/room/{roomName}", a.SingleRoom)
+	a.Router.Get("/message/{room}", a.SingleRoomSSE)
 	a.Router.Get("/testSSE", a.TestSSE)
 	a.Router.Get("/movies", a.Movies)
 	a.Router.Get("/shuffle/{number}", a.Shuffle)
 	a.Router.Get("/messing", a.Messing)
-	a.Router.Get("/chat/{room}", a.Chat)
-	a.Router.Get("/message/{room}", a.ChatSSE)
 }
 
 func (a *App) setupNats() {
@@ -87,12 +86,26 @@ func (a *App) setupNats() {
 		a.mu.Lock()
 		// Store message in room history
 		a.roomMessages[room] = append(a.roomMessages[room], message)
-		clients := a.gameClients[room]
+		gameClients := a.gameClients[room]
 		a.mu.Unlock()
 
-		for client := range clients {
+		for gameClient := range gameClients {
 			select {
-			case client <- message:
+			case gameClient <- message:
+			default: // Non-blocking send to prevent deadlock
+			}
+		}
+	})
+	a.Nats.Subscribe(JOIN_MSG+".*", func(m *nats.Msg) {
+		room := strings.TrimPrefix(m.Subject, JOIN_MSG+".")
+
+		a.mu.Lock()
+		gameClients := a.gameClients[room]
+		a.mu.Unlock()
+
+		for gameClient := range gameClients {
+			select {
+			case gameClient <- JOIN_MSG:
 			default: // Non-blocking send to prevent deadlock
 			}
 		}
