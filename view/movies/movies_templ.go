@@ -9,11 +9,11 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
+	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-func MoviesPage(movies []jellyfin.JellyfinItem, baseURL string) templ.Component {
+func MoviesPage(movies []types.JellyfinItem, baseURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

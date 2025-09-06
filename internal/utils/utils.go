@@ -6,6 +6,8 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func PrintRes(resp *http.Response) {
@@ -37,4 +39,14 @@ func GetUsernameFromCookie(r *http.Request) string {
 		return ""
 	}
 	return cookie.Value
+}
+
+func SendSSEError(w http.ResponseWriter, r *http.Request, message string, statusCode int) {
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElementf(`<div id="error" class="error-message text-red-500">%s</div>`, message)
+}
+
+func ClearSSEError(w http.ResponseWriter, r *http.Request) {
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElements(`<div id="error" class="hidden"></div>`)
 }

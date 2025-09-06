@@ -12,8 +12,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
-	"github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
-	"github.com/json-bateman/jellyfin-grabber/internal/natty"
+	"github.com/json-bateman/jellyfin-grabber/internal/handlers/api"
+	"github.com/json-bateman/jellyfin-grabber/internal/handlers/web"
 	"github.com/nats-io/nats.go"
 )
 
@@ -26,7 +26,7 @@ type App struct {
 	Config   *config.Config
 	Logger   *slog.Logger
 	Router   *chi.Mux
-	Jellyfin *jellyfin.Client
+	Jellyfin *config.Client
 	Nats     *nats.Conn
 
 	HTTPServer *http.Server
@@ -63,7 +63,7 @@ func (a *App) setupFileServer() {
 }
 
 func (a *App) setupNats() {
-	a.Nats = natty.Connect()
+	a.Nats = config.Connect()
 	a.Nats.Subscribe("chat.*", func(m *nats.Msg) {
 		room := strings.TrimPrefix(m.Subject, "chat.")
 		message := string(m.Data)
@@ -118,42 +118,16 @@ func (a *App) Initialize() error {
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
 
-	a.Jellyfin = jellyfin.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
+	a.Jellyfin = config.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
 
 	a.setupFileServer()
-
-	// Protected Routes
-	a.Router.Group(func(r chi.Router) {
-		r.Use(a.RequireUsername)
-
-		// Web
-		r.Get("/host", a.Host)
-		r.Get("/join", a.Join)
-		r.Get("/room/{roomName}", a.SingleRoom)
-		r.Get("/message/{room}", a.SingleRoomSSE)
-		r.Get("/testSSE", a.TestSSE)
-		r.Get("/movies", a.Movies)
-		r.Get("/messing", a.Messing)
-		r.Get("/", a.Index)
-	})
-
-	// Public Routes
-	a.Router.Group(func(r chi.Router) {
-		// Web
-		r.Get("/username", a.Username)
-		r.Get("/shuffle/{number}", a.Shuffle)
-
-		// Api
-		r.Post("/api/movies", a.PostMovies)
-		r.Post("/api/host", a.HostForm)
-		r.Post("/api/username", a.SetUsername)
-		r.Post("/api/nats/publish", a.PublishToNATS)
-		r.Post("/api/rooms/{roomName}/join", a.JoinRoom)
-		r.Post("/api/rooms/{roomName}/leave", a.LeaveRoom)
-
-	})
-
 	a.setupNats()
+
+	api := api.NewAPIHandlers(a.Nats, a.gameClients, a.roomMessages, &a.mu)
+	a.Router.Route("/api", api.SetupRoutes)
+
+	web := web.NewWebHandlers(a.Config, a.Jellyfin, a.Logger, a.gameClients, a.roomMessages, &a.mu)
+	a.Router.Route("/", web.SetupRoutes)
 
 	return nil
 }

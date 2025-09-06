@@ -1,9 +1,9 @@
 package movies
 
-import "github.com/json-bateman/jellyfin-grabber/internal/jellyfin"
 import "github.com/json-bateman/jellyfin-grabber/view/common"
+import "github.com/json-bateman/jellyfin-grabber/internal/types"
 
-templ Shuffle(movies []jellyfin.JellyfinItem, baseURL string) {
+templ Shuffle(movies []types.JellyfinItem, baseURL string) {
 	@common.Layout("Movies page") {
 		<section class="flex flex-col justify-center items-center">
 			<span class="text-3xl mb-4">Shuffled Movies</span>

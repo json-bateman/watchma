@@ -129,31 +129,31 @@ func SingleRoom(room *services.Room) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><div id=\"chat\" class=\"h-96 overflow-y-auto p-4 bg-primary/5\"></div></div></div></div><script>\n            window.addEventListener('load', () => {\n                fetch(\"/api/rooms/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><div id=\"chat\" class=\"h-96 overflow-y-auto p-4 bg-primary/5\"></div></div></div></div><script>\n                window.addEventListener('DOMContentLoaded', () => {\n                    fetch(\"/api/rooms/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 70, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 70, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "/join\", {method: \"POST\"});\n            });\n            <!-- User cleanup on page leave, prefer this over visibility change because unload events -->\n            <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->\n            window.addEventListener('pagehide', () => {\n                navigator.sendBeacon(\"/api/rooms/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "/join\", {method: \"POST\"});\n                });\n                <!-- User cleanup on page leave, prefer this over visibility change because unload events -->\n                <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->\n                window.addEventListener('pagehide', () => {\n                    navigator.sendBeacon(\"/api/rooms/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Var9, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 75, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 75, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "/leave\");\n            });\n        </script></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "/leave\");\n                });\n            </script></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -7,7 +7,9 @@
 - [X] Display list of movies?? maybe or just have them available
 
 - Next steps stuff: 
-    - Make number of people per room actually fill, maybe SSE for join/ page when the room is full
+    - When host makes room, after leaving, doesn't remove him from room? Something is wrong with the
+    join / leave logic
+
     - Make Ready Up! button work, user ready: true? maybe not sure seems like a flag
 
 - have room flow
