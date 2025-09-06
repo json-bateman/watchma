@@ -7,20 +7,6 @@ table {
   width: 100%;
 }
 
-th,
-td {
-  padding: 4px 8px;
-}
-
-/* When chrome autofills it changes input styling, this resets that */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
-  -webkit-text-fill-color: var(--color-text) !important;
-}
-
 /* ------------
 Theme Variables
 ------------ */
@@ -82,11 +68,11 @@ Applied Tailwind Styles
 -------------------- */
 
 .btn {
-  @apply flex justify-center py-1 border-3 border-primary/80 text-background w-60 bg-accent cursor-pointer hover:bg-primary/75 h-9;
+  @apply flex justify-center items-center py-1 border-3 border-primary/80 text-text w-60 bg-accent cursor-pointer hover:bg-primary/75 h-9;
 }
 
 .btn-secondary {
-  @apply flex justify-center py-1 border-3 w-60 bg-secondary cursor-pointer hover:bg-secondary/75 h-9;
+  @apply flex justify-center items-center py-1 border-3 w-60 bg-secondary cursor-pointer hover:bg-secondary/75 h-9;
 }
 
 .btn-accent {
@@ -102,11 +88,15 @@ Applied Tailwind Styles
 }
 
 .input {
-  @apply bg-background text-text/95 border-3 w-60 pl-1 py-1 border-primary h-9
+  @apply bg-primary/5 text-text border-3 w-60 border-primary pl-1 py-1 h-9
 }
 
 .select {
-  @apply border-3 border-primary text-text/95 pl-1 py-1 text-lg h-9
+  @apply bg-primary/5 text-text border-3 border-primary pl-1 py-1 text-lg h-9
+}
+
+.th-join {
+  @apply p-4 tracking-wider border-r-2 border-background/50
 }
 
 
@@ -161,4 +151,24 @@ Regular CSS Styles
     transform: scale(1);
     opacity: 0;
   }
+}
+
+/* When chrome autofills it changes input styling, this resets that */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-text) !important;
+  -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
+  caret-color: var(--color-text) !important;
+}
+
+input,
+textarea,
+select {
+  color: var(--color-text);
+  background: var(--color-background);
+  caret-color: var(--color-text);
 }

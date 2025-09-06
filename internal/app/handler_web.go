@@ -163,7 +163,15 @@ func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
 
 	myRoom, ok := services.AllRooms.GetRoom(roomName)
 	if !ok {
-		http.Redirect(w, r, "/join", http.StatusSeeOther)
+		component := rooms.NoRoom(roomName)
+		templ.Handler(component).ServeHTTP(w, r)
+		return
+	}
+
+	if myRoom.Game.MaxPlayers <= len(myRoom.Users) {
+		component := rooms.RoomFull(roomName)
+		templ.Handler(component).ServeHTTP(w, r)
+		return
 	}
 
 	component := rooms.SingleRoom(myRoom)
