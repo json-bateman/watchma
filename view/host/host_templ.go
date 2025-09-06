@@ -43,20 +43,7 @@ func HostPage(username string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text flex flex-col items-center justify-center\"><form action=\"/api/host\" method=\"POST\" class=\"flex flex-col gap-2\"><div class=\"flex flex-col\"><label class=\"label\" for=\"room-name\">Room Name</label> <input id=\"room-name\" class=\"input\" name=\"roomName\" required placeholder=\"Room Name...\"></div><div class=\"flex flex-col\"><label class=\"label\" for=\"movies\">Movie Count</label> <select id=\"movies\" name=\"movies\" class=\"select\"><option value=\"20\">20</option> <option value=\"50\">50</option> <option value=\"100\">100</option> <option value=\"200\">200</option></select></div><div class=\"flex flex-col\"><label class=\"label\" for=\"maxplayers\">Max Players</label> <select id=\"maxplayers\" name=\"maxplayers\" class=\"select\"><option value=\"2\">2</option> <option value=\"3\">3</option> <option value=\"4\">4</option> <option value=\"5\">5</option> <option value=\"6\">6</option> <option value=\"7\">7</option> <option value=\"8\">8</option> <option value=\"9\">9</option> <option value=\"10\">10</option> <option value=\"11\">11</option> <option value=\"12\">12</option></select></div><div class=\"flex flex-col\"><label class=\"label\" for=\"username\">Username</label> <input id=\"username\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(username)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/host/host.templ`, Line: 40, Col: 42}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"input\" name=\"username\" required placeholder=\"Username...\"></div><button type=\"submit\" class=\"btn\">Host Room</button></form></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text flex flex-col items-center justify-center\"><form action=\"/api/host\" method=\"POST\" class=\"flex flex-col gap-2\"><div class=\"flex flex-col\"><label class=\"label\" for=\"room-name\">Room Name</label> <input id=\"room-name\" class=\"input\" name=\"roomName\" required placeholder=\"Room Name...\"></div><div class=\"flex flex-col\"><label class=\"label\" for=\"movies\">Movie Count</label> <select id=\"movies\" name=\"movies\" class=\"select\"><option value=\"20\">20</option> <option value=\"50\">50</option> <option value=\"100\">100</option> <option value=\"200\">200</option></select></div><div class=\"flex flex-col\"><label class=\"label\" for=\"maxplayers\">Max Players</label> <select id=\"maxplayers\" name=\"maxplayers\" class=\"select\"><option value=\"2\">2</option> <option value=\"3\">3</option> <option value=\"4\">4</option> <option value=\"5\">5</option> <option value=\"6\">6</option> <option value=\"7\">7</option> <option value=\"8\">8</option> <option value=\"9\">9</option> <option value=\"10\">10</option> <option value=\"11\">11</option> <option value=\"12\">12</option></select></div><button type=\"submit\" class=\"btn\">Host Room</button></form></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -4,25 +4,19 @@ import "github.com/json-bateman/jellyfin-grabber/view/common"
 
 templ UsernameForm() {
 	@common.Layout("username") {
-		<div id="inputs">
+		<form method="POST" action="/api/username" class="flex flex-col w-full space-y-3 items-center justify-center mt-6">
 			<div class="flex flex-col">
 				<input
-					data-bind-username
 					class="input"
 					type="text"
 					name="username"
 					id="username"
 					placeholder="Enter your username"
 					required
-					data-on-keydown="if (evt.key !== 'Enter' || !$username.trim().length) return; @post('/api/username');"
 				/>
 			</div>
-			<button
-				data-on-click="@post('/api/username')"
-				class="btn"
-				type="submit"
-			>Set Username</button>
+			<button class="btn" type="submit">Set Username</button>
 			<div id="error" class="hidden"></div>
-		</div>
+		</form>
 	}
 }

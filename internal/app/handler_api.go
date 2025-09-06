@@ -14,17 +14,13 @@ import (
 
 func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
-	// err := r.ParseMultipartForm(1 << 15) // 32KB
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
 		return
 	}
 
-	// Access fields by name
-	// TODO: Something with this data, maybe put it in a room struct
 	roomName := r.FormValue("roomName")
 	moviesStr := r.FormValue("movies")
-	username := r.FormValue("username")
 	maxPlayersStr := r.FormValue("maxplayers")
 
 	movies, err := strconv.Atoi(moviesStr)
@@ -40,18 +36,6 @@ func (a *App) HostForm(w http.ResponseWriter, r *http.Request) {
 	services.AllRooms.AddRoom(roomName, &services.GameSession{
 		MovieNumber: movies,
 		MaxPlayers:  maxPlayers,
-	})
-	room, _ := services.AllRooms.GetRoom(roomName)
-	room.AddUser(username)
-
-	// Set username cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "jelly_user",
-		Value:    username,
-		Path:     "/",
-		MaxAge:   30 * 24 * 60 * 60, // 30 days
-		HttpOnly: false,
-		Secure:   false,
 	})
 
 	// Redirect to room (no username in URL needed)
@@ -98,36 +82,28 @@ func ClearSSEError(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) SetUsername(w http.ResponseWriter, r *http.Request) {
-	var u Username
-	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-		SendSSEError(w, r, "Bad request", http.StatusBadRequest)
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error parsing form", http.StatusBadRequest)
 		return
 	}
 
-	if u.Username == "" {
-		SendSSEError(w, r, "Please Enter a Username", http.StatusBadRequest)
-		return
-	}
+	username := r.FormValue("username")
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "jelly_user",
-		Value:    u.Username,
-		Path:     "/",
-		MaxAge:   30 * 24 * 60 * 60, // 30 days
-		HttpOnly: false,             // Allow JS to read if needed
-		Secure:   false,             // Set to true in production with HTTPS
+		Name:   "jelly_user",
+		Value:  username,
+		Path:   "/",
+		MaxAge: 30 * 24 * 60 * 60, // 30 days
 	})
 
-	ClearSSEError(w, r)
-
-	http.Redirect(w, r, "/join", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // PublishToNATS publishes a JSON payload {"subject": string, "message": string} to the configured NATS server.
 type natsPublishRequest struct {
-	Subject  string `json:"subject"`
-	Message  string `json:"message"`
-	Username string `json:"username"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
 }
 
 type ChatMessage struct {
@@ -136,11 +112,6 @@ type ChatMessage struct {
 }
 
 func (a *App) PublishToNATS(w http.ResponseWriter, r *http.Request) {
-	if a.Nats == nil {
-		utils.WriteJSONError(w, http.StatusServiceUnavailable, "NATS connection not initialized")
-		return
-	}
-
 	var req natsPublishRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")

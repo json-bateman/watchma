@@ -24,19 +24,24 @@ templ Layout(title string) {
 				<footer class="border-t-3 pt-2 border-orange-400 flex justify-center text-center text-orange-400 text-2xl">© JsonB { time.Now().Year() }</footer>
 			</main>
 			<script>
-                function getSystemTheme() {
-                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    return 'dark'
-                  }
-                  return 'burgundy-light'
-                }
-                
-                const currentTheme = localStorage.getItem('theme')
-                if (!currentTheme) {
-                  const systemTheme = getSystemTheme()
-                  localStorage.setItem("theme", systemTheme)
-                }
-                document.querySelector('html').setAttribute('data-theme', localStorage.getItem("theme"))
+                document.addEventListener("DOMContentLoaded", function () {
+                    const htmlEl = document.querySelector('html')
+                    console.log('HTML element:', htmlEl)
+
+                    function getSystemTheme() {
+                      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        return 'dark'
+                      }
+                      return 'burgundy-light'
+                    }
+                    
+                    const currentTheme = localStorage.getItem('theme')
+                    if (!currentTheme) {
+                      const systemTheme = getSystemTheme()
+                      localStorage.setItem("theme", systemTheme)
+                    }
+                    document.querySelector('html').setAttribute('data-theme', localStorage.getItem("theme"))
+                })
             </script>
 			<!-- Datastar -->
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>

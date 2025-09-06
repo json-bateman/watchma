@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -24,7 +25,24 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-const JOIN_MSG = "JOINED-ROOM-xD"
+type RoomMessage struct {
+	Subject  string `json:"subject"`
+	Message  string `json:"message"`
+	Username string `json:"username"`
+}
+
+// RequireUsername middleware checks for jelly_user cookie
+func (a *App) RequireUsername(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		username := utils.GetUsernameFromCookie(r)
+		if username == "" {
+			http.Redirect(w, r, "/username", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 // --- view ---//
 func (a *App) Index(w http.ResponseWriter, r *http.Request) {
@@ -106,39 +124,8 @@ func (a *App) Movies(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-// --- view/rooms ---//
-func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
-
-	var myRoom *services.Room
-	for a, b := range services.AllRooms.Rooms {
-		if roomName == a {
-			myRoom = b
-		}
-	}
-
-	// OK to overwrite when host joins, just updates the timestamp
-	myRoom.AddUser(username)
-
-	// Broadcast user list update to all clients in the room
-	a.Nats.Publish(JOIN_MSG+"."+roomName, nil)
-
-	component := rooms.SingleRoom(myRoom)
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
 // --- view/join ---//
 func (a *App) Join(w http.ResponseWriter, r *http.Request) {
-	// Check if user has username cookie
-	username := utils.GetUsernameFromCookie(r)
-	if username == "" {
-		// No username, redirect to username form
-		http.Redirect(w, r, "/username", http.StatusSeeOther)
-		return
-	}
-
-	// User has username, show join page
 	component := join.JoinPage(services.AllRooms.Rooms)
 	templ.Handler(component).ServeHTTP(w, r)
 }
@@ -170,6 +157,19 @@ func (a *App) TestSSE(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// --- view/rooms ---//
+func (a *App) SingleRoom(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+
+	myRoom, ok := services.AllRooms.GetRoom(roomName)
+	if !ok {
+		http.Redirect(w, r, "/join", http.StatusSeeOther)
+	}
+
+	component := rooms.SingleRoom(myRoom)
+	templ.Handler(component).ServeHTTP(w, r)
+}
+
 func (a *App) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	room := chi.URLParam(r, "room")
 	sse := datastar.NewSSE(w, r)
@@ -193,14 +193,8 @@ func (a *App) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send existing user list
-	var myRoom *services.Room
-	for name, r := range services.AllRooms.Rooms {
-		if name == room {
-			myRoom = r
-			break
-		}
-	}
-	if myRoom != nil {
+	myRoom, ok := services.AllRooms.GetRoom(room)
+	if ok {
 		userBox := rooms.UserBox(myRoom)
 		if err := sse.PatchElementTempl(userBox); err != nil {
 			a.Logger.Error("Error patching initial user list")
@@ -222,33 +216,43 @@ func (a *App) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case message := <-client:
-			if message == JOIN_MSG {
-				// Handle user join/leave updates
-				var myRoom *services.Room
-				for name, r := range services.AllRooms.Rooms {
-					if name == room {
-						myRoom = r
-						break
+			// Try to parse as JSON first
+			var roomMsg RoomMessage
+			if err := json.Unmarshal([]byte(message), &roomMsg); err == nil {
+				// Handle structured messages
+				switch roomMsg.Subject {
+				case JOIN_MSG:
+					myRoom, ok := services.AllRooms.GetRoom(room)
+					if ok {
+						myRoom.AddUser(roomMsg.Username)
+						userBox := rooms.UserBox(myRoom)
+						if err := sse.PatchElementTempl(userBox); err != nil {
+							fmt.Println("Error patching user list")
+							return
+						}
 					}
-				}
-				if myRoom != nil {
-					userBox := rooms.UserBox(myRoom)
-					if err := sse.PatchElementTempl(userBox); err != nil {
-						fmt.Println("Error patching user list")
+				case LEAVE_MSG:
+					myRoom, ok := services.AllRooms.GetRoom(room)
+					if ok {
+						myRoom.RemoveUser(roomMsg.Username)
+						userBox := rooms.UserBox(myRoom)
+						if err := sse.PatchElementTempl(userBox); err != nil {
+							fmt.Println("Error patching user list")
+							return
+						}
+					}
+				default:
+					// Handle old-style chat messages (fallback)
+					a.mu.RLock()
+					currentMessages := make([]string, len(a.roomMessages[room]))
+					copy(currentMessages, a.roomMessages[room])
+					a.mu.RUnlock()
+
+					chat := rooms.ChatBox(currentMessages)
+					if err := sse.PatchElementTempl(chat); err != nil {
+						fmt.Println("Error patching chat message")
 						return
 					}
-				}
-			} else {
-				// Handle chat message updates
-				a.mu.RLock()
-				currentMessages := make([]string, len(a.roomMessages[room]))
-				copy(currentMessages, a.roomMessages[room])
-				a.mu.RUnlock()
-
-				chat := rooms.ChatBox(currentMessages)
-				if err := sse.PatchElementTempl(chat); err != nil {
-					fmt.Println("Error patching chat message")
-					return
 				}
 			}
 
@@ -256,4 +260,78 @@ func (a *App) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+func (a *App) LeaveRoom(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	username := utils.GetUsernameFromCookie(r)
+
+	if username == "" {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	// Create structured message
+	msg := RoomMessage{
+		Subject:  LEAVE_MSG,
+		Username: username,
+	}
+
+	msgBytes, err := json.Marshal(msg)
+	if err != nil {
+		http.Error(w, "Failed to create message", http.StatusInternalServerError)
+		return
+	}
+
+	// Broadcast to all clients in this room
+	a.mu.RLock()
+	if clients, ok := a.gameClients[roomName]; ok {
+		for client := range clients {
+			select {
+			case client <- string(msgBytes):
+			default:
+				// Client buffer full, skip
+			}
+		}
+	}
+	a.mu.RUnlock()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *App) JoinRoom(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	username := utils.GetUsernameFromCookie(r)
+
+	if username == "" {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	// Create structured message
+	msg := RoomMessage{
+		Subject:  JOIN_MSG,
+		Username: username,
+	}
+
+	msgBytes, err := json.Marshal(msg)
+	if err != nil {
+		http.Error(w, "Failed to create message", http.StatusInternalServerError)
+		return
+	}
+
+	// Broadcast to all clients in this room
+	a.mu.RLock()
+	if clients, ok := a.gameClients[roomName]; ok {
+		for client := range clients {
+			select {
+			case client <- string(msgBytes):
+			default:
+				// Client buffer full, skip
+			}
+		}
+	}
+	a.mu.RUnlock()
+
+	w.WriteHeader(http.StatusOK)
 }
