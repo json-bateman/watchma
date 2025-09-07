@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -19,14 +20,15 @@ const (
 )
 
 type Config struct {
-	// Don't log this
-	JellyfinApiKey  string `json:"-"`
+	// Don't log the api key
+	JellyfinApiKey  string `json:"-"` // Exclude from JSON Marshalling
 	JellyfinBaseURL string
 
 	Port     int
 	LogLevel slog.Level
 	Env      string
 
+	// Timeout users who are inactive maybe?
 	SessionTimeout time.Duration
 }
 
@@ -36,6 +38,7 @@ func LoadConfig() *Config {
 	}
 
 	config := &Config{
+		// Once again, don't log the api key!
 		JellyfinApiKey:  os.Getenv(J_API_KEY),
 		JellyfinBaseURL: os.Getenv(J_BASE_URL),
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
@@ -45,7 +48,7 @@ func LoadConfig() *Config {
 		SessionTimeout: getEnvAsDuration("SESSION_TIMEOUT", 30*time.Minute),
 	}
 
-	if err := config.Validate(); err != nil {
+	if err := config.validate(); err != nil {
 		slog.Error("Configuration validation failed", "error", err)
 		os.Exit(1)
 	}
@@ -54,7 +57,8 @@ func LoadConfig() *Config {
 	return config
 }
 
-func (c *Config) Validate() error {
+// Validate checks for essential .env variables
+func (c *Config) validate() error {
 	if c.JellyfinApiKey == "" {
 		return fmt.Errorf("required environment variable %s is not set", J_API_KEY)
 	}
@@ -68,14 +72,16 @@ func (c *Config) Validate() error {
 }
 
 func (c *Config) logConfig() {
-	fmt.Println("---------------------------------------")
-	slog.Info("Configuration loaded",
-		"jellyfin_url", c.JellyfinBaseURL,
-		"port", c.Port,
-		"log_level", c.LogLevel,
-		"environment", c.Env,
-	)
-	fmt.Println("---------------------------------------")
+	fmt.Println("------------------------------------------------------------------")
+	slog.Info("Configuration loaded")
+	slog.Info("JELLYFIN_URL", "url", c.JellyfinBaseURL)
+	if c.JellyfinApiKey != "" {
+		slog.Info("JELLYFIN_API_KEY", "status", "loaded") // Confirm existance only
+	}
+	slog.Info("PORT", "port", c.Port)
+	slog.Info("LOG_LEVEL", "level", c.LogLevel)
+	slog.Info("ENVIRONMENT", "env", c.Env)
+	fmt.Println("------------------------------------------------------------------")
 }
 
 func getEnvAsString(key, defaultValue string) string {
@@ -104,7 +110,7 @@ func getEnvAsDuration(key string, defaultValue time.Duration) time.Duration {
 }
 
 func parseLogLevel(level string) slog.Level {
-	switch level {
+	switch strings.ToUpper(level) {
 	case "DEBUG":
 		return slog.LevelDebug
 	case "INFO":

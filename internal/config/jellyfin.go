@@ -22,6 +22,7 @@ func NewClient(apiKey, baseURL string) *JellyfinClient {
 	}
 }
 
+// FetchJellyfinMovies fetches all movies from configured Jellyfin Server
 func (c *JellyfinClient) FetchJellyfinMovies() (*types.JellyfinItems, error) {
 	req, err := c.newJellyfinRequest("GET", "/Items?IncludeItemTypes=Movie&Recursive=true")
 	if err != nil {

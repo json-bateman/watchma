@@ -38,8 +38,10 @@ type Room struct {
 	mu    sync.RWMutex
 }
 
-var AllRooms = &RoomManager{
-	Rooms: make(map[string]*Room),
+func NewRoomManager() *RoomManager {
+	return &RoomManager{
+		Rooms: make(map[string]*Room),
+	}
 }
 
 func (rm *RoomManager) AddRoom(name string, game *GameSession) {

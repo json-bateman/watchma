@@ -14,6 +14,8 @@ func main() {
 	}
 
 	if err := application.Run(); err != nil {
-		log.Fatal("App failed:", err)
+		application.Logger.Error("App failed to Run:",
+			"Error", err,
+		)
 	}
 }

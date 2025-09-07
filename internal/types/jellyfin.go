@@ -1,5 +1,6 @@
 package types
 
+// JellyfinItem represents a full movie/tv show json from Jellyfin's API
 type JellyfinItem struct {
 	Name            string  `json:"Name"`
 	Id              string  `json:"Id"`
@@ -17,6 +18,7 @@ type JellyfinItem struct {
 	BackdropImageTags []string `json:"BackdropImageTags"`
 }
 
+// JellyfinItems represents an array of full movie/tv show json from Jellyfin's API
 type JellyfinItems struct {
 	Items []JellyfinItem `json:"Items"`
 }

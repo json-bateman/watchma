@@ -1,13 +1,17 @@
 package config
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func FileServer(r chi.Router, path string, root http.FileSystem) {
+// fileServer sets up the fileserver for public assets and routes /public GET reqs to the /public/ folder
+func fileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit any URL parameters.")
 	}
@@ -24,4 +28,13 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
 		fs.ServeHTTP(w, r)
 	})
+}
+
+// SetupFileServer to serve public assets
+func SetupFileServer(l *slog.Logger, r *chi.Mux) {
+	workdir, _ := os.Getwd()
+	publicPath := filepath.Join(workdir, "public")
+	filesDir := http.Dir(publicPath)
+	fileServer(r, "/public", filesDir)
+	l.Info("File server configured for /public/*")
 }

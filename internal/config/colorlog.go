@@ -19,28 +19,32 @@ const (
 	ColorGray   = "\033[1;90m"
 )
 
-const LevelWebSocket slog.Level = slog.Level(2)
+const LevelNATS slog.Level = slog.Level(2)
 
-type ColorHandler struct {
+// ColorLog is our app's logger
+type ColorLog struct {
 	level slog.Level
 }
 
-func New(level slog.Level) *slog.Logger {
-	return slog.New(&ColorHandler{level: level})
+// NewColorLog creates a new slog.Logger, this is the app's logger
+func NewColorLog(level slog.Level) *slog.Logger {
+	return slog.New(&ColorLog{level: level})
 }
 
-func (h *ColorHandler) Enabled(_ context.Context, level slog.Level) bool {
+// Enabled reports whether the handler handles records at the given level.
+func (h *ColorLog) Enabled(_ context.Context, level slog.Level) bool {
 	return level >= h.level
 }
 
-func (h *ColorHandler) Handle(_ context.Context, r slog.Record) error {
+// Handle is a custom implementation of slog.Handle to handle and style the slog.Record
+func (h *ColorLog) Handle(_ context.Context, r slog.Record) error {
 	var color string
 	var levelLabel string
 
 	switch {
-	case r.Level == LevelWebSocket:
+	case r.Level == LevelNATS:
 		color = ColorBlue
-		levelLabel = "WS"
+		levelLabel = "NATS"
 	case r.Level >= slog.LevelError:
 		color = ColorRed
 		levelLabel = "ERROR"
@@ -58,23 +62,30 @@ func (h *ColorHandler) Handle(_ context.Context, r slog.Record) error {
 	timestamp := r.Time.Format(time.RFC3339)
 	msg := r.Message
 
-	fmt.Fprintf(os.Stderr, "%s[%s] [%s] %s%s\n", color, timestamp, levelLabel, msg, ColorReset)
+	// Only color the level label, rest is default terminal color
+	fmt.Fprintf(os.Stderr, "[%s] %s%s%s %s",
+		timestamp,
+		color, levelLabel, ColorReset,
+		msg)
 
 	if r.NumAttrs() > 0 {
 		r.Attrs(func(a slog.Attr) bool {
-			fmt.Fprintf(os.Stderr, "%s    - %s: %v%s\n", color, a.Key, a.Value, ColorReset)
+			// Attributes also in default color
+			fmt.Fprintf(os.Stderr, " %s=%v", a.Key, a.Value)
 			return true
 		})
 	}
 
+	fmt.Fprintf(os.Stderr, "\n")
 	return nil
 }
 
-// Need these to satisfy slog's interface, even though they don't do anything
-func (h *ColorHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+// WithAttrs to satisfy slog's interface, even though it's doing nothing
+func (h *ColorLog) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return h
 }
 
-func (h *ColorHandler) WithGroup(name string) slog.Handler {
+// WithGroup to satisfy slog's interface, even though it's doing nothing
+func (h *ColorLog) WithGroup(name string) slog.Handler {
 	return h
 }
