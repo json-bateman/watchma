@@ -12,9 +12,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
+	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"github.com/starfederation/datastar-go/datastar"
-	"math/rand"
 	"strings"
 )
 
@@ -116,7 +116,7 @@ func SingleRoom(room *services.Room) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><!-- Chatbox --><div class=\"mb-6\"><div class=\"flex gap-2\"><input class=\"input mb-2\" placeholder=\"chat message...\" data-bind-message data-on-keydown=\"if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';\"> <button data-on-click=\"@post('/api/nats/publish');$message='';\" class=\"btn !w-16\">Send</button></div><div id=\"container\" class=\"shadow-brutalist border-primary border-4\" data-on-load=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><!-- Chatbox --><div class=\"mb-6\"><div class=\"flex gap-2\"><input class=\"input mb-2\" placeholder=\"chat message...\" data-bind-message data-on-keydown=\"if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';\"> <button data-on-click=\"@post('/message');$message='';\" class=\"btn !w-16\">Send</button></div><div id=\"container\" class=\"shadow-brutalist border-primary border-4\" data-on-load=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -129,25 +129,25 @@ func SingleRoom(room *services.Room) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><div id=\"chat\" class=\"h-96 overflow-y-auto p-4 bg-primary/5\"></div></div></div></div><script>\n                window.addEventListener('DOMContentLoaded', () => {\n                    fetch(\"/api/rooms/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><div id=\"chat\" class=\"h-96 overflow-y-auto p-4 bg-primary/5\"></div></div></div></div><script>\n                window.addEventListener('DOMContentLoaded', () => {\n                    fetch(\"/rooms/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 70, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 70, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "/join\", {method: \"POST\"});\n                });\n                <!-- User cleanup on page leave, prefer this over visibility change because unload events -->\n                <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->\n                window.addEventListener('pagehide', () => {\n                    navigator.sendBeacon(\"/api/rooms/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "/join\", {\n                        method: \"POST\",\n                    });\n                });\n                <!-- User cleanup on page leave, prefer this over visibility change because unload events -->\n                <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->\n                window.addEventListener('pagehide', () => {\n                    navigator.sendBeacon(\"/rooms/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Var9, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 75, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 77, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
@@ -167,7 +167,7 @@ func SingleRoom(room *services.Room) templ.Component {
 	})
 }
 
-func ChatBox(messages []string) templ.Component {
+func ChatBox(messages []types.Message) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -193,42 +193,48 @@ func ChatBox(messages []string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, m := range messages {
-			if msg := parseMessage(m); msg != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"mb-2 flex\"><span class=\"font-bold text-accent\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Trim(msg.Username, " "))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 87, Col: 73}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span> <span class=\"text-gray-600\">:&nbsp;</span> <span>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var12 string
-				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Message)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 89, Col: 24}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<p class=\"text-red-500\">Invalid message format</p>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"mb-2 flex\"><span style=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(getUserColor(m.Username, "color"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 88, Col: 51}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"font-bold text-accent\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Trim(m.Username, " "))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 88, Col: 114}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</span> <span class=\"text-gray-600\">:&nbsp;</span> <span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(m.Message)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 90, Col: 21}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
@@ -255,21 +261,21 @@ func UserBox(room *services.Room) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var13 == nil {
-			templ_7745c5c3_Var13 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div id=\"users\" class=\"flex flex-col\"><div class=\"flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4\"><div class=\"text-text text-xl font-black uppercase tracking-wider\"><span>Players:&nbsp</span> <span class=\"text-2xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(len(room.Users))
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(len(room.Users))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 103, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 101, Col: 44}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -277,12 +283,12 @@ func UserBox(room *services.Room) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@post('/rooms/%s')", room.Name))
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("@post('/rooms/%s')", room.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 107, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 105, Col: 64}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -295,12 +301,12 @@ func UserBox(room *services.Room) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var16 string
-			templ_7745c5c3_Var16, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(getUserColor(user))
+			var templ_7745c5c3_Var17 string
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(getUserColor(user, "background-color"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 116, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 114, Col: 51}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -308,12 +314,12 @@ func UserBox(room *services.Room) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(user)
+			var templ_7745c5c3_Var18 string
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(user)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 118, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 116, Col: 17}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -338,24 +344,35 @@ func parseMessage(jsonStr string) *ChatMessage {
 	return &msg
 }
 
-func getUserColor(username string) templ.SafeCSS {
+// getUserColor returns a deterministic color assignment based on username, claude made it don't judge me.
+func getUserColor(username string, css string) templ.SafeCSS {
 	colors := []string{
-		"background-color: #ef4444;", // red
-		"background-color: #f97316;", // orange
-		"background-color: #eab308;", // yellow
-		"background-color: #22c55e;", // green
-		"background-color: #3b82f6;", // blue
-		"background-color: #8b5cf6;", // violet
-		"background-color: #ec4899;", // pink
-		"background-color: #06b6d4;", // cyan
-		"background-color: #f59e0b;", // amber
-		"background-color: #10b981;", // emerald
-		"background-color: #6366f1;", // indigo
-		"background-color: #84cc16;", // lime
+		"#ef4444;", // red
+		"#f97316;", // orange
+		"#eab308;", // yellow
+		"#22c55e;", // green
+		"#3b82f6;", // blue
+		"#8b5cf6;", // violet
+		"#ec4899;", // pink
+		"#06b6d4;", // cyan
+		"#f59e0b;", // amber
+		"#10b981;", // emerald
+		"#6366f1;", // indigo
+		"#84cc16;", // lime
 	}
 
-	randomIndex := rand.Intn(len(colors))
-	return templ.SafeCSS(colors[randomIndex])
+	hash := 0
+	for _, char := range username {
+		hash = hash*31 + int(char)
+	}
+
+	index := hash % len(colors)
+	if index < 0 {
+		index = -index
+	}
+	cssVal := fmt.Sprintf("%s: %s", css, colors[index])
+
+	return templ.SafeCSS(cssVal)
 }
 
 var _ = templruntime.GeneratedTemplate

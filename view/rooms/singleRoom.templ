@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
+	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"github.com/starfederation/datastar-go/datastar"
-	"math/rand"
 	"strings"
 )
 
@@ -47,10 +47,10 @@ templ SingleRoom(room *services.Room) {
 							class="input mb-2"
 							placeholder="chat message..."
 							data-bind-message
-							data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/api/nats/publish');$message = '';"
+							data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
 						/>
 						<button
-							data-on-click="@post('/api/nats/publish');$message='';"
+							data-on-click="@post('/message');$message='';"
 							class="btn !w-16"
 						>
 							Send
@@ -67,30 +67,28 @@ templ SingleRoom(room *services.Room) {
 			</div>
 			<script>
                 window.addEventListener('DOMContentLoaded', () => {
-                    fetch("/api/rooms/{{ room.Name }}/join", {method: "POST"});
+                    fetch("/rooms/{{ room.Name }}/join", {
+                        method: "POST",
+                    });
                 });
                 <!-- User cleanup on page leave, prefer this over visibility change because unload events -->
                 <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->
                 window.addEventListener('pagehide', () => {
-                    navigator.sendBeacon("/api/rooms/{{ room.Name }}/leave");
+                    navigator.sendBeacon("/rooms/{{ room.Name }}/leave");
                 });
             </script>
 		</section>
 	}
 }
 
-templ ChatBox(messages []string) {
+templ ChatBox(messages []types.Message) {
 	<div id="chat" class="h-96 overflow-y-auto bg-primary/5 p-4">
 		for _, m := range messages {
-			if msg := parseMessage(m); msg != nil {
-				<div class="mb-2 flex">
-					<span class="font-bold text-accent">{ strings.Trim(msg.Username," ") }</span>
-					<span class="text-gray-600">:&nbsp;</span>
-					<span>{ msg.Message }</span>
-				</div>
-			} else {
-				<p class="text-red-500">Invalid message format</p>
-			}
+			<div class="mb-2 flex">
+				<span style={ getUserColor(m.Username, "color") } class="font-bold text-accent">{ strings.Trim(m.Username," ") }</span>
+				<span class="text-gray-600">:&nbsp;</span>
+				<span>{ m.Message }</span>
+			</div>
 		}
 	</div>
 }
@@ -113,7 +111,7 @@ templ UserBox(room *services.Room) {
 			for user := range room.Users {
 				<div
 					class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
-					style={ getUserColor(user) }
+					style={ getUserColor(user, "background-color") }
 				>
 					<span>{ user }</span>
 				</div>
@@ -130,22 +128,33 @@ func parseMessage(jsonStr string) *ChatMessage {
 	return &msg
 }
 
-func getUserColor(username string) templ.SafeCSS {
+// getUserColor returns a deterministic color assignment based on username, claude made it don't judge me.
+func getUserColor(username string, css string) templ.SafeCSS {
 	colors := []string{
-		"background-color: #ef4444;", // red
-		"background-color: #f97316;", // orange
-		"background-color: #eab308;", // yellow
-		"background-color: #22c55e;", // green
-		"background-color: #3b82f6;", // blue
-		"background-color: #8b5cf6;", // violet
-		"background-color: #ec4899;", // pink
-		"background-color: #06b6d4;", // cyan
-		"background-color: #f59e0b;", // amber
-		"background-color: #10b981;", // emerald
-		"background-color: #6366f1;", // indigo
-		"background-color: #84cc16;", // lime
+		"#ef4444;", // red
+		"#f97316;", // orange
+		"#eab308;", // yellow
+		"#22c55e;", // green
+		"#3b82f6;", // blue
+		"#8b5cf6;", // violet
+		"#ec4899;", // pink
+		"#06b6d4;", // cyan
+		"#f59e0b;", // amber
+		"#10b981;", // emerald
+		"#6366f1;", // indigo
+		"#84cc16;", // lime
 	}
 
-	randomIndex := rand.Intn(len(colors))
-	return templ.SafeCSS(colors[randomIndex])
+	hash := 0
+	for _, char := range username {
+		hash = hash*31 + int(char)
+	}
+
+	index := hash % len(colors)
+	if index < 0 {
+		index = -index
+	}
+	cssVal := fmt.Sprintf("%s: %s", css, colors[index])
+
+	return templ.SafeCSS(cssVal)
 }

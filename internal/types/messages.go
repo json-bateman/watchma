@@ -1,7 +1,7 @@
 package types
 
-// NatsPublishRequest represents a request to publish to NATS
-type NatsPublishRequest struct {
+// Message represents a request to publish to NATS
+type Message struct {
 	Subject  string `json:"subject"`
 	Username string `json:"username"`
 	Message  string `json:"message"`

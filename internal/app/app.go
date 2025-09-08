@@ -9,66 +9,48 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
-	"github.com/json-bateman/jellyfin-grabber/internal/handlers/api"
 	"github.com/json-bateman/jellyfin-grabber/internal/handlers/web"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
-	"github.com/nats-io/nats.go"
-)
-
-const (
-	JOIN_MSG  = "Joined-Room:"
-	LEAVE_MSG = "Left-Room:"
 )
 
 type App struct {
-	Config   *config.Config
+	Settings *config.Settings
 	Logger   *slog.Logger
 	Router   *chi.Mux
 	Jellyfin *services.JellyfinService
-	Nats     *nats.Conn
 	wg       sync.WaitGroup
-
-	// players / game clients
-	gameClients  map[string]map[chan string]bool
-	roomMessages map[string][]string
-	mu           sync.RWMutex
 }
 
 func New() *App {
 	return &App{
-		Config:       config.LoadConfig(),
-		gameClients:  make(map[string]map[chan string]bool),
-		roomMessages: make(map[string][]string),
+		Settings: config.LoadSettings(),
 	}
 }
 
 func (a *App) Initialize() error {
-	a.Logger = config.NewColorLog(a.Config.LogLevel)
+	a.Logger = config.NewColorLog(a.Settings.LogLevel)
 	slog.SetDefault(a.Logger)
 
-	a.Jellyfin = services.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
-	a.Nats = config.NatsConnect(a.Logger)
+	a.Jellyfin = services.NewClient(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL)
 
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
 
 	config.SetupFileServer(a.Logger, a.Router)
 
+	// Create services - each owns its data
 	roomService := services.NewRoomService()
-	messageService := services.NewMessageService(a.Nats, a.gameClients, a.roomMessages)
-	messageService.SetupSubscriptions()
 
-	api := api.NewAPIHandlers(a.Nats, a.gameClients, a.roomMessages)
-	a.Router.Route("/api", api.SetupRoutes)
-
-	web := web.NewWebHandlers(a.Config, a.Jellyfin, a.Logger, a.gameClients, a.roomMessages, roomService)
-	a.Router.Route("/", web.SetupRoutes)
+	webHandler := web.NewWebHandler(a.Settings, a.Jellyfin, a.Logger, roomService)
+	// apiHandler := api.NewAPIHandler(messageService)
+	// a.Router.Route("/api", apiHandler.SetupRoutes)
+	a.Router.Route("/", webHandler.SetupRoutes)
 
 	return nil
 }
 
 func (a *App) Run() error {
-	a.Logger.Info("Starting server", "port", a.Config.Port)
-	port := fmt.Sprintf(":%d", a.Config.Port)
+	a.Logger.Info("Starting server", "port", a.Settings.Port)
+	port := fmt.Sprintf(":%d", a.Settings.Port)
 	return http.ListenAndServe(port, a.Router)
 }

@@ -1,7 +1,6 @@
 package utils
 
 const (
-	JOIN_MSG  = "Joined-Room:"
-	LEAVE_MSG = "Left-Room:"
-	NATS_NAME = "jellyfin-grabber"
+	ROOM_UPDATE_EVENT  = "Room Update event!"
+	MESSAGE_SENT_EVENT = "Message sent event!"
 )

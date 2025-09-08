@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// fileServer sets up the fileserver for public assets and routes /public GET reqs to the /public/ folder
+// fileServer sets up the fileserver for public assets anr routes /public GET reqs to the /public/ folder
 func fileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit any URL parameters.")

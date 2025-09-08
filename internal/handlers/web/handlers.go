@@ -20,39 +20,36 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/view"
 	"github.com/json-bateman/jellyfin-grabber/view/host"
 	"github.com/json-bateman/jellyfin-grabber/view/join"
-	"github.com/json-bateman/jellyfin-grabber/view/messing"
 	"github.com/json-bateman/jellyfin-grabber/view/movies"
-	"github.com/json-bateman/jellyfin-grabber/view/rooms"
 	"github.com/json-bateman/jellyfin-grabber/view/username"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-// WebHandlers holds dependencies needed by web handlers
-type WebHandlers struct {
-	Config       *config.Config
-	Jellyfin     *services.JellyfinService
-	Logger       *slog.Logger
-	gameClients  map[string]map[chan string]bool
-	roomMessages map[string][]string
-	mu           *sync.RWMutex
-	rS           *services.RoomService
+// WebHandler holds dependencies needed by web handlers
+type WebHandler struct {
+	settings    *config.Settings
+	jellyfin    *services.JellyfinService
+	logger      *slog.Logger
+	roomService *services.RoomService
+	sseClients  map[string]map[chan string]bool
+
+	mu sync.RWMutex
 }
 
-// NewWebHandlers creates a new web handlers instance
-func NewWebHandlers(cfg *config.Config, jf *services.JellyfinService, l *slog.Logger, gameClients map[string]map[chan string]bool, roomMessages map[string][]string, rm *services.RoomService) *WebHandlers {
-	return &WebHandlers{
-		Config:       cfg,
-		Jellyfin:     jf,
-		Logger:       l,
-		gameClients:  gameClients,
-		roomMessages: roomMessages,
-		rS:           rm,
+// NewWebHandler creates a new web handlers instance
+func NewWebHandler(cfg *config.Settings, jf *services.JellyfinService, l *slog.Logger, rs *services.RoomService) *WebHandler {
+	return &WebHandler{
+		settings:    cfg,
+		jellyfin:    jf,
+		logger:      l,
+		roomService: rs,
+		sseClients:  make(map[string]map[chan string]bool),
 	}
 }
 
 // Sets up all Web Routes through Chi Router.
 // Web Routes should return web elements (I.E. SSE, HTML)
-func (h *WebHandlers) SetupRoutes(r chi.Router) {
+func (h *WebHandler) SetupRoutes(r chi.Router) {
 	// Public web routes
 	r.Get("/username", h.Username)
 	r.Post("/username", h.SetUsername)
@@ -67,13 +64,16 @@ func (h *WebHandlers) SetupRoutes(r chi.Router) {
 		r.Get("/host", h.Host)
 		r.Post("/host", h.HostForm)
 		r.Get("/join", h.Join)
-		r.Get("/movies", h.Movies)
 		r.Get("/room/{roomName}", h.SingleRoom)
 		r.Get("/message/{room}", h.SingleRoomSSE)
+		r.Post("/message", h.PublishChatMessage)
+		r.Post("/rooms/{roomName}/join", h.JoinRoom)
+		r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
+		r.Get("/movies", h.Movies)
 	})
 }
 
-func (h *WebHandlers) SetUsername(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) SetUsername(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
@@ -92,138 +92,28 @@ func (h *WebHandlers) SetUsername(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (h *WebHandlers) Index(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 	component := view.IndexPage("Sup wit it")
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-func (h *WebHandlers) Host(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
 	component := host.HostPage("username")
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-func (h *WebHandlers) Join(w http.ResponseWriter, r *http.Request) {
-	component := join.JoinPage(h.rS.Rooms)
+func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
+	component := join.JoinPage(h.roomService.Rooms)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-func (h *WebHandlers) Username(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) Username(w http.ResponseWriter, r *http.Request) {
 	component := username.UsernameForm()
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-func (h *WebHandlers) SingleRoom(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-
-	myRoom, ok := h.rS.GetRoom(roomName)
-	if !ok {
-		component := rooms.NoRoom(roomName)
-		templ.Handler(component).ServeHTTP(w, r)
-		return
-	}
-
-	if myRoom.Game.MaxPlayers <= len(myRoom.Users) {
-		component := rooms.RoomFull(roomName)
-		templ.Handler(component).ServeHTTP(w, r)
-		return
-	}
-
-	component := rooms.SingleRoom(myRoom)
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
-func (h *WebHandlers) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
-	room := chi.URLParam(r, "room")
-	sse := datastar.NewSSE(w, r)
-	client := make(chan string, 100)
-
-	h.mu.Lock()
-	// Register for chat updates
-	if h.gameClients[room] == nil {
-		h.gameClients[room] = make(map[chan string]bool)
-	}
-	h.gameClients[room][client] = true
-
-	// Send existing message history to new client
-	if roomHistory := h.roomMessages[room]; len(roomHistory) > 0 {
-		chat := rooms.ChatBox(h.roomMessages[room])
-		if err := sse.PatchElementTempl(chat); err != nil {
-			h.Logger.Error("Error Patching chatbox on load")
-			h.mu.Unlock()
-			return
-		}
-	}
-
-	// Send existing user list to new client
-	myRoom, ok := h.rS.GetRoom(room)
-	if ok {
-		userBox := rooms.UserBox(myRoom)
-		if err := sse.PatchElementTempl(userBox); err != nil {
-			h.Logger.Error("Error patching initial user list")
-		}
-	}
-	h.mu.Unlock()
-
-	// Cleanup when connection closes
-	defer func() {
-		h.mu.Lock()
-		delete(h.gameClients[room], client)
-		if len(h.gameClients[room]) == 0 {
-			delete(h.gameClients, room)
-		}
-		h.mu.Unlock()
-		close(client)
-	}()
-
-	for {
-		select {
-		case message := <-client:
-			var roomMsg types.NatsPublishRequest
-			// Should be able to parse into RoomMessage
-			if err := json.Unmarshal([]byte(message), &roomMsg); err == nil {
-				switch roomMsg.Subject {
-				case utils.JOIN_MSG:
-					myRoom, ok := h.rS.GetRoom(room)
-					if ok {
-						myRoom.AddUser(roomMsg.Username)
-						userBox := rooms.UserBox(myRoom)
-						if err := sse.PatchElementTempl(userBox); err != nil {
-							fmt.Println("Error patching user list")
-							return
-						}
-					}
-				case utils.LEAVE_MSG:
-					myRoom, ok := h.rS.GetRoom(room)
-					if ok {
-						myRoom.RemoveUser(roomMsg.Username)
-						userBox := rooms.UserBox(myRoom)
-						if err := sse.PatchElementTempl(userBox); err != nil {
-							fmt.Println("Error patching user list")
-							return
-						}
-					}
-				default:
-					// Everything else is a chat message
-					h.mu.RLock()
-					currentMessages := make([]string, len(h.roomMessages[room]))
-					copy(currentMessages, h.roomMessages[room])
-					h.mu.RUnlock()
-
-					chat := rooms.ChatBox(currentMessages)
-					if err := sse.PatchElementTempl(chat); err != nil {
-						fmt.Println("Error patching chat message")
-						return
-					}
-				}
-			} // else {} What to do if message can't be parsed?
-		case <-r.Context().Done():
-			return
-		}
-	}
-}
-
-func (h *WebHandlers) Movies(w http.ResponseWriter, r *http.Request) {
-	items, err := h.Jellyfin.FetchJellyfinMovies()
+func (h *WebHandler) Movies(w http.ResponseWriter, r *http.Request) {
+	items, err := h.jellyfin.FetchJellyfinMovies()
 	if err != nil {
 		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
@@ -246,11 +136,11 @@ func (h *WebHandlers) Movies(w http.ResponseWriter, r *http.Request) {
 		randMovies = items.Items
 	}
 
-	component := movies.MoviesPage(randMovies, h.Config.JellyfinBaseURL)
+	component := movies.MoviesPage(randMovies, h.settings.JellyfinBaseURL)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-func (h *WebHandlers) Shuffle(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 	number := chi.URLParam(r, "number")
 
 	intVal, err := strconv.Atoi(number)
@@ -260,7 +150,7 @@ func (h *WebHandlers) Shuffle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items, err := h.Jellyfin.FetchJellyfinMovies()
+	items, err := h.jellyfin.FetchJellyfinMovies()
 	if err != nil {
 		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
@@ -282,7 +172,7 @@ func (h *WebHandlers) Shuffle(w http.ResponseWriter, r *http.Request) {
 		randMovies = items.Items
 	}
 
-	component := movies.Shuffle(randMovies, h.Config.JellyfinBaseURL)
+	component := movies.Shuffle(randMovies, h.settings.JellyfinBaseURL)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -300,12 +190,7 @@ func TestSSE(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Messing(w http.ResponseWriter, r *http.Request) {
-	component := messing.Test()
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
-func (h *WebHandlers) HostForm(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
@@ -322,11 +207,11 @@ func (h *WebHandlers) HostForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Movies must be a number", http.StatusBadRequest)
 		return
 	}
-	if h.rS.RoomExists(roomName) {
+	if h.roomService.RoomExists(roomName) {
 		http.Error(w, "This room name already exists", http.StatusBadRequest)
 		return
 	}
-	h.rS.AddRoom(roomName, &services.GameSession{
+	h.roomService.AddRoom(roomName, &types.GameSession{
 		MovieNumber: movies,
 		MaxPlayers:  maxPlayers,
 	})
@@ -334,7 +219,7 @@ func (h *WebHandlers) HostForm(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
 }
 
-func (h *WebHandlers) PostMovies(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) PostMovies(w http.ResponseWriter, r *http.Request) {
 	var moviesReq types.MovieReq
 	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&moviesReq); err != nil {
@@ -349,4 +234,24 @@ func (h *WebHandlers) PostMovies(w http.ResponseWriter, r *http.Request) {
 	sse.PatchElementTempl(movies.SubmitButton())
 
 	fmt.Println(moviesReq.MoviesReq)
+}
+
+func (h *WebHandler) AddClient(roomName string, client chan string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.sseClients[roomName] == nil {
+		h.sseClients[roomName] = make(map[chan string]bool)
+	}
+	h.sseClients[roomName][client] = true
+}
+
+func (h *WebHandler) RemoveClient(roomName string, client chan string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	delete(h.sseClients[roomName], client)
+	if len(h.sseClients[roomName]) == 0 {
+		delete(h.sseClients, roomName)
+	}
 }
