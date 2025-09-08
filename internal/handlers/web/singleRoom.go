@@ -136,10 +136,9 @@ func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) 
 	}
 
 	req.Username = username
-	// Store message
 	room, ok := h.roomService.GetRoom(req.Room)
-	fmt.Printf("req: %+v", req)
 	if ok {
+		// Store message
 		room.RoomMessages = append(room.RoomMessages, req)
 		h.BroadcastToRoom(room.Name, utils.MESSAGE_SENT_EVENT)
 	}
@@ -163,4 +162,24 @@ func (h *WebHandler) BroadcastToRoom(roomName, message string) {
 		}
 	}
 	h.mu.RUnlock()
+}
+
+func (h *WebHandler) AddClient(roomName string, client chan string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.sseClients[roomName] == nil {
+		h.sseClients[roomName] = make(map[chan string]bool)
+	}
+	h.sseClients[roomName][client] = true
+}
+
+func (h *WebHandler) RemoveClient(roomName string, client chan string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	delete(h.sseClients[roomName], client)
+	if len(h.sseClients[roomName]) == 0 {
+		delete(h.sseClients, roomName)
+	}
 }

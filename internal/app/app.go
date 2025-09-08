@@ -38,13 +38,10 @@ func (a *App) Initialize() error {
 
 	config.SetupFileServer(a.Logger, a.Router)
 
-	// Create services - each owns its data
 	roomService := services.NewRoomService()
 
 	webHandler := web.NewWebHandler(a.Settings, a.Jellyfin, a.Logger, roomService)
-	// apiHandler := api.NewAPIHandler(messageService)
-	// a.Router.Route("/api", apiHandler.SetupRoutes)
-	a.Router.Route("/", webHandler.SetupRoutes)
+	webHandler.SetupRoutes(a.Router)
 
 	return nil
 }

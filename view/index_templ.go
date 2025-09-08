@@ -43,7 +43,7 @@ func IndexPage(name string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-5xl flex text-text font-serif justify-center\">Welcome to the Movie Showdown</div><div class=\"flex justify-center gap-2 my-16\"><a href=\"host\" class=\"btn\">Host Room</a> <a href=\"join\" class=\"btn-secondary\">Join Room</a></div><div class=\"flex justify-center\"><a href=\"shuffle/8\" class=\"btn-accent\">Shuffle 8</a></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-5xl flex text-text font-serif justify-center\">Welcome to the Movie Showdown</div><div class=\"flex justify-center gap-4 my-16\"><a href=\"host\" class=\"btn-accent\">Host Room</a> <a href=\"join\" class=\"btn-accent\">Join Room</a></div><div class=\"flex justify-center\"><a href=\"shuffle/8\" class=\"btn\">Shuffle 8</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

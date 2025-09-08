@@ -61,6 +61,26 @@ Theme Variables
     --ff-sans: "Mulish", sans-serif;
   }
 
+  /* When chrome autofills it changes input styling, this resets that */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-text) !important;
+    -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
+    caret-color: var(--color-text) !important;
+  }
+
+  input,
+  textarea,
+  select {
+    color: var(--color-text);
+    background: var(--color-background);
+    caret-color: var(--color-text);
+  }
+
 }
 
 /* --------------------
@@ -68,15 +88,18 @@ Applied Tailwind Styles
 -------------------- */
 
 .btn {
-  @apply flex justify-center items-center py-1 border-3 border-primary/80 text-text w-60 bg-accent cursor-pointer hover:bg-primary/75 h-9;
+  @apply flex bg-primary/80 border-primary justify-center items-center py-1 border-3 text-text w-60 cursor-pointer hover:bg-primary/90 h-9;
+  box-shadow: 3px 3px 0px var(--color-primary);
 }
 
 .btn-secondary {
-  @apply flex justify-center items-center py-1 border-3 w-60 bg-secondary cursor-pointer hover:bg-secondary/75 h-9;
+  @apply flex bg-secondary/80 border-secondary justify-center items-center py-1 border-3 text-text w-60 cursor-pointer hover:bg-secondary/90 h-9;
+  box-shadow: 3px 3px 0px var(--color-secondary);
 }
 
 .btn-accent {
-  @apply flex border-transparent justify-center py-1 border-3 w-60 bg-accent cursor-pointer hover:bg-secondary/75 h-9;
+  @apply flex bg-accent/80 border-accent justify-center items-center py-1 border-3 text-text w-60 cursor-pointer hover:bg-accent/90 h-9;
+  box-shadow: 3px 3px 0px var(--color-accent);
 }
 
 .btn-success {
@@ -88,11 +111,12 @@ Applied Tailwind Styles
 }
 
 .input {
-  @apply bg-primary/5 text-text border-3 w-60 border-primary pl-1 py-1 h-9
+  @apply bg-primary/5 text-text border-3 w-60 border-primary pl-1 py-1 h-9;
 }
 
 .select {
-  @apply bg-primary/5 text-text border-3 border-primary pl-1 py-1 text-lg h-9
+  @apply bg-primary/5 text-text border-3 border-primary pl-1 py-1 text-lg h-9;
+  box-shadow: 3px 3px 0px var(--color-primary);
 }
 
 .th-join {
@@ -151,24 +175,4 @@ Regular CSS Styles
     transform: scale(1);
     opacity: 0;
   }
-}
-
-/* When chrome autofills it changes input styling, this resets that */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active,
-textarea:-webkit-autofill,
-select:-webkit-autofill {
-  -webkit-text-fill-color: var(--color-text) !important;
-  -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
-  caret-color: var(--color-text) !important;
-}
-
-input,
-textarea,
-select {
-  color: var(--color-text);
-  background: var(--color-background);
-  caret-color: var(--color-text);
 }

@@ -258,6 +258,9 @@
   .table {
     display: table;
   }
+  .h-1 {
+    height: calc(var(--spacing) * 1);
+  }
   .h-96 {
     height: calc(var(--spacing) * 96);
   }
@@ -411,6 +414,9 @@
   }
   .object-cover {
     object-fit: cover;
+  }
+  .p-0 {
+    padding: calc(var(--spacing) * 0);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -654,6 +660,16 @@ table {
     --ff-serif: "IBM Plex Serif", serif;
     --ff-sans: "Mulish", sans-serif;
   }
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active, textarea:-webkit-autofill, select:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-text) !important;
+    -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
+    caret-color: var(--color-text) !important;
+  }
+  input, textarea, select {
+    color: var(--color-text);
+    background: var(--color-background);
+    caret-color: var(--color-text);
+  }
 }
 .btn {
   display: flex;
@@ -664,21 +680,22 @@ table {
   justify-content: center;
   border-style: var(--tw-border-style);
   border-width: 3px;
-  border-color: color-mix(in srgb, oklch(var(--primary)) 80%, transparent);
+  border-color: var(--color-primary);
+  background-color: color-mix(in srgb, oklch(var(--primary)) 80%, transparent);
   @supports (color: color-mix(in lab, red, red)) {
-    border-color: color-mix(in oklab, var(--color-primary) 80%, transparent);
+    background-color: color-mix(in oklab, var(--color-primary) 80%, transparent);
   }
-  background-color: var(--color-accent);
   padding-block: calc(var(--spacing) * 1);
   color: var(--color-text);
   &:hover {
     @media (hover: hover) {
-      background-color: color-mix(in srgb, oklch(var(--primary)) 75%, transparent);
+      background-color: color-mix(in srgb, oklch(var(--primary)) 90%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in oklab, var(--color-primary) 75%, transparent);
+        background-color: color-mix(in oklab, var(--color-primary) 90%, transparent);
       }
     }
   }
+  box-shadow: 3px 3px 0px var(--color-primary);
 }
 .btn-secondary {
   display: flex;
@@ -689,36 +706,48 @@ table {
   justify-content: center;
   border-style: var(--tw-border-style);
   border-width: 3px;
-  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  background-color: color-mix(in srgb, oklch(var(--secondary)) 80%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-secondary) 80%, transparent);
+  }
   padding-block: calc(var(--spacing) * 1);
+  color: var(--color-text);
   &:hover {
     @media (hover: hover) {
-      background-color: color-mix(in srgb, oklch(var(--secondary)) 75%, transparent);
+      background-color: color-mix(in srgb, oklch(var(--secondary)) 90%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in oklab, var(--color-secondary) 75%, transparent);
+        background-color: color-mix(in oklab, var(--color-secondary) 90%, transparent);
       }
     }
   }
+  box-shadow: 3px 3px 0px var(--color-secondary);
 }
 .btn-accent {
   display: flex;
   height: calc(var(--spacing) * 9);
   width: calc(var(--spacing) * 60);
   cursor: pointer;
+  align-items: center;
   justify-content: center;
   border-style: var(--tw-border-style);
   border-width: 3px;
-  border-color: transparent;
-  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  background-color: color-mix(in srgb, oklch(var(--accent)) 80%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-accent) 80%, transparent);
+  }
   padding-block: calc(var(--spacing) * 1);
+  color: var(--color-text);
   &:hover {
     @media (hover: hover) {
-      background-color: color-mix(in srgb, oklch(var(--secondary)) 75%, transparent);
+      background-color: color-mix(in srgb, oklch(var(--accent)) 90%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in oklab, var(--color-secondary) 75%, transparent);
+        background-color: color-mix(in oklab, var(--color-accent) 90%, transparent);
       }
     }
   }
+  box-shadow: 3px 3px 0px var(--color-accent);
 }
 .btn-success {
   display: flex;
@@ -770,6 +799,7 @@ table {
   font-size: var(--text-lg);
   line-height: var(--tw-leading, var(--text-lg--line-height));
   color: var(--color-text);
+  box-shadow: 3px 3px 0px var(--color-primary);
 }
 .th-join {
   border-right-style: var(--tw-border-style);
@@ -821,16 +851,6 @@ table {
     transform: scale(1);
     opacity: 0;
   }
-}
-input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active, textarea:-webkit-autofill, select:-webkit-autofill {
-  -webkit-text-fill-color: var(--color-text) !important;
-  -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
-  caret-color: var(--color-text) !important;
-}
-input, textarea, select {
-  color: var(--color-text);
-  background: var(--color-background);
-  caret-color: var(--color-text);
 }
 @property --tw-rotate-x {
   syntax: "*";
