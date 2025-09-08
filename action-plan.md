@@ -1,25 +1,31 @@
 ### Things to Do
 
-- [X] Figure out how to connect to jellyfin server
-
-- [X] Load list of movies
-
-- [X] Display list of movies?? maybe or just have them available
-
 - Next steps stuff: 
-    - When host makes room, after leaving, doesn't remove him from room? Something is wrong with the
-    join / leave logic
 
-    - Make Ready Up! button work, user ready: true? maybe not sure seems like a flag
+- services setup
+    - [X] Setup logger, configure routing, make env variables accessable
+    - [X] Figure out how to connect to jellyfin server
+    - [X] Configure nats messaging system (removed, don't need the complexity for a single server)
+    - [X] Room service to handle all of the apps rooms
 
 - have room flow
+    - [X] host page to host a room (done with form)
+    - [X] table for all active rooms
     - [X] others can join room, assign users to room
-    - [ ] People vote on movies (/movies)
-    - [ ] Generate a tournament bracket
-    - [ ] People vote on the faceoffs 1 at a time
+    - [X] When host makes room, after leaving, doesn't remove him from room? Something is wrong with the
+    join / leave logic (fixed)
+    - [ ] Make Ready Up! button work, user struct - ready: true? maybe not, but sure seems like a flag
+
+- then game flow
+    - [ ] move from lobby state to movies state
+    - [ ] People vote on movies (/movies) (don't need SSE, everyone can have own instance)
+    - [ ] Submit button to submit choices
+    - [ ] View results!
 
 
 - stretch goals
+    - [ ] Generate a tournament bracket
+    - [ ] People vote on the faceoffs 1 at a time
     - [ ] create DB to store results of finished games
     - [ ] let individual users log in
     - [ ] save users selections over time in the DB
