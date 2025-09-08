@@ -63,7 +63,7 @@ func (h *ColorLog) Handle(_ context.Context, r slog.Record) error {
 	msg := r.Message
 
 	// Only color the level label, rest is default terminal color
-	fmt.Fprintf(os.Stderr, "[%s] %s%s%s %s",
+	fmt.Fprintf(os.Stdout, "[%s] %s%s%s %s",
 		timestamp,
 		color, levelLabel, ColorReset,
 		msg)
@@ -71,12 +71,12 @@ func (h *ColorLog) Handle(_ context.Context, r slog.Record) error {
 	if r.NumAttrs() > 0 {
 		r.Attrs(func(a slog.Attr) bool {
 			// Attributes also in default color
-			fmt.Fprintf(os.Stderr, " %s=%v", a.Key, a.Value)
+			fmt.Fprintf(os.Stdout, " %s=%v", a.Key, a.Value)
 			return true
 		})
 	}
 
-	fmt.Fprintf(os.Stderr, "\n")
+	fmt.Fprintf(os.Stdout, "\n")
 	return nil
 }
 

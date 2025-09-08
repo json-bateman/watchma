@@ -76,7 +76,7 @@ func (c *Config) logConfig() {
 	slog.Info("Configuration loaded")
 	slog.Info("JELLYFIN_URL", "url", c.JellyfinBaseURL)
 	if c.JellyfinApiKey != "" {
-		slog.Info("JELLYFIN_API_KEY", "status", "loaded") // Confirm existance only
+		slog.Info("JELLYFIN_API_KEY", "status", "loaded") // Confirm value exists only
 	}
 	slog.Info("PORT", "port", c.Port)
 	slog.Info("LOG_LEVEL", "level", c.LogLevel)

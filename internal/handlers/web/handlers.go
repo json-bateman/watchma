@@ -29,25 +29,24 @@ import (
 
 // WebHandlers holds dependencies needed by web handlers
 type WebHandlers struct {
-	roomManager  *services.RoomManager
 	Config       *config.Config
-	Jellyfin     *config.JellyfinClient
+	Jellyfin     *services.JellyfinService
 	Logger       *slog.Logger
 	gameClients  map[string]map[chan string]bool
 	roomMessages map[string][]string
 	mu           *sync.RWMutex
+	rS           *services.RoomService
 }
 
 // NewWebHandlers creates a new web handlers instance
-func NewWebHandlers(cfg *config.Config, jf *config.JellyfinClient, l *slog.Logger, gameClients map[string]map[chan string]bool, roomMessages map[string][]string, mu *sync.RWMutex, rm *services.RoomManager) *WebHandlers {
+func NewWebHandlers(cfg *config.Config, jf *services.JellyfinService, l *slog.Logger, gameClients map[string]map[chan string]bool, roomMessages map[string][]string, rm *services.RoomService) *WebHandlers {
 	return &WebHandlers{
 		Config:       cfg,
 		Jellyfin:     jf,
 		Logger:       l,
 		gameClients:  gameClients,
 		roomMessages: roomMessages,
-		mu:           mu,
-		roomManager:  rm,
+		rS:           rm,
 	}
 }
 
@@ -104,7 +103,7 @@ func (h *WebHandlers) Host(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebHandlers) Join(w http.ResponseWriter, r *http.Request) {
-	component := join.JoinPage(h.roomManager.Rooms)
+	component := join.JoinPage(h.rS.Rooms)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -116,7 +115,7 @@ func (h *WebHandlers) Username(w http.ResponseWriter, r *http.Request) {
 func (h *WebHandlers) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 
-	myRoom, ok := h.roomManager.GetRoom(roomName)
+	myRoom, ok := h.rS.GetRoom(roomName)
 	if !ok {
 		component := rooms.NoRoom(roomName)
 		templ.Handler(component).ServeHTTP(w, r)
@@ -156,7 +155,7 @@ func (h *WebHandlers) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send existing user list to new client
-	myRoom, ok := h.roomManager.GetRoom(room)
+	myRoom, ok := h.rS.GetRoom(room)
 	if ok {
 		userBox := rooms.UserBox(myRoom)
 		if err := sse.PatchElementTempl(userBox); err != nil {
@@ -179,12 +178,12 @@ func (h *WebHandlers) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case message := <-client:
-			var roomMsg types.RoomMessage
+			var roomMsg types.NatsPublishRequest
 			// Should be able to parse into RoomMessage
 			if err := json.Unmarshal([]byte(message), &roomMsg); err == nil {
 				switch roomMsg.Subject {
 				case utils.JOIN_MSG:
-					myRoom, ok := h.roomManager.GetRoom(room)
+					myRoom, ok := h.rS.GetRoom(room)
 					if ok {
 						myRoom.AddUser(roomMsg.Username)
 						userBox := rooms.UserBox(myRoom)
@@ -194,7 +193,7 @@ func (h *WebHandlers) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				case utils.LEAVE_MSG:
-					myRoom, ok := h.roomManager.GetRoom(room)
+					myRoom, ok := h.rS.GetRoom(room)
 					if ok {
 						myRoom.RemoveUser(roomMsg.Username)
 						userBox := rooms.UserBox(myRoom)
@@ -323,11 +322,11 @@ func (h *WebHandlers) HostForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Movies must be a number", http.StatusBadRequest)
 		return
 	}
-	if h.roomManager.RoomExists(roomName) {
+	if h.rS.RoomExists(roomName) {
 		http.Error(w, "This room name already exists", http.StatusBadRequest)
 		return
 	}
-	h.roomManager.AddRoom(roomName, &services.GameSession{
+	h.rS.AddRoom(roomName, &services.GameSession{
 		MovieNumber: movies,
 		MaxPlayers:  maxPlayers,
 	})

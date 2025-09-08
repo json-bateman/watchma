@@ -19,7 +19,7 @@ templ SingleRoom(room *services.Room) {
 	@common.Layout(room.Name) {
 		<!-- janky way to set the subject field for the NATS payload
     TODO: make this not janky -->
-		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s'}", room.Name) }></span>
+		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
 		<section class="flex justify-center grow">
 			<div class="flex max-w-[800px] flex-col justify-between grow">
 				<div>

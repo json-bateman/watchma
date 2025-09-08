@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
@@ -25,12 +24,8 @@ type App struct {
 	Config   *config.Config
 	Logger   *slog.Logger
 	Router   *chi.Mux
-	Jellyfin *config.JellyfinClient
+	Jellyfin *services.JellyfinService
 	Nats     *nats.Conn
-
-	HTTPServer *http.Server
-
-	shutdown chan os.Signal
 	wg       sync.WaitGroup
 
 	// players / game clients
@@ -51,7 +46,7 @@ func (a *App) Initialize() error {
 	a.Logger = config.NewColorLog(a.Config.LogLevel)
 	slog.SetDefault(a.Logger)
 
-	a.Jellyfin = config.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
+	a.Jellyfin = services.NewClient(a.Config.JellyfinApiKey, a.Config.JellyfinBaseURL)
 	a.Nats = config.NatsConnect(a.Logger)
 
 	a.Router = chi.NewRouter()
@@ -59,12 +54,14 @@ func (a *App) Initialize() error {
 
 	config.SetupFileServer(a.Logger, a.Router)
 
-	roomManager := services.NewRoomManager()
+	roomService := services.NewRoomService()
+	messageService := services.NewMessageService(a.Nats, a.gameClients, a.roomMessages)
+	messageService.SetupSubscriptions()
 
-	api := api.NewAPIHandlers(a.Nats, a.gameClients, a.roomMessages, &a.mu)
+	api := api.NewAPIHandlers(a.Nats, a.gameClients, a.roomMessages)
 	a.Router.Route("/api", api.SetupRoutes)
 
-	web := web.NewWebHandlers(a.Config, a.Jellyfin, a.Logger, a.gameClients, a.roomMessages, &a.mu, roomManager)
+	web := web.NewWebHandlers(a.Config, a.Jellyfin, a.Logger, a.gameClients, a.roomMessages, roomService)
 	a.Router.Route("/", web.SetupRoutes)
 
 	return nil

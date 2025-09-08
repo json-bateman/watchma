@@ -20,12 +20,11 @@ type APIHandlers struct {
 	mu           *sync.RWMutex
 }
 
-func NewAPIHandlers(nats *nats.Conn, gameClients map[string]map[chan string]bool, roomMessages map[string][]string, mu *sync.RWMutex) *APIHandlers {
+func NewAPIHandlers(nats *nats.Conn, gameClients map[string]map[chan string]bool, roomMessages map[string][]string) *APIHandlers {
 	return &APIHandlers{
 		Nats:         nats,
 		gameClients:  gameClients,
 		roomMessages: roomMessages,
-		mu:           mu,
 	}
 }
 
@@ -39,13 +38,24 @@ func (h *APIHandlers) SetupRoutes(r chi.Router) {
 
 		r.Post("/nats/publish", h.PublishToNATS)
 
-		r.Post("/rooms/{roomName}/join", h.JoinRoom)
-		r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
+		// r.Post("/rooms/{roomName}/join", h.JoinRoom)
+		// r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
 	})
 }
 
 func (h *APIHandlers) PublishToNATS(w http.ResponseWriter, r *http.Request) {
 	var req types.NatsPublishRequest
+
+	// body, err := io.ReadAll(r.Body)
+	// if err != nil {
+	// 	http.Error(w, "Failed to read request body", http.StatusBadRequest)
+	// 	return
+	// }
+	// defer r.Body.Close()
+	//
+	// bodyString := string(body)
+	// fmt.Println(bodyString)
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
 		return
@@ -60,13 +70,9 @@ func (h *APIHandlers) PublishToNATS(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSONError(w, http.StatusBadRequest, "Username not found in cookie")
 		return
 	}
+	req.Username = username
 
-	chatMsg := types.ChatMessage{
-		Username: username,
-		Message:  req.Message,
-	}
-
-	msgBytes, err := json.Marshal(chatMsg)
+	msgBytes, err := json.Marshal(req)
 	if err != nil {
 		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to encode message")
 		return
@@ -85,76 +91,76 @@ func (h *APIHandlers) PublishToNATS(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *APIHandlers) JoinRoom(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
-
-	if username == "" {
-		http.Error(w, "No username found", http.StatusBadRequest)
-		return
-	}
-
-	// Create structured message
-	msg := types.RoomMessage{
-		Subject:  utils.JOIN_MSG,
-		Username: username,
-	}
-
-	msgBytes, err := json.Marshal(msg)
-	if err != nil {
-		http.Error(w, "Failed to create message", http.StatusInternalServerError)
-		return
-	}
-
-	// Broadcast to all clients in this room
-	h.mu.RLock()
-	if clients, ok := h.gameClients[roomName]; ok {
-		for client := range clients {
-			select {
-			case client <- string(msgBytes):
-			default:
-				// Client buffer full, skip
-			}
-		}
-	}
-	h.mu.RUnlock()
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func (h *APIHandlers) LeaveRoom(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
-
-	if username == "" {
-		http.Error(w, "No username found", http.StatusBadRequest)
-		return
-	}
-
-	// Create structured message
-	msg := types.RoomMessage{
-		Subject:  utils.LEAVE_MSG,
-		Username: username,
-	}
-
-	msgBytes, err := json.Marshal(msg)
-	if err != nil {
-		http.Error(w, "Failed to create message", http.StatusInternalServerError)
-		return
-	}
-
-	// Broadcast to all clients in this room
-	h.mu.RLock()
-	if clients, ok := h.gameClients[roomName]; ok {
-		for client := range clients {
-			select {
-			case client <- string(msgBytes):
-			default:
-				// Client buffer full, skip
-			}
-		}
-	}
-	h.mu.RUnlock()
-
-	w.WriteHeader(http.StatusOK)
-}
+// func (h *APIHandlers) JoinRoom(w http.ResponseWriter, r *http.Request) {
+// 	roomName := chi.URLParam(r, "roomName")
+// 	username := utils.GetUsernameFromCookie(r)
+//
+// 	if username == "" {
+// 		http.Error(w, "No username found", http.StatusBadRequest)
+// 		return
+// 	}
+//
+// 	// Create structured message
+// 	msg := types.RoomMessage{
+// 		Subject:  utils.JOIN_MSG,
+// 		Username: username,
+// 	}
+//
+// 	msgBytes, err := json.Marshal(msg)
+// 	if err != nil {
+// 		http.Error(w, "Failed to create message", http.StatusInternalServerError)
+// 		return
+// 	}
+//
+// 	// Broadcast to all clients in this room
+// 	h.mu.RLock()
+// 	if clients, ok := h.gameClients[roomName]; ok {
+// 		for client := range clients {
+// 			select {
+// 			case client <- string(msgBytes):
+// 			default:
+// 				// Client buffer full, skip
+// 			}
+// 		}
+// 	}
+// 	h.mu.RUnlock()
+//
+// 	w.WriteHeader(http.StatusOK)
+// }
+//
+// func (h *APIHandlers) LeaveRoom(w http.ResponseWriter, r *http.Request) {
+// 	roomName := chi.URLParam(r, "roomName")
+// 	username := utils.GetUsernameFromCookie(r)
+//
+// 	if username == "" {
+// 		http.Error(w, "No username found", http.StatusBadRequest)
+// 		return
+// 	}
+//
+// 	// Create structured message
+// 	msg := types.RoomMessage{
+// 		Subject:  utils.LEAVE_MSG,
+// 		Username: username,
+// 	}
+//
+// 	msgBytes, err := json.Marshal(msg)
+// 	if err != nil {
+// 		http.Error(w, "Failed to create message", http.StatusInternalServerError)
+// 		return
+// 	}
+//
+// 	// Broadcast to all clients in this room
+// 	h.mu.RLock()
+// 	if clients, ok := h.gameClients[roomName]; ok {
+// 		for client := range clients {
+// 			select {
+// 			case client <- string(msgBytes):
+// 			default:
+// 				// Client buffer full, skip
+// 			}
+// 		}
+// 	}
+// 	h.mu.RUnlock()
+//
+// 	w.WriteHeader(http.StatusOK)
+// }

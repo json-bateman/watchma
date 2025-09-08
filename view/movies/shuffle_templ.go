@@ -44,7 +44,7 @@ func Shuffle(movies []types.JellyfinItem, baseURL string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"flex flex-col justify-center items-center\"><span class=\"text-3xl mb-4\">Shuffled Movies</span><div id=\"moviesSubmit\" class=\"flex justify-center flex-wrap gap-2 md:gap-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"flex flex-col justify-center items-center mb-6\"><span class=\"text-3xl mb-4\">Shuffled Movies</span><div id=\"moviesSubmit\" class=\"flex justify-center flex-wrap gap-2 md:gap-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
