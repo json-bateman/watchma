@@ -1,21 +1,15 @@
 package web
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"sync"
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view"
-	"github.com/json-bateman/jellyfin-grabber/view/host"
-	"github.com/json-bateman/jellyfin-grabber/view/join"
-	"github.com/json-bateman/jellyfin-grabber/view/username"
 )
 
 // WebHandler holds dependencies needed by web handlers
@@ -66,70 +60,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 	})
 }
 
-func (h *WebHandler) SetUsername(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "Error parsing form", http.StatusBadRequest)
-		return
-	}
-
-	username := r.FormValue("username")
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   "jelly_user",
-		Value:  username,
-		Path:   "/",
-		MaxAge: 30 * 24 * 60 * 60, // 30 days
-	})
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func (h *WebHandler) Username(w http.ResponseWriter, r *http.Request) {
-	component := username.UsernameForm()
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
 func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 	component := view.IndexPage("Sup wit it")
 	templ.Handler(component).ServeHTTP(w, r)
-}
-
-func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
-	component := join.JoinPage(h.roomService.Rooms)
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
-func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
-	component := host.HostPage("username")
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
-func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "Error parsing form", http.StatusBadRequest)
-		return
-	}
-
-	roomName := r.FormValue("roomName")
-	moviesStr := r.FormValue("movies")
-	maxPlayersStr := r.FormValue("maxplayers")
-
-	movies, err := strconv.Atoi(moviesStr)
-	maxPlayers, err := strconv.Atoi(maxPlayersStr)
-	if err != nil {
-		http.Error(w, "Movies must be a number", http.StatusBadRequest)
-		return
-	}
-	if h.roomService.RoomExists(roomName) {
-		http.Error(w, "This room name already exists", http.StatusBadRequest)
-		return
-	}
-	h.roomService.AddRoom(roomName, &types.GameSession{
-		MovieNumber: movies,
-		MaxPlayers:  maxPlayers,
-	})
-
-	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
 }

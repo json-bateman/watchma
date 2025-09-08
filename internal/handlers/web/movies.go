@@ -97,23 +97,3 @@ func (h *WebHandler) PostMovies(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(moviesReq.MoviesReq)
 }
-
-func (h *WebHandler) AddClient(roomName string, client chan string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	if h.sseClients[roomName] == nil {
-		h.sseClients[roomName] = make(map[chan string]bool)
-	}
-	h.sseClients[roomName][client] = true
-}
-
-func (h *WebHandler) RemoveClient(roomName string, client chan string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	delete(h.sseClients[roomName], client)
-	if len(h.sseClients[roomName]) == 0 {
-		delete(h.sseClients, roomName)
-	}
-}

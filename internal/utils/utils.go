@@ -34,7 +34,7 @@ func WriteJSONResponse(w http.ResponseWriter, status int, data any) {
 }
 
 func GetUsernameFromCookie(r *http.Request) string {
-	cookie, err := r.Cookie("jelly_user")
+	cookie, err := r.Cookie(USERNAME_COOKIE)
 	if err != nil {
 		return ""
 	}
