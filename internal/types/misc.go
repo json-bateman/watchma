@@ -27,6 +27,7 @@ type MovieRequest struct {
 type User struct {
 	Name     string
 	JoinedAt time.Time
+	Ready    bool
 }
 
 // Message represents a chat message

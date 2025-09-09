@@ -56,11 +56,12 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Post("/message", h.PublishChatMessage)
 		r.Post("/rooms/{roomName}/join", h.JoinRoom)
 		r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
+		r.Post("/rooms/{roomName}/ready", h.Ready)
 		r.Get("/movies", h.Movies)
 	})
 }
 
 func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
-	component := view.IndexPage("Sup wit it")
+	component := view.IndexPage("Movie Showdown")
 	templ.Handler(component).ServeHTTP(w, r)
 }

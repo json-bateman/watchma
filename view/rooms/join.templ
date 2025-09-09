@@ -18,7 +18,7 @@ templ JoinPage(rooms map[string]*services.Room) {
 							<th class="th-join">Room Name</th>
 							<th class="th-join">Movies</th>
 							<th class="th-join">Players</th>
-							<th class="p-4 tracking-wider">Action</th>
+							<th class="p-2 tracking-wider">Action</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -36,7 +36,7 @@ templ JoinPage(rooms map[string]*services.Room) {
 									</td>
 									<td class="hover:cursor-pointer hover:text-primary transition-all py-2">
 										<a href={ templ.SafeURL("room/" + room.Name) }>
-											Join Room
+											Join 
 										</a>
 									</td>
 								</tr>
@@ -45,13 +45,13 @@ templ JoinPage(rooms map[string]*services.Room) {
 								<td class="py-2"></td>
 								<td class="py-2"></td>
 								<td class="py-2"></td>
-								<td class="py-3">
+								<td class="py-1">
 									<div class="flex text-text justify-center">
 										<a
 											href="/host"
-											class="hover:text-primary transition-all"
+											class="text-2xl hover:text-primary transition-all"
 										>
-											Host New Room
+											+	
 										</a>
 									</div>
 								</td>

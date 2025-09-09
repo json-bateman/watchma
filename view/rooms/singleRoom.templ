@@ -17,7 +17,7 @@ type ChatMessage struct {
 
 templ SingleRoom(room *services.Room) {
 	@common.Layout(room.Name) {
-		<!-- janky way to set the subject field for the NATS payload
+		<!-- janky(?) way to set the subject field for the message payload
     TODO: make this not janky -->
 		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
 		<section class="flex justify-center grow">
@@ -94,6 +94,62 @@ templ ChatBox(messages []types.Message) {
 }
 
 templ UserBox(room *services.Room) {
+	{{
+	totalReady := 0
+	users := room.UsersByJoin()
+	}}
+	for _, u := range users {
+		if u.Ready {
+			{{ totalReady++ }}
+		}
+	}
+	<div id="users" class="flex flex-col">
+		<div class="flex h-28 justify-between bg-background border-4 border-primary p-4 shadow-brutalist">
+			<div class="w-20 text-text text-2xl flex flex-col justify-center items-center leading-5">
+				<div class="bg-primary shadow-hard flex justify-center items-center p-2 w-12 text-center">
+					<span>{ totalReady }/{ len(users) }</span>
+				</div>
+			</div>
+			<div>
+				<button
+					class="btn uppercase gap-2 tracking-wide"
+					data-on-click={ fmt.Sprintf("@post('/rooms/%s/ready')", room.Name) }
+				>
+					Ready Up!
+				</button>
+				if len(users) == totalReady && totalReady > 1 {
+					<button
+						class="btn-success font-black uppercase tracking-wide"
+						data-on-click={ fmt.Sprintf("@post('/rooms/%s/start')", room.Name) }
+					>
+						Start Game!
+					</button>
+				}
+			</div>
+		</div>
+		<div class="flex flex-wrap gap-4 my-4">
+			for _, u := range users {
+				if u.Ready {
+					<div
+						class="text-white text-xl shadow-hard-success border-4 border-green-600 justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
+						style={ getUserColor(u.Name, "background-color") }
+					>
+						<span>{ u.Name }</span>
+					</div>
+				} else {
+					<div
+						class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
+						style={ getUserColor(u.Name, "background-color") }
+					>
+						<span>{ u.Name }</span>
+					</div>
+				}
+			}
+		</div>
+	</div>
+}
+
+templ Button(room *services.Room) {
 	<div id="users" class="flex flex-col">
 		<div class="flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4">
 			<div class="text-text text-xl font-black uppercase tracking-wider">
@@ -102,18 +158,18 @@ templ UserBox(room *services.Room) {
 			</div>
 			<button
 				class="btn"
-				data-on-click={ fmt.Sprintf("@post('/rooms/%s')", room.Name) }
+				data-on-click={ fmt.Sprintf("@post('/rooms/%s/ready')", room.Name) }
 			>
 				Ready Up!
 			</button>
 		</div>
 		<div class="flex flex-wrap gap-4">
-			for user := range room.Users {
+			for _, u := range room.Users {
 				<div
 					class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
-					style={ getUserColor(user, "background-color") }
+					style={ getUserColor(u.Name, "background-color") }
 				>
-					<span>{ user }</span>
+					<span>{ u.Name }</span>
 				</div>
 			}
 		</div>

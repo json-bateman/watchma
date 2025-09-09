@@ -88,22 +88,23 @@ Applied Tailwind Styles
 -------------------- */
 
 .btn {
-  @apply flex bg-primary/80 border-primary justify-center items-center py-1 border-3 text-text w-60 cursor-pointer hover:bg-primary/90 h-9;
-  box-shadow: 3px 3px 0px var(--color-primary);
+  @apply flex bg-primary/80 border-primary justify-center items-center py-1 border-3 text-text w-52 cursor-pointer hover:bg-primary/90 h-9;
+  box-shadow: 3px 3px 0px oklch(var(--primary) / 0.8);
 }
 
 .btn-secondary {
-  @apply flex bg-secondary/80 border-secondary justify-center items-center py-1 border-3 text-text w-60 cursor-pointer hover:bg-secondary/90 h-9;
-  box-shadow: 3px 3px 0px var(--color-secondary);
+  @apply flex bg-secondary/80 border-secondary justify-center items-center py-1 border-3 text-text w-52 cursor-pointer hover:bg-secondary/90 h-9;
+  box-shadow: 3px 3px 0px oklch(var(--secondary) / 0.8);
 }
 
 .btn-accent {
-  @apply flex bg-accent/80 border-accent justify-center items-center py-1 border-3 text-text w-60 cursor-pointer hover:bg-accent/90 h-9;
-  box-shadow: 3px 3px 0px var(--color-accent);
+  @apply flex bg-accent/80 border-accent justify-center items-center py-1 border-3 text-text w-52 cursor-pointer hover:bg-accent/90 h-9;
+  box-shadow: 3px 3px 0px var(--accent / 0.8);
 }
 
 .btn-success {
-  @apply flex justify-center py-1 border-3 w-60 bg-green-400 cursor-pointer hover:bg-green-400/75 h-9;
+  @apply flex justify-center py-1 border-3 border-green-600 w-52 bg-green-400 cursor-pointer hover:bg-green-400/75 h-9;
+  box-shadow: 3px 3px 0px var(--color-green-800);
 }
 
 .label {
@@ -111,7 +112,7 @@ Applied Tailwind Styles
 }
 
 .input {
-  @apply bg-primary/5 text-text border-3 w-60 border-primary pl-1 py-1 h-9;
+  @apply bg-primary/5 text-text border-3 w-52 border-primary pl-1 py-1 h-9;
 }
 
 .select {
@@ -120,7 +121,7 @@ Applied Tailwind Styles
 }
 
 .th-join {
-  @apply p-4 tracking-wider border-r-2 border-background/50
+  @apply p-2 tracking-wider border-r-2 border-background/50
 }
 
 
@@ -138,6 +139,10 @@ Regular CSS Styles
 
 .shadow-hard-text {
   box-shadow: 4px 4px 0px var(--color-text);
+}
+
+.shadow-hard-success {
+  box-shadow: 3px 3px 0px var(--color-green-800);
 }
 
 .loader {

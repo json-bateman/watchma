@@ -46,7 +46,7 @@ func JoinPage(rooms map[string]*services.Room) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text mt-8 flex flex-col items-center justify-center px-4\"><div class=\"text-text text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2\">Available Rooms</div><div class=\"w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist\"><table class=\"w-full border-collapse\"><thead class=\"bg-primary text-background\"><tr><th class=\"th-join\">Room Name</th><th class=\"th-join\">Movies</th><th class=\"th-join\">Players</th><th class=\"p-4 tracking-wider\">Action</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text mt-8 flex flex-col items-center justify-center px-4\"><div class=\"text-text text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2\">Available Rooms</div><div class=\"w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist\"><table class=\"w-full border-collapse\"><thead class=\"bg-primary text-background\"><tr><th class=\"th-join\">Room Name</th><th class=\"th-join\">Movies</th><th class=\"th-join\">Players</th><th class=\"p-2 tracking-wider\">Action</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -135,12 +135,12 @@ func JoinPage(rooms map[string]*services.Room) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\">Join Room</a></td></tr>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\">Join </a></td></tr>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " <tr><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-3\"><div class=\"flex text-text justify-center\"><a href=\"/host\" class=\"hover:text-primary transition-all\">Host New Room</a></div></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " <tr><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-1\"><div class=\"flex text-text justify-center\"><a href=\"/host\" class=\"text-2xl hover:text-primary transition-all\">+\t</a></div></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

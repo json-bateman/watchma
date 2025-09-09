@@ -1,6 +1,7 @@
 package services
 
 import (
+	"sort"
 	"sync"
 	"time"
 
@@ -89,5 +90,20 @@ func (r *Room) GetAllUsers() []*types.User {
 	for _, user := range r.Users {
 		users = append(users, user)
 	}
+	return users
+}
+
+// services/room.go
+func (r *Room) UsersByJoin() []*types.User {
+	r.mu.RLock()
+	users := make([]*types.User, 0, len(r.Users))
+	for _, u := range r.Users {
+		users = append(users, u) // copy values to avoid races on fields
+	}
+	r.mu.RUnlock()
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].JoinedAt.Before(users[j].JoinedAt)
+	})
 	return users
 }

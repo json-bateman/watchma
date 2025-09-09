@@ -70,7 +70,13 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		select {
 		case message := <-client:
 			switch message {
-			case utils.ROOM_UPDATE_EVENT:
+			case utils.ROOM_JOINLEAVE_EVENT:
+				userBox := rooms.UserBox(myRoom)
+				if err := sse.PatchElementTempl(userBox); err != nil {
+					fmt.Println("Error patching user list")
+					return
+				}
+			case utils.ROOM_READY_EVENT:
 				userBox := rooms.UserBox(myRoom)
 				if err := sse.PatchElementTempl(userBox); err != nil {
 					fmt.Println("Error patching user list")
@@ -98,7 +104,7 @@ func (h *WebHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.AddUser(username)
-		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
+		h.BroadcastToRoom(roomName, utils.ROOM_JOINLEAVE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{"ok": true, "update": "user joined room"})
@@ -111,13 +117,35 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.RemoveUser(username)
-		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
+		h.BroadcastToRoom(roomName, utils.ROOM_JOINLEAVE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"ok":    true,
 		"room":  room.Name,
-		"event": utils.ROOM_UPDATE_EVENT,
+		"event": utils.ROOM_JOINLEAVE_EVENT,
+	})
+}
+
+func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	username := utils.GetUsernameFromCookie(r)
+
+	room, ok := h.roomService.GetRoom(roomName)
+	if ok {
+		u, found := room.GetUser(username)
+		if found && u.Ready {
+			u.Ready = false
+		} else {
+			u.Ready = true
+		}
+		h.BroadcastToRoom(roomName, utils.ROOM_READY_EVENT)
+	}
+
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
+		"ok":    true,
+		"room":  room.Name,
+		"event": utils.ROOM_JOINLEAVE_EVENT,
 	})
 }
 
