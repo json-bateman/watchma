@@ -2,7 +2,9 @@ package rooms
 
 import (
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
+	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 templ JoinPage(rooms map[string]*services.Room) {
@@ -21,61 +23,75 @@ templ JoinPage(rooms map[string]*services.Room) {
 							<th class="p-2 tracking-wider">Action</th>
 						</tr>
 					</thead>
-					<tbody>
-						if len(rooms) > 0 {
-							for _, room := range rooms {
-								<tr class={ "text-center text-text hover:bg-primary/10 px-4 border-b-2 border-primary/20 transition-colors" }>
-									<td class="py-2 font-bold text-xl">{ room.Name }</td>
-									<td class="py-2 font-semibold text-lg">{ room.Game.MovieNumber }</td>
-									<td class="py-2">
-										<div class="flex justify-center items-center">
-											<div class="bg-accent px-2 py-1 rounded font-bold">
-												{ len(room.Users) }/{ room.Game.MaxPlayers }
-											</div>
-										</div>
-									</td>
-									<td class="hover:cursor-pointer hover:text-primary transition-all py-2">
-										<a href={ templ.SafeURL("room/" + room.Name) }>
-											Join 
-										</a>
-									</td>
-								</tr>
-							}
-							<tr>
-								<td class="py-2"></td>
-								<td class="py-2"></td>
-								<td class="py-2"></td>
-								<td class="py-1">
-									<div class="flex text-text justify-center">
-										<a
-											href="/host"
-											class="text-2xl hover:text-primary transition-all"
-										>
-											+	
-										</a>
-									</div>
-								</td>
-							</tr>
-						} else {
-							<tr>
-								<td colspan="4" class="p-8 text-center">
-									<div class="flex flex-col items-center">
-										<div class="text-2xl font-bold text-primary mb-4">
-											No Active Rooms
-										</div>
-										<div class="text-lg mb-6 text-text/80">
-											Be the first to start a movie showdown!
-										</div>
-										<a href="/host" class="btn uppercase tracking-wider">
-											Host New Room
-										</a>
-									</div>
-								</td>
-							</tr>
-						}
-					</tbody>
+					@RoomListBody(rooms)
 				</table>
 			</div>
 		</section>
 	}
+}
+
+templ RoomListBody(rooms map[string]*services.Room) {
+	<tbody id="joinTable" data-on-load={ datastar.GetSSE("/sse/join") }>
+		if len(rooms) > 0 {
+			for _, room := range rooms {
+				<tr class={ "text-center text-text hover:bg-primary/10 px-4 border-b-2 border-primary/20 transition-colors" }>
+					<td class="py-2 font-bold text-xl">{ room.Name }</td>
+					<td class="py-2 font-semibold text-lg">{ room.Game.MovieNumber }</td>
+					<td class="py-2">
+						<div class="flex justify-center items-center">
+							<div class="bg-accent px-2 py-1 rounded font-bold">
+								{ len(room.Users) }/{ room.Game.MaxPlayers }
+							</div>
+						</div>
+					</td>
+					<td class="hover:cursor-pointer transition-all py-2">
+						if room.Game.MaxPlayers == len(room.Users) {
+							<span class="hover:text-red-400">
+								Full!
+							</span>
+						} else if room.Game.Step != types.Lobby {
+							<span class="hover:text-orange-500">
+								In Progress
+							</span>
+						} else {
+							<a class="hover:text-primary" href={ templ.SafeURL("room/" + room.Name) }>
+								Join 
+							</a>
+						}
+					</td>
+				</tr>
+			}
+			<tr>
+				<td class="py-2"></td>
+				<td class="py-2"></td>
+				<td class="py-2"></td>
+				<td class="py-1">
+					<div class="flex text-text justify-center">
+						<a
+							href="/host"
+							class="text-2xl hover:text-primary transition-all"
+						>
+							+	
+						</a>
+					</div>
+				</td>
+			</tr>
+		} else {
+			<tr>
+				<td colspan="4" class="p-8 text-center">
+					<div class="flex flex-col items-center">
+						<div class="text-2xl font-bold text-primary mb-4">
+							No Active Rooms
+						</div>
+						<div class="text-lg mb-6 text-text/80">
+							Be the first to start a movie showdown!
+						</div>
+						<a href="/host" class="btn uppercase tracking-wider">
+							Host New Room
+						</a>
+					</div>
+				</td>
+			</tr>
+		}
+	</tbody>
 }

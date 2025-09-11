@@ -17,6 +17,7 @@ import (
 
 func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
+	username := utils.GetUsernameFromCookie(r)
 
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if !ok {
@@ -31,7 +32,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	component := rooms.SingleRoom(myRoom)
+	component := rooms.SingleRoom(myRoom, username)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -39,6 +40,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 // Events to the client in real-time
 func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	room := chi.URLParam(r, "room")
+	username := utils.GetUsernameFromCookie(r)
 	sse := datastar.NewSSE(w, r)
 	client := make(chan string, 100)
 
@@ -47,7 +49,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	// Send existing user list to new client
 	myRoom, ok := h.roomService.GetRoom(room)
 	if ok {
-		userBox := rooms.UserBox(myRoom)
+		userBox := rooms.UserBox(myRoom, username)
 		if err := sse.PatchElementTempl(userBox); err != nil {
 			h.logger.Error("Error patching initial user list")
 		}
@@ -75,7 +77,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		case message := <-client:
 			switch message {
 			case utils.ROOM_UPDATE_EVENT:
-				userBox := rooms.UserBox(myRoom)
+				userBox := rooms.UserBox(myRoom, username)
 				if err := sse.PatchElementTempl(userBox); err != nil {
 					fmt.Println("Error patching user list")
 					return
@@ -110,6 +112,8 @@ func (h *WebHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		room.AddUser(username)
 		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
+		// Broadcast room list update to join page clients
+		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{"ok": true, "update": "user joined room"})
@@ -123,6 +127,8 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		room.RemoveUser(username)
 		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
+		// Broadcast room list update to join page clients
+		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
@@ -135,8 +141,8 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.roomService.GetRoom(roomName)
-	room.Game.Started = true
 	if ok {
+		room.Game.Step = types.Movies
 		items, err := h.jellyfin.FetchJellyfinMovies()
 		if err != nil {
 		}

@@ -51,8 +51,9 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Get("/host", h.Host)
 		r.Post("/host", h.HostForm)
 		r.Get("/join", h.Join)
+		r.Get("/sse/join", h.JoinSSE)
 		r.Get("/room/{roomName}", h.SingleRoom)
-		r.Get("/message/{room}", h.SingleRoomSSE)
+		r.Get("/sse/{room}", h.SingleRoomSSE)
 		r.Get("/rooms/{roomName}/movies", h.Movies)
 		r.Get("/movies", h.Movies)
 

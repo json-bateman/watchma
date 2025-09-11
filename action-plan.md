@@ -15,8 +15,10 @@
     - [X] When host makes room, after leaving, doesn't remove him from room? Something is wrong with the
     join / leave logic (fixed)
     - [X] Make Ready Up! button work, user struct - ready: true? maybe not, but sure seems like a flag
-    - [ ] Start Game! Button, should push users into a new endpoint maybe? /{room}/vote? Not sure
-    how that would work, might have to just replace the entire screen via SSE?
+    - [X] Start Game! Button, should push users into a new endpoint maybe? /{room}/vote? Not sure
+    how that would work, might have to just replace the entire screen via SSE? (I solved this by
+    just overwriting the whole page with an SSE event)
+    - [X] Make Join table update with kept alive SSE connection
 
 - then game flow
     - [ ] move from lobby state to movies state
@@ -24,6 +26,9 @@
     - [ ] Submit button to submit choices
     - [ ] View results!
 
+- side quests
+    - [ ] Figure out if there's a way to remove javascript for setting theme on page load in Layout
+    - [ ] If there is, whole page can be replaced with SSE
 
 - stretch goals
     - [ ] Generate a tournament bracket
@@ -31,3 +36,8 @@
     - [ ] create DB to store results of finished games
     - [ ] let individual users log in
     - [ ] save users selections over time in the DB
+
+- stretchier goals
+    - [ ] Add an input field for the host of each room to choose an actor
+    - [ ] Generate LLM prompt or use a preconfigured one, that makes the LLM a host for the game
+    - [ ] Have the LLM say something funny or witty in-betwixt rounds, deliver with SSE??

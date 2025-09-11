@@ -11,15 +11,16 @@ type GameStep int
 const (
 	Lobby = iota
 	Movies
+	Results
 )
 
 type GameSession struct {
+	Host        string
 	Movies      []JellyfinItem
 	MovieNumber int
 	MaxPlayers  int
 	Votes       map[string]int // MovieID -> vote count
 	Step        GameStep
-	Started     bool
 }
 
 // MovieRequest represents a request containing movie IDs

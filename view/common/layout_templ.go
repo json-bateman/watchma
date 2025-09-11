@@ -64,20 +64,20 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"border-t-3 pt-2 mt-8 border-primary flex justify-center text-center text-primary text-2xl\">© JsonB ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"border-t-3 pt-2 mt-8 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary\"><span>JsonB ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Year())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 24, Col: 138}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 25, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</footer></main><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span> <a class=\"w-6 h-6\"><img src=\"/public/github-logo.svg\"></a></footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n\n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
