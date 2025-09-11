@@ -1,33 +1,46 @@
 package movies
 
 import (
+	"fmt"
+	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
 )
 
-templ MoviesPage(movies []types.JellyfinItem, baseURL string) {
+templ MoviesPage(movies []types.JellyfinItem, baseURL string, room *services.Room) {
 	@common.Layout("Movies page") {
-		<div data-signals="{movies: []}">
-			<section class="flex flex-col justify-center items-center">
-				<span class="text-3xl">Movies</span>
-				<div class="text-text flex flex-col items-center justify-center" id="moviesSubmit">
-					<button class="btn mb-6" data-on-click="@post('/api/movies')">Submit Choices</button>
-					<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
-						for _, m := range movies {
-							<label class="block w-40 md:w-64 border border-3 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-4">
-								<input class="hidden" type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
-								<img
-									src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
-									alt={ "Cover for " + m.Name }
-									class="w-full h-full object-cover"
-								/>
-							</label>
-						}
-					</div>
-				</div>
-			</section>
+		<div id="movies" data-signals="{movies: []}">
+			@Movies(movies, baseURL, room)
 		</div>
 	}
+}
+
+templ Movies(movies []types.JellyfinItem, baseURL string, room *services.Room) {
+	<section id="movies" data-signals="{movies: []}">
+		<div class="flex flex-col justify-center items-center">
+			<span class="text-3xl">Movies</span>
+			<div class="text-text flex flex-col items-center justify-center" id="moviesSubmit">
+				<button
+					class="btn mb-6"
+					data-on-click={ fmt.Sprintf("@post('/rooms/%s/start')", room.Name) }
+				>
+					Submit Choices
+				</button>
+				<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
+					for _, m := range movies {
+						<label class="block w-40 md:w-64 border cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-2">
+							<input class="hidden" type="checkbox" value={ m.Id } data-bind-movies data-on-change="console.log($movies)"/>
+							<img
+								src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+								alt={ "Cover for " + m.Name }
+								class="w-full h-full object-cover"
+							/>
+						</label>
+					}
+				</div>
+			</div>
+		</div>
+	</section>
 }
 
 templ SubmitButton() {

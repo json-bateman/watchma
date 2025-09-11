@@ -99,7 +99,7 @@ Applied Tailwind Styles
 
 .btn-accent {
   @apply flex bg-accent/80 border-accent justify-center items-center py-1 border-3 text-text w-52 cursor-pointer hover:bg-accent/90 h-9;
-  box-shadow: 3px 3px 0px var(--accent / 0.8);
+  box-shadow: 3px 3px 0px oklch(var(--accent) / 0.8);
 }
 
 .btn-success {

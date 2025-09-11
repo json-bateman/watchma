@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 // Dumping unorganized types in this file until there's enough to refactor
 
@@ -12,11 +14,12 @@ const (
 )
 
 type GameSession struct {
-	Movies      []string
+	Movies      []JellyfinItem
 	MovieNumber int
 	MaxPlayers  int
 	Votes       map[string]int // MovieID -> vote count
 	Step        GameStep
+	Started     bool
 }
 
 // MovieRequest represents a request containing movie IDs

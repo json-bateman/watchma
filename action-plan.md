@@ -14,7 +14,9 @@
     - [X] others can join room, assign users to room
     - [X] When host makes room, after leaving, doesn't remove him from room? Something is wrong with the
     join / leave logic (fixed)
-    - [ ] Make Ready Up! button work, user struct - ready: true? maybe not, but sure seems like a flag
+    - [X] Make Ready Up! button work, user struct - ready: true? maybe not, but sure seems like a flag
+    - [ ] Start Game! Button, should push users into a new endpoint maybe? /{room}/vote? Not sure
+    how that would work, might have to just replace the entire screen via SSE?
 
 - then game flow
     - [ ] move from lobby state to movies state

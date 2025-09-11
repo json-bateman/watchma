@@ -94,7 +94,7 @@ func (r *Room) GetAllUsers() []*types.User {
 }
 
 // services/room.go
-func (r *Room) UsersByJoin() []*types.User {
+func (r *Room) UsersByJoinTime() []*types.User {
 	r.mu.RLock()
 	users := make([]*types.User, 0, len(r.Users))
 	for _, u := range r.Users {

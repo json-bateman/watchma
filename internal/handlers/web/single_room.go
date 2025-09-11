@@ -3,12 +3,14 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/internal/utils"
+	"github.com/json-bateman/jellyfin-grabber/view/movies"
 	"github.com/json-bateman/jellyfin-grabber/view/rooms"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -33,6 +35,8 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
+// Function that does the heavy lifting by keeping the SSE channel open and sending
+// Events to the client in real-time
 func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	room := chi.URLParam(r, "room")
 	sse := datastar.NewSSE(w, r)
@@ -70,13 +74,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		select {
 		case message := <-client:
 			switch message {
-			case utils.ROOM_JOINLEAVE_EVENT:
-				userBox := rooms.UserBox(myRoom)
-				if err := sse.PatchElementTempl(userBox); err != nil {
-					fmt.Println("Error patching user list")
-					return
-				}
-			case utils.ROOM_READY_EVENT:
+			case utils.ROOM_UPDATE_EVENT:
 				userBox := rooms.UserBox(myRoom)
 				if err := sse.PatchElementTempl(userBox); err != nil {
 					fmt.Println("Error patching user list")
@@ -88,6 +86,13 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 					fmt.Println("Error patching chat message")
 					return
 				}
+			case utils.ROOM_START_EVENT:
+				movies := movies.Movies(myRoom.Game.Movies, h.settings.JellyfinBaseURL, myRoom)
+				if err := sse.PatchElementTempl(movies); err != nil {
+					fmt.Println("Error patching chat message")
+					return
+				}
+
 			default: // discard for now, maybe error?
 			}
 
@@ -104,7 +109,7 @@ func (h *WebHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.AddUser(username)
-		h.BroadcastToRoom(roomName, utils.ROOM_JOINLEAVE_EVENT)
+		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{"ok": true, "update": "user joined room"})
@@ -117,13 +122,48 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.RemoveUser(username)
-		h.BroadcastToRoom(roomName, utils.ROOM_JOINLEAVE_EVENT)
+		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"ok":    true,
 		"room":  room.Name,
-		"event": utils.ROOM_JOINLEAVE_EVENT,
+		"event": utils.ROOM_UPDATE_EVENT,
+	})
+}
+
+func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	room, ok := h.roomService.GetRoom(roomName)
+	room.Game.Started = true
+	if ok {
+		items, err := h.jellyfin.FetchJellyfinMovies()
+		if err != nil {
+		}
+
+		if items == nil || len(items.Items) == 0 {
+			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", room.Name))
+		}
+
+		rand.Shuffle(len(items.Items), func(i, j int) {
+			items.Items[i], items.Items[j] = items.Items[j], items.Items[i]
+		})
+
+		var randMovies []types.JellyfinItem
+		if len(items.Items) >= room.Game.MovieNumber {
+			randMovies = items.Items[:room.Game.MovieNumber]
+		} else {
+			randMovies = items.Items
+		}
+		room.Game.Movies = randMovies
+
+		h.BroadcastToRoom(roomName, utils.ROOM_START_EVENT)
+	}
+
+	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
+		"ok":    true,
+		"room":  room.Name,
+		"event": utils.ROOM_START_EVENT,
 	})
 }
 
@@ -139,13 +179,13 @@ func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
 		} else {
 			u.Ready = true
 		}
-		h.BroadcastToRoom(roomName, utils.ROOM_READY_EVENT)
+		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
 	}
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"ok":    true,
 		"room":  room.Name,
-		"event": utils.ROOM_JOINLEAVE_EVENT,
+		"event": utils.ROOM_UPDATE_EVENT,
 	})
 }
 
@@ -166,7 +206,6 @@ func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) 
 	req.Username = username
 	room, ok := h.roomService.GetRoom(req.Room)
 	if ok {
-		// Store message
 		room.RoomMessages = append(room.RoomMessages, req)
 		h.BroadcastToRoom(room.Name, utils.MESSAGE_SENT_EVENT)
 	}

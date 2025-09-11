@@ -53,11 +53,15 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Get("/join", h.Join)
 		r.Get("/room/{roomName}", h.SingleRoom)
 		r.Get("/message/{room}", h.SingleRoomSSE)
-		r.Post("/message", h.PublishChatMessage)
+		r.Get("/rooms/{roomName}/movies", h.Movies)
+		r.Get("/movies", h.Movies)
+
+		r.Post("/rooms/{roomName}/message", h.PublishChatMessage)
 		r.Post("/rooms/{roomName}/join", h.JoinRoom)
 		r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
 		r.Post("/rooms/{roomName}/ready", h.Ready)
-		r.Get("/movies", h.Movies)
+		r.Post("/rooms/{roomName}/start", h.StartGame)
+		r.Post("/rooms/{roomName}/submit", h.PublishChatMessage)
 	})
 }
 

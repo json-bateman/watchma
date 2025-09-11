@@ -20,9 +20,6 @@ import (
 func (h *WebHandler) Movies(w http.ResponseWriter, r *http.Request) {
 	items, err := h.jellyfin.FetchJellyfinMovies()
 	if err != nil {
-		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
-		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
-		return
 	}
 
 	if items == nil || len(items.Items) == 0 {
@@ -35,13 +32,13 @@ func (h *WebHandler) Movies(w http.ResponseWriter, r *http.Request) {
 	})
 
 	var randMovies []types.JellyfinItem
-	if len(items.Items) >= 8 {
-		randMovies = items.Items[:8]
+	if len(items.Items) >= 20 {
+		randMovies = items.Items[:20]
 	} else {
 		randMovies = items.Items
 	}
 
-	component := movies.MoviesPage(randMovies, h.settings.JellyfinBaseURL)
+	component := movies.MoviesPage(randMovies, h.settings.JellyfinBaseURL, nil)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
