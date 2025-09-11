@@ -3,7 +3,7 @@ package common
 import "time"
 
 templ Layout(title string) {
-	<html lang="en">
+	<html data-theme="burgundy-light" lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -23,21 +23,6 @@ templ Layout(title string) {
 				</div>
 				<footer class="border-t-3 pt-2 mt-8 border-primary flex justify-center text-center text-primary text-2xl">© JsonB { time.Now().Year() }</footer>
 			</main>
-			<script>
-                function getSystemTheme() {
-                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    return 'dark'
-                  }
-                  return 'burgundy-light'
-                }
-                
-                const currentTheme = localStorage.getItem('theme')
-                if (!currentTheme) {
-                  const systemTheme = getSystemTheme()
-                  localStorage.setItem("theme", systemTheme)
-                }
-                document.querySelector('html').setAttribute('data-theme', localStorage.getItem("theme"))
-            </script>
 			<!-- Datastar -->
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
 		</body>

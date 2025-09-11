@@ -31,7 +31,7 @@ func Layout(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"/public/style.css\" rel=\"stylesheet\"><link href=\"/public/favicon.png\" rel=\"icon\" type=\"image/png\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html data-theme=\"burgundy-light\" lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"/public/style.css\" rel=\"stylesheet\"><link href=\"/public/favicon.png\" rel=\"icon\" type=\"image/png\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -77,7 +77,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n                \n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</footer></main><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
