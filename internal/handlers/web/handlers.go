@@ -56,12 +56,12 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 
 		r.Post("/host", h.HostForm)
 		r.Post("/message", h.PublishChatMessage)
-		r.Post("/rooms/{roomName}/movies", h.SubmitMovies)
-		r.Post("/rooms/{roomName}/join", h.JoinRoom)
-		r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
-		r.Post("/rooms/{roomName}/ready", h.Ready)
-		r.Post("/rooms/{roomName}/start", h.StartGame)
-		r.Post("/rooms/{roomName}/submit", h.SubmitMovies)
+		r.Post("/room/{roomName}/movies", h.SubmitMovies)
+		r.Post("/room/{roomName}/join", h.JoinRoom)
+		r.Post("/room/{roomName}/leave", h.LeaveRoom)
+		r.Post("/room/{roomName}/ready", h.Ready)
+		r.Post("/room/{roomName}/start", h.StartGame)
+		r.Post("/room/{roomName}", h.SubmitMovies)
 	})
 }
 

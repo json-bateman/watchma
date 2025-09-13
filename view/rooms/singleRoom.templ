@@ -70,14 +70,14 @@ templ SingleRoom(room *services.Room, username string) {
 			</div>
 			<script>
                 window.addEventListener('DOMContentLoaded', () => {
-                    fetch("/rooms/{{ room.Name }}/join", {
+                    fetch("/room/{{ room.Name }}/join", {
                         method: "POST",
                     });
                 });
                 <!-- User cleanup on page leave, prefer this over visibility change because unload events -->
                 <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->
                 window.addEventListener('pagehide', () => {
-                    navigator.sendBeacon("/rooms/{{ room.Name }}/leave");
+                    navigator.sendBeacon("/room/{{ room.Name }}/leave");
                 });
             </script>
 		</section>
@@ -117,7 +117,7 @@ templ UserBox(room *services.Room, username string) {
 			<div>
 				<button
 					class="btn uppercase gap-2 tracking-wide"
-					data-on-click={ fmt.Sprintf("@post('/rooms/%s/ready')", room.Name) }
+					data-on-click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
 				>
 					Ready Up!
 				</button>
@@ -125,7 +125,7 @@ templ UserBox(room *services.Room, username string) {
 					if len(users) == totalReady && totalReady > 1 {
 						<button
 							class="btn-success font-black uppercase tracking-wide"
-							data-on-click={ fmt.Sprintf("@post('/rooms/%s/start')", room.Name) }
+							data-on-click={ fmt.Sprintf("@post('/room/%s/start')", room.Name) }
 						>
 							Start Game!
 						</button>
@@ -170,7 +170,7 @@ templ Button(room *services.Room) {
 			</div>
 			<button
 				class="btn"
-				data-on-click={ fmt.Sprintf("@post('/rooms/%s/ready')", room.Name) }
+				data-on-click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
 			>
 				Ready Up!
 			</button>

@@ -55,25 +55,48 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
+	username := utils.GetUsernameFromCookie(r)
 	var moviesReq types.MovieRequest
 	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&moviesReq); err != nil {
 		utils.SendSSEError(w, r, "Invalid Request Body", http.StatusBadRequest)
 		return
 	}
-	if len(moviesReq.MoviesReq) == 0 {
+
+	if len(moviesReq.Movies) == 0 {
 		utils.SendSSEError(w, r, "Must include at least 1 movie id.", http.StatusBadRequest)
 		return
 	}
 	room, ok := h.roomService.GetRoom(roomName)
-	if ok {
-		for _, movie := range moviesReq.MoviesReq {
-			room.Game.Votes[movie]++
+	user, ok2 := room.GetUser(username)
+	if ok && ok2 {
+		for _, movieID := range moviesReq.Movies {
+			// Find the JellyfinItem that matches this ID
+			for i := range room.Game.Movies {
+				if room.Game.Movies[i].Id == movieID {
+					room.Game.Votes[&room.Game.Movies[i]]++
+					break
+				}
+			}
+			user.SelectedMovies = append(user.SelectedMovies, movieID)
 		}
 	}
+	user.HasSelectedMovies = true
 
 	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(movies.SubmitButton())
 
-	fmt.Println(moviesReq.MoviesReq)
+	playersComplete := 0
+	for _, user := range room.Users {
+		if user.HasSelectedMovies {
+			playersComplete++
+		}
+	}
+	// If all players have selected movies, push them to final screen
+	if playersComplete == len(room.Users) {
+		h.BroadcastToRoom(roomName, utils.ROOM_FINISH_EVENT)
+	} else {
+		// If not, render successfully submitted movies button
+		buttonAndMovies := movies.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, user.SelectedMovies)
+		sse.PatchElementTempl(buttonAndMovies)
+	}
 }

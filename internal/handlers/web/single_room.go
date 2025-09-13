@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -92,6 +93,25 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			case utils.ROOM_START_EVENT:
 				movies := movies.Movies(myRoom.Game.Movies, h.settings.JellyfinBaseURL, myRoom)
 				if err := sse.PatchElementTempl(movies); err != nil {
+					fmt.Println("Error patching chat message")
+					return
+				}
+			case utils.ROOM_FINISH_EVENT:
+				// Extract map entries into a slice
+				var movieVotes []types.MovieVote
+				for jfinMovie, votes := range myRoom.Game.Votes {
+					movieVotes = append(movieVotes, types.MovieVote{
+						Movie: jfinMovie,
+						Votes: votes,
+					})
+				}
+
+				// Sort by votes (descending - highest votes first)
+				sort.Slice(movieVotes, func(i, j int) bool {
+					return movieVotes[i].Votes > movieVotes[j].Votes
+				})
+				finalScreen := movies.GameFinished(movieVotes, h.settings.JellyfinBaseURL)
+				if err := sse.PatchElementTempl(finalScreen); err != nil {
 					fmt.Println("Error patching chat message")
 					return
 				}

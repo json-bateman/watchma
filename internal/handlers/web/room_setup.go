@@ -85,6 +85,7 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 		MovieNumber: movies,
 		MaxPlayers:  maxPlayers,
 		Host:        username,
+		Votes:       make(map[*types.JellyfinItem]int),
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)

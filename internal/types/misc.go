@@ -19,19 +19,21 @@ type GameSession struct {
 	Movies      []JellyfinItem
 	MovieNumber int
 	MaxPlayers  int
-	Votes       map[string]int // MovieID -> vote count
+	Votes       map[*JellyfinItem]int // MovieID -> vote count
 	Step        GameStep
 }
 
 // MovieRequest represents a request containing movie IDs
 type MovieRequest struct {
-	MoviesReq []string `json:"moviesReq"`
+	Movies []string `json:"movies"`
 }
 
 type User struct {
-	Name     string
-	JoinedAt time.Time
-	Ready    bool
+	Name              string
+	JoinedAt          time.Time
+	Ready             bool
+	SelectedMovies    []string //MovieID
+	HasSelectedMovies bool
 }
 
 // Message represents a chat message
@@ -40,4 +42,10 @@ type Message struct {
 	Username string `json:"username"`
 	Message  string `json:"message"`
 	Room     string `json:"room"`
+}
+
+// MovieVote represents a struct for holding final votes
+type MovieVote struct {
+	Movie *JellyfinItem
+	Votes int
 }
