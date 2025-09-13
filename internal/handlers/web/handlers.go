@@ -38,31 +38,30 @@ func NewWebHandler(cfg *config.Settings, jf *services.JellyfinService, l *slog.L
 // Web Routes should return web elements (I.E. SSE, HTML)
 func (h *WebHandler) SetupRoutes(r chi.Router) {
 	// Public web routes
+	r.Get("/", h.Index)
 	r.Get("/username", h.Username)
-	r.Post("/username", h.SetUsername)
 	r.Get("/shuffle/{number}", h.Shuffle)
-	r.Post("/movies", h.PostMovies)
+
+	r.Post("/username", h.SetUsername)
 
 	// Protected web routes
 	r.Group(func(r chi.Router) {
 		r.Use(RequireUsername)
 
-		r.Get("/", h.Index)
 		r.Get("/host", h.Host)
-		r.Post("/host", h.HostForm)
 		r.Get("/join", h.Join)
 		r.Get("/sse/join", h.JoinSSE)
 		r.Get("/room/{roomName}", h.SingleRoom)
-		r.Get("/sse/{room}", h.SingleRoomSSE)
-		r.Get("/rooms/{roomName}/movies", h.Movies)
-		r.Get("/movies", h.Movies)
+		r.Get("/sse/{roomName}", h.SingleRoomSSE)
 
-		r.Post("/rooms/{roomName}/message", h.PublishChatMessage)
+		r.Post("/host", h.HostForm)
+		r.Post("/message", h.PublishChatMessage)
+		r.Post("/rooms/{roomName}/movies", h.SubmitMovies)
 		r.Post("/rooms/{roomName}/join", h.JoinRoom)
 		r.Post("/rooms/{roomName}/leave", h.LeaveRoom)
 		r.Post("/rooms/{roomName}/ready", h.Ready)
 		r.Post("/rooms/{roomName}/start", h.StartGame)
-		r.Post("/rooms/{roomName}/submit", h.PublishChatMessage)
+		r.Post("/rooms/{roomName}/submit", h.SubmitMovies)
 	})
 }
 

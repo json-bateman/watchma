@@ -7,8 +7,13 @@ templ Layout(title string) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<link href="/public/style.css" rel="stylesheet"/>
 			<link href="/public/favicon.png" rel="icon" type="image/png"/>
+			<!-- google fonts -->
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+			<link href="https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap" rel="stylesheet"/>
+			<!-- stylesheet -->
+			<link href="/public/style.css" rel="stylesheet"/>
 			<title>{ title }</title>
 		</head>
 		<body class="bg-background min-h-svh">
@@ -18,12 +23,12 @@ templ Layout(title string) {
 					@themeToggle()
 				</header>
 				<!-- Here's where the pages are injected -->
-				<div class="grow flex flex-col text-text">
+				<div class="grow flex flex-col text-text font-sans">
 					{ children... }
 				</div>
 				<footer class="border-t-3 pt-2 mt-8 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
 					<span>JsonB { time.Now().Year() } </span>
-					<a class="w-6 h-6">
+					<a href="https://github.com/json-bateman" class="w-6 h-6">
 						<img src="/public/github-logo.svg"/>
 					</a>
 				</footer>

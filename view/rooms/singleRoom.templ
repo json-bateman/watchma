@@ -17,15 +17,18 @@ type ChatMessage struct {
 
 templ SingleRoom(room *services.Room, username string) {
 	@common.Layout(room.Name) {
-		<!-- janky(?) way to set the subject field for the message payload
+		<section id="moviesRoom" class="flex justify-center grow">
+			<!-- janky(?) way to set the subject field for the message payload
     TODO: make this not janky -->
-		<span data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
-		<section id="movies" class="flex justify-center grow">
+			<span class="hidden" data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
 			<div class="flex max-w-[800px] flex-col justify-between grow">
 				<div>
 					<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">
-						<div class="text-text text-4xl font-black uppercase tracking-widest mb-4 border-b-4 border-white pb-2">
-							{ room.Name }
+						<div class="text-text flex flex-wrap justify-between items-center font-black uppercase mb-4 border-b-4 border-white pb-2">
+							<span class="text-4xl tracking-widest">{ room.Name }</span>
+							if username == room.Game.Host {
+								<span class="text-primary">You are the host!</span>
+							}
 						</div>
 						<div class="grid grid-cols-2 gap-4">
 							<div class="bg-white text-black p-3 border-2 border-black">
@@ -50,7 +53,7 @@ templ SingleRoom(room *services.Room, username string) {
 							data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
 						/>
 						<button
-							data-on-click="@post('/message');$message='';"
+							data-on-click={ "@post('/message');$message='';" }
 							class="btn !w-16"
 						>
 							Send
@@ -107,7 +110,7 @@ templ UserBox(room *services.Room, username string) {
 		<div class="flex h-28 justify-between bg-background border-4 border-primary p-4 shadow-brutalist">
 			<div class="w-20 text-text text-xl flex flex-col justify-center items-center">
 				<span>READY</span>
-				<div class="bg-primary shadow-hard flex justify-center items-center px-2 py-1 text-center">
+				<div class="pl-2 pt-2 bg-secondary shadow-hard flex justify-center items-center px-2 py-1 text-center">
 					<span>{ totalReady }/{ len(users) }</span>
 				</div>
 			</div>
@@ -118,11 +121,17 @@ templ UserBox(room *services.Room, username string) {
 				>
 					Ready Up!
 				</button>
-				if len(users) == totalReady && totalReady > 1 {
-					if username == room.Game.Host {
+				if username == room.Game.Host {
+					if len(users) == totalReady && totalReady > 1 {
 						<button
 							class="btn-success font-black uppercase tracking-wide"
 							data-on-click={ fmt.Sprintf("@post('/rooms/%s/start')", room.Name) }
+						>
+							Start Game!
+						</button>
+					} else {
+						<button
+							class="btn-disabled font-black uppercase tracking-wide"
 						>
 							Start Game!
 						</button>

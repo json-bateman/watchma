@@ -8,11 +8,13 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/internal/types"
 )
 
+// RoomService manages all room operations
 type RoomService struct {
 	mu    sync.RWMutex
 	Rooms map[string]*Room
 }
 
+// Room manages all operations within rooms, including managing GameSession
 type Room struct {
 	Name         string
 	Game         *types.GameSession
@@ -21,43 +23,49 @@ type Room struct {
 	mu           sync.RWMutex
 }
 
+// NewRoomService creates a RoomService
 func NewRoomService() *RoomService {
 	return &RoomService{
 		Rooms: make(map[string]*Room),
 	}
 }
 
-func (rm *RoomService) AddRoom(name string, game *types.GameSession) {
+// AddRoom adds Room with [roomName] as key to Rooms map with mutex lock
+func (rm *RoomService) AddRoom(roomName string, game *types.GameSession) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	rm.Rooms[name] = &Room{
-		Name:         name,
+	rm.Rooms[roomName] = &Room{
+		Name:         roomName,
 		Game:         game,
 		RoomMessages: make([]types.Message, 0),
 		Users:        make(map[string]*types.User),
 	}
 }
 
-func (rm *RoomService) RoomExists(name string) bool {
+// RoomExists checks if [roomName] is in Rooms map with mutex lock
+func (rm *RoomService) RoomExists(roomName string) bool {
 	rm.mu.RLock()
 	defer rm.mu.RUnlock()
-	_, exists := rm.Rooms[name]
+	_, exists := rm.Rooms[roomName]
 	return exists
 }
 
-func (rm *RoomService) DeleteRoom(name string) {
+// DeleteRoom deletes room from Rooms map with mutex lock
+func (rm *RoomService) DeleteRoom(roomName string) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
-	delete(rm.Rooms, name)
+	delete(rm.Rooms, roomName)
 }
 
-func (rm *RoomService) GetRoom(name string) (*Room, bool) {
+// GetRoom gets room from Rooms map with mutex lock
+func (rm *RoomService) GetRoom(roomName string) (*Room, bool) {
 	rm.mu.RLock()
 	defer rm.mu.RUnlock()
-	room, ok := rm.Rooms[name]
+	room, ok := rm.Rooms[roomName]
 	return room, ok
 }
 
+// AddUser adds a user to Room.Users map with mutex lock
 func (r *Room) AddUser(username string) *types.User {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -70,12 +78,14 @@ func (r *Room) AddUser(username string) *types.User {
 	return user
 }
 
+// RemoveUser removes a user to Room.Users map with mutex lock
 func (r *Room) RemoveUser(username string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	delete(r.Users, username)
 }
 
+// GetUser gets a user from Room.Users map with mutex lock
 func (r *Room) GetUser(username string) (*types.User, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -83,6 +93,7 @@ func (r *Room) GetUser(username string) (*types.User, bool) {
 	return user, exists
 }
 
+// GetAllUsers gets all users from Room.Users map with mutex lock
 func (r *Room) GetAllUsers() []*types.User {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -93,7 +104,7 @@ func (r *Room) GetAllUsers() []*types.User {
 	return users
 }
 
-// services/room.go
+// UsersByJoinTime gets all users by Join Time from Room.Users and sorts them, returning the sorted array.
 func (r *Room) UsersByJoinTime() []*types.User {
 	r.mu.RLock()
 	users := make([]*types.User, 0, len(r.Users))

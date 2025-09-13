@@ -43,7 +43,15 @@ func UsernameForm() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/username\" class=\"flex flex-col w-full space-y-3 items-center justify-center mt-6\"><div class=\"flex flex-col\"><input class=\"input\" type=\"text\" name=\"username\" id=\"username\" placeholder=\"Enter your username\" required></div><button class=\"btn\" type=\"submit\">Set Username</button><div id=\"error\" class=\"hidden\"></div></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/username\" class=\"flex flex-col w-full space-y-3 items-center justify-center mt-6\"><div class=\"flex flex-col\"><input class=\"input\" type=\"text\" name=\"username\" id=\"username\" placeholder=\"Enter your username\" required></div><button class=\"btn\" type=\"submit\">Set Username</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = common.Error().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

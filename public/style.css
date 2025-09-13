@@ -13,7 +13,9 @@
     --color-green-400: oklch(79.2% 0.209 151.711);
     --color-green-600: oklch(62.7% 0.194 149.214);
     --color-green-800: oklch(44.8% 0.119 151.328);
+    --color-gray-400: oklch(70.7% 0.022 261.325);
     --color-gray-600: oklch(44.6% 0.03 256.802);
+    --color-gray-800: oklch(27.8% 0.033 256.848);
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
@@ -29,8 +31,8 @@
     --text-3xl--line-height: calc(2.25 / 1.875);
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
-    --text-5xl: 3rem;
-    --text-5xl--line-height: 1;
+    --text-6xl: 3.75rem;
+    --text-6xl--line-height: 1;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --font-weight-black: 900;
@@ -412,6 +414,9 @@
       background-color: color-mix(in oklab, var(--color-primary) 5%, transparent);
     }
   }
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
   .bg-white {
     background-color: var(--color-white);
   }
@@ -451,8 +456,14 @@
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
   }
+  .pl-2 {
+    padding-left: calc(var(--spacing) * 2);
+  }
   .text-center {
     text-align: center;
+  }
+  .font-sans {
+    font-family: var(--font-sans);
   }
   .font-serif {
     font-family: var(--font-serif);
@@ -469,9 +480,9 @@
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
   }
-  .text-5xl {
-    font-size: var(--text-5xl);
-    line-height: var(--tw-leading, var(--text-5xl--line-height));
+  .text-6xl {
+    font-size: var(--text-6xl);
+    line-height: var(--tw-leading, var(--text-6xl--line-height));
   }
   .text-lg {
     font-size: var(--text-lg);
@@ -526,6 +537,9 @@
   }
   .text-primary {
     color: var(--color-primary);
+  }
+  .text-red-400 {
+    color: var(--color-red-400);
   }
   .text-red-500 {
     color: var(--color-red-500);
@@ -661,8 +675,13 @@ table {
     --accent: 48.36% 0.1086 43.1;
   }
   :root {
-    --ff-serif: "IBM Plex Serif", serif;
+    --ff-serif: "Rubik Doodle Shadow", system-ui;
     --ff-sans: "Mulish", sans-serif;
+    --text: 16.7% 0.0195 43.33;
+    --background: 98.27% 0.0055 31.05;
+    --primary: 61.54% 0.1255 43.54;
+    --secondary: 80.24% 0.0618 46.87;
+    --accent: 71.46% 0.1005 43.45;
   }
   input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active, textarea:-webkit-autofill, select:-webkit-autofill {
     -webkit-text-fill-color: var(--color-text) !important;
@@ -690,7 +709,7 @@ table {
     background-color: color-mix(in oklab, var(--color-primary) 80%, transparent);
   }
   padding-block: calc(var(--spacing) * 1);
-  color: var(--color-text);
+  color: var(--color-white);
   &:hover {
     @media (hover: hover) {
       background-color: color-mix(in srgb, oklch(var(--primary)) 90%, transparent);
@@ -699,7 +718,7 @@ table {
       }
     }
   }
-  box-shadow: 3px 3px 0px oklch(var(--primary) / 0.8);
+  box-shadow: 2px 2px 0px oklch(var(--primary) / 0.8);
 }
 .btn-secondary {
   display: flex;
@@ -725,7 +744,7 @@ table {
       }
     }
   }
-  box-shadow: 3px 3px 0px oklch(var(--secondary) / 0.8);
+  box-shadow: 2px 2px 0px oklch(var(--secondary) / 0.8);
 }
 .btn-accent {
   display: flex;
@@ -774,6 +793,19 @@ table {
   }
   box-shadow: 3px 3px 0px var(--color-green-800);
 }
+.btn-disabled {
+  display: flex;
+  height: calc(var(--spacing) * 9);
+  width: calc(var(--spacing) * 52);
+  cursor: not-allowed;
+  justify-content: center;
+  border-style: var(--tw-border-style);
+  border-width: 3px;
+  border-color: var(--color-gray-600);
+  background-color: var(--color-gray-400);
+  padding-block: calc(var(--spacing) * 1);
+  box-shadow: 3px 3px 0px var(--color-gray-800);
+}
 .label {
   color: var(--color-primary);
 }
@@ -805,7 +837,7 @@ table {
   font-size: var(--text-lg);
   line-height: var(--tw-leading, var(--text-lg--line-height));
   color: var(--color-text);
-  box-shadow: 3px 3px 0px var(--color-primary);
+  box-shadow: 3px 3px 0px var(--color-secondary);
 }
 .th-join {
   border-right-style: var(--tw-border-style);
@@ -820,6 +852,20 @@ table {
 }
 .shadow-brutalist {
   box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
+}
+.shadow-dance-text {
+  animation: shadow-dance 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+}
+@keyframes shadow-dance {
+  0% {
+    text-shadow: -1px 1px 0 var(--color-secondary), -3px 3px 0 var(--color-primary);
+  }
+  50% {
+    text-shadow: -12px 12px 0 var(--color-primary), -30px 30px 0 var(--color-secondary);
+  }
+  100% {
+    text-shadow: -1px 1px 0 var(--color-secondary), -3px 3px 0 var(--color-primary);
+  }
 }
 .shadow-hard {
   box-shadow: 3px 3px 0px var(--color-secondary);

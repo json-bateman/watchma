@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
@@ -39,7 +40,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 // Function that does the heavy lifting by keeping the SSE channel open and sending
 // Events to the client in real-time
 func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
-	room := chi.URLParam(r, "room")
+	room := chi.URLParam(r, "roomName")
 	username := utils.GetUsernameFromCookie(r)
 	sse := datastar.NewSSE(w, r)
 	client := make(chan string, 100)
@@ -197,9 +198,11 @@ func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) {
 	var req types.Message
-
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
+		return
+	}
+	if len(strings.Trim(req.Message, " ")) == 0 {
 		return
 	}
 

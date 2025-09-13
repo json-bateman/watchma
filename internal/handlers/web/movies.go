@@ -17,31 +17,6 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-func (h *WebHandler) Movies(w http.ResponseWriter, r *http.Request) {
-	items, err := h.jellyfin.FetchJellyfinMovies()
-	if err != nil {
-	}
-
-	if items == nil || len(items.Items) == 0 {
-		log.Printf("no movies found")
-	}
-
-	// TODO: Improve this ranomizer for number of items after room is made
-	rand.Shuffle(len(items.Items), func(i, j int) {
-		items.Items[i], items.Items[j] = items.Items[j], items.Items[i]
-	})
-
-	var randMovies []types.JellyfinItem
-	if len(items.Items) >= 20 {
-		randMovies = items.Items[:20]
-	} else {
-		randMovies = items.Items
-	}
-
-	component := movies.MoviesPage(randMovies, h.settings.JellyfinBaseURL, nil)
-	templ.Handler(component).ServeHTTP(w, r)
-}
-
 func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 	number := chi.URLParam(r, "number")
 
@@ -78,17 +53,25 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
-func (h *WebHandler) PostMovies(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
 	var moviesReq types.MovieRequest
 	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&moviesReq); err != nil {
-		utils.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
+		utils.SendSSEError(w, r, "Invalid Request Body", http.StatusBadRequest)
 		return
 	}
 	if len(moviesReq.MoviesReq) == 0 {
-		utils.WriteJSONError(w, http.StatusBadRequest, "Must include at least 1 movie id.")
+		utils.SendSSEError(w, r, "Must include at least 1 movie id.", http.StatusBadRequest)
 		return
 	}
+	room, ok := h.roomService.GetRoom(roomName)
+	if ok {
+		for _, movie := range moviesReq.MoviesReq {
+			room.Game.Votes[movie]++
+		}
+	}
+
 	sse := datastar.NewSSE(w, r)
 	sse.PatchElementTempl(movies.SubmitButton())
 

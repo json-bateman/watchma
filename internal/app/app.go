@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"sync"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -18,7 +17,6 @@ type App struct {
 	Logger   *slog.Logger
 	Router   *chi.Mux
 	Jellyfin *services.JellyfinService
-	wg       sync.WaitGroup
 }
 
 func New() *App {

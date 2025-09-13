@@ -45,7 +45,7 @@ func (c *JellyfinService) FetchJellyfinMovies() (*types.JellyfinItems, error) {
 	return &result, nil
 }
 
-// Sets Jellyfin Token as the header on the request.
+// newJellyfinRequest sets Jellyfin Token as the header on the request.
 func (c *JellyfinService) newJellyfinRequest(method, apiEndpoint string) (*http.Request, error) {
 	apiKey := c.apiKey
 	baseUrl := c.baseURL

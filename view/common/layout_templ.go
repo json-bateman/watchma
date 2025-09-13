@@ -31,14 +31,14 @@ func Layout(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html data-theme=\"burgundy-light\" lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"/public/style.css\" rel=\"stylesheet\"><link href=\"/public/favicon.png\" rel=\"icon\" type=\"image/png\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html data-theme=\"burgundy-light\" lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link href=\"/public/favicon.png\" rel=\"icon\" type=\"image/png\"><!-- google fonts --><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap\" rel=\"stylesheet\"><!-- stylesheet --><link href=\"/public/style.css\" rel=\"stylesheet\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 12, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 17, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -56,7 +56,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</header><!-- Here's where the pages are injected --><div class=\"grow flex flex-col text-text\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</header><!-- Here's where the pages are injected --><div class=\"grow flex flex-col text-text font-sans\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -71,13 +71,13 @@ func Layout(title string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Year())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 25, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/common/layout.templ`, Line: 30, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span> <a class=\"w-6 h-6\"><img src=\"/public/github-logo.svg\"></a></footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n\n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span> <a href=\"https://github.com/json-bateman\" class=\"w-6 h-6\"><img src=\"/public/github-logo.svg\"></a></footer></main><script>\n                function getSystemTheme() {\n                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {\n                    return 'dark'\n                  }\n                  return 'burgundy-light'\n                }\n\n                const currentTheme = localStorage.getItem('theme')\n                if (!currentTheme) {\n                  const systemTheme = getSystemTheme()\n                  localStorage.setItem(\"theme\", systemTheme)\n                }\n                document.querySelector('html').setAttribute('data-theme', localStorage.getItem(\"theme\"))\n            </script><!-- Datastar --><script type=\"module\" src=\"https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

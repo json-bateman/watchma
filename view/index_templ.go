@@ -43,13 +43,13 @@ func IndexPage(name string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-5xl flex text-text font-serif mt-8 justify-center text-center\">Welcome to the Movie Showdown</div><div class=\"flex justify-center gap-4 my-16\"><a href=\"host\" class=\"btn-accent\">Host Room</a> <a href=\"join\" class=\"btn-accent\">Join Room</a></div><div class=\"flex justify-center\"><a href=\"shuffle/8\" class=\"btn\">Shuffle 8</a></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-6xl flex flex-wrap gap-3 text-text mt-8 justify-center font-serif text-center\"><span class=\"font-bold shadow-dance-text\">Movie</span> <span class=\"font-bold shadow-dance-text\">Showdown</span></div><div class=\"flex justify-center gap-4 my-16\"><a href=\"host\" class=\"btn-accent\">Host Room</a> <a href=\"join\" class=\"btn-accent\">Join Room</a></div><div class=\"flex justify-center\"><a href=\"shuffle/8\" class=\"btn\">Shuffle 8</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.Layout("Index Page").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.Layout("Movie Showdown").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

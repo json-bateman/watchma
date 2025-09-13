@@ -16,7 +16,6 @@ tmp_dir = "tmp"
   include_ext = ["go", "tpl", "templ", "html"]
   include_file = []
   kill_delay = "0s"
-  log = "build-errors.log"
   poll = false
   poll_interval = 0
   post_cmd = []

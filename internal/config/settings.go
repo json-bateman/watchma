@@ -28,7 +28,7 @@ type Settings struct {
 	LogLevel slog.Level
 	Env      string
 
-	// Timeout users who are inactive maybe?
+	//TODO: Timeout users who are inactive maybe?
 	SessionTimeout time.Duration
 }
 
