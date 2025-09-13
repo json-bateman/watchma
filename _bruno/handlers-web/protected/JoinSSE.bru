@@ -1,0 +1,17 @@
+meta {
+  name: JoinSSE
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:{{PORT}}/sse/join
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: text/event-stream
+  Cache-Control: no-cache
+  Cookie: jelly_user=testuser
+}

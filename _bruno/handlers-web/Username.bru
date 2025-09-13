@@ -1,0 +1,11 @@
+meta {
+  name: Username
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:{{PORT}}/username
+  body: none
+  auth: inherit
+}

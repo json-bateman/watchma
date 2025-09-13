@@ -1,0 +1,15 @@
+meta {
+  name: SingleRoom
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:{{PORT}}/room/testroom
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}

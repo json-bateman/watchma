@@ -1,0 +1,20 @@
+meta {
+  name: PublishChatMessage
+  type: http
+  seq: 14
+}
+
+post {
+  url: http://localhost:{{PORT}}/message
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}
+
+body:form-urlencoded {
+  message: Hello everyone!
+  roomName: testroom
+}

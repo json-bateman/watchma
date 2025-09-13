@@ -1,0 +1,20 @@
+meta {
+  name: HostForm
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:{{PORT}}/host
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}
+
+body:form-urlencoded {
+  roomName: testroom
+  maxPlayers: 4
+}

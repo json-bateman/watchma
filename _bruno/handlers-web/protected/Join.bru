@@ -1,0 +1,15 @@
+meta {
+  name: Join
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:{{PORT}}/join
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}

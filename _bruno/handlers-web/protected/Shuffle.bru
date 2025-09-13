@@ -1,0 +1,15 @@
+meta {
+  name: Shuffle
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:{{PORT}}/shuffle/5
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}

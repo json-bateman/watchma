@@ -1,0 +1,17 @@
+meta {
+  name: SingleRoomSSE
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:{{PORT}}/sse/testroom
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: text/event-stream
+  Cache-Control: no-cache
+  Cookie: jelly_user=testuser
+}

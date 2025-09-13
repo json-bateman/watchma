@@ -13,6 +13,7 @@
     --color-green-400: oklch(79.2% 0.209 151.711);
     --color-green-600: oklch(62.7% 0.194 149.214);
     --color-green-800: oklch(44.8% 0.119 151.328);
+    --color-sky-400: oklch(74.6% 0.16 232.661);
     --color-gray-400: oklch(70.7% 0.022 261.325);
     --color-gray-600: oklch(44.6% 0.03 256.802);
     --color-gray-800: oklch(27.8% 0.033 256.848);
@@ -256,6 +257,9 @@
   .table {
     display: table;
   }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
@@ -420,6 +424,9 @@
   .bg-white {
     background-color: var(--color-white);
   }
+  .fill-sky-400 {
+    fill: var(--color-sky-400);
+  }
   .object-cover {
     object-fit: cover;
   }
@@ -538,9 +545,6 @@
   .text-primary {
     color: var(--color-primary);
   }
-  .text-red-400 {
-    color: var(--color-red-400);
-  }
   .text-red-500 {
     color: var(--color-red-500);
   }
@@ -639,6 +643,11 @@
   .md\:gap-4 {
     @media (width >= 48rem) {
       gap: calc(var(--spacing) * 4);
+    }
+  }
+  .dark\:text-white {
+    @media (prefers-color-scheme: dark) {
+      color: var(--color-white);
     }
   }
 }
@@ -854,9 +863,9 @@ table {
   box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
 }
 .shadow-dance-text {
-  animation: shadow-dance 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+  animation: shadow-accordian 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
 }
-@keyframes shadow-dance {
+@keyframes shadow-accordian {
   0% {
     text-shadow: -1px 1px 0 var(--color-secondary), -3px 3px 0 var(--color-primary);
   }

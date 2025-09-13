@@ -1,0 +1,15 @@
+meta {
+  name: Ready
+  type: http
+  seq: 11
+}
+
+post {
+  url: http://localhost:{{PORT}}/rooms/testroom/ready
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}

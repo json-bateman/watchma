@@ -1,0 +1,19 @@
+meta {
+  name: SubmitMovies
+  type: http
+  seq: 13
+}
+
+post {
+  url: http://localhost:{{PORT}}/rooms/testroom/movies
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}
+
+body:json {
+  {"movies": ["movie1", "movie2", "movie3"]}
+}

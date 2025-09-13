@@ -146,10 +146,10 @@ Regular CSS Styles
 }
 
 .shadow-dance-text {
-  animation: shadow-dance 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+  animation: shadow-accordian 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
 }
 
-@keyframes shadow-dance {
+@keyframes shadow-accordian {
   0% {
     text-shadow: -1px 1px 0 var(--color-secondary), -3px 3px 0 var(--color-primary)
   }

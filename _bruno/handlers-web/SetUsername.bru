@@ -1,0 +1,15 @@
+meta {
+  name: SetUsername
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:{{PORT}}/username
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  username: testuser
+}

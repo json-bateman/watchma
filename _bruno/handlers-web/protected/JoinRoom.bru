@@ -1,0 +1,15 @@
+meta {
+  name: JoinRoom
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:{{PORT}}/rooms/testroom/join
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}

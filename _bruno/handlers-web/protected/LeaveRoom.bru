@@ -1,0 +1,15 @@
+meta {
+  name: LeaveRoom
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://localhost:{{PORT}}/rooms/testroom/leave
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: jelly_user=testuser
+}

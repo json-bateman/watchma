@@ -1,12 +1,18 @@
-### Datastar + Templ + Tailwind
 
-Trying out a new stack, the eventual goal for this site is to have a tournament style movie picker
-that you can play by grabbing information directly from your jellyfin server. 
+## ![](public/github-title.png) 
 
-### Getting started
+<a  target="_blank" href="https://data-star.dev/" ><img src="public/datastar-rocket.png" width="32"/></a> + <a target="_blank" href="https://templ.guide/"><img src="public/templ.svg" width="120"/></a> + <a target="_blank" href="https://tailwindcss.com/"><img src="public/tailwind.png" width="36"/></a>
 
-`task dev` to compile the css, templ files and run the server.
-`task` to see all available commands
+### Why I made this
+How many times have you thought "Man there's nothing to watch"? But then you actually have hundreds
+of movies at your disposal and you're simply overwhelmed by choices and your friends can't actually
+decide on what to watch so you just end up scrolling Jellyfin and arguing?
+
+Ok maybe this is a specific me problem, but if it's not, that's why I made this site, hopefully to
+make the process of picking a movie more fun, as of now it's a basic voting system with lobbies. But
+if I'm feeling ambitious I'd like to make this jackbox style one day.
+
+## Dev Setup
 
 ### For this to work you must have 5 things installed and in your `$PATH`
 - [task](https://github.com/go-task/task?tab=readme-ov-file)
@@ -15,14 +21,17 @@ that you can play by grabbing information directly from your jellyfin server.
 - [templ](https://github.com/a-h/templ?tab=readme-ov-file)
 - [tailwindcss](https://github.com/tailwindlabs/tailwindcss/) - Download from Releases
 
-### Setting .env variables (`internal/config/settings.go`)
-JELLYFIN_API_KEY=<Your Jellyfin API Key>
-JELLYFIN_BASE_URL=<The URL where you have jellyfin configured> 
-- (jellyfin's default port is http://localhost:8096)
+### Setting .env variables (loaded by `internal/config/settings.go`)
+Must have a Jellyfin server with API key in your `.env` for this to run properly.
 
-PORT=<Your app port>
-LOG_LEVEL=<DEBUG | INFO | WARN | ERROR>
-SESSION_TIMEOUT=<user timeout i.e. 30m> (not implemented yet)
+`JELLYFIN_API_KEY`  
+`JELLYFIN_BASE_URL`  
+`PORT`  (to run the app on)  
+`LOG_LEVEL` (DEBUG | INFO | WARN | ERROR)
+
+### Running dev
+`task dev` to compile the css, templ files and run the server with Air and Tailwind in watch mode.  
+`task` to see all available commands
 
 ### Using Bruno (basically offline postman)
 I have some of the api endpoints saved in the _bruno folder [install bruno](https://www.usebruno.com/)
