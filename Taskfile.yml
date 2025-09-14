@@ -27,7 +27,7 @@ tasks:
   # Build tasks
   css:build:
     desc: Build CSS for production
-    cmd: tailwindcss -i ./public/input.css -o ./public/style.css --minify
+    cmd: npx --yes --package=tailwindcss@latest tailwindcss -i ./public/input.css -o ./public/style.css --minify
 
   templ:build:
     desc: Generate templ files
