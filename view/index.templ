@@ -3,11 +3,11 @@ package view
 import "github.com/json-bateman/jellyfin-grabber/view/common"
 
 templ IndexPage(name string) {
-	@common.Layout("Movie Delphia") {
-		<div class="text-7xl flex flex-wrap gap-3 text-text mt-8 justify-center  text-center">
+	@common.Layout("Watchma") {
+		<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
 			<span class="font-bold shadow-dance-text">Watchma</span>
 		</div>
-		<div class="flex justify-center gap-4 my-16">
+		<div class="flex justify-center gap-4 my-12">
 			<a href="host" class="btn-accent">Host Room</a>
 			<a href="join" class="btn-accent">Join Room</a>
 		</div>

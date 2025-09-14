@@ -27,7 +27,7 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items, err := h.jellyfin.FetchJellyfinMovies()
+	items, err := h.movieService.FetchJellyfinMovies()
 	if err != nil {
 		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)

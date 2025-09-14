@@ -23,6 +23,7 @@ type Settings struct {
 	// Don't log the api key
 	JellyfinApiKey  string `json:"-"` // Exclude from JSON Marshalling
 	JellyfinBaseURL string
+	UseDummyData    bool // Use dummy data when Jellyfin credentials not available
 
 	Port     int
 	LogLevel slog.Level
@@ -41,6 +42,7 @@ func LoadSettings() *Settings {
 		// Once again, don't log the api key!
 		JellyfinApiKey:  os.Getenv(J_API_KEY),
 		JellyfinBaseURL: os.Getenv(J_BASE_URL),
+		UseDummyData:    os.Getenv(J_API_KEY) == "" || os.Getenv(J_BASE_URL) == "",
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
 
 		Port:           getEnvAsInt(PORT, 8080),
@@ -59,11 +61,14 @@ func LoadSettings() *Settings {
 
 // Validate checks for essential .env variables
 func (c *Settings) validate() error {
-	if c.JellyfinApiKey == "" {
-		return fmt.Errorf("required environment variable %s is not set", J_API_KEY)
-	}
-	if c.JellyfinBaseURL == "" {
-		return fmt.Errorf("required environment variable %s is not set", J_BASE_URL)
+	// Only require Jellyfin credentials if not using dummy data
+	if !c.UseDummyData {
+		if c.JellyfinApiKey == "" {
+			return fmt.Errorf("required environment variable %s is not set", J_API_KEY)
+		}
+		if c.JellyfinBaseURL == "" {
+			return fmt.Errorf("required environment variable %s is not set", J_BASE_URL)
+		}
 	}
 	if c.Port < 1 || c.Port > 65535 {
 		return fmt.Errorf("invalid port: %d", c.Port)
@@ -74,9 +79,13 @@ func (c *Settings) validate() error {
 func (c *Settings) logConfig() {
 	fmt.Println("------------------------------------------------------------------")
 	slog.Info("Configuration loaded")
-	slog.Info("JELLYFIN_URL", "url", c.JellyfinBaseURL)
-	if c.JellyfinApiKey != "" {
-		slog.Info("JELLYFIN_API_KEY", "status", "loaded") // Confirm value exists only
+	if c.UseDummyData {
+		slog.Info("LOADING TEST DATA", "status", "Using dummy data (no Jellyfin credentials provided)")
+	} else {
+		slog.Info("JELLYFIN_URL", "url", c.JellyfinBaseURL)
+		if c.JellyfinApiKey != "" {
+			slog.Info("JELLYFIN_API_KEY", "status", "loaded") // Confirm value exists only
+		}
 	}
 	slog.Info("PORT", "port", c.Port)
 	slog.Info("LOG_LEVEL", "level", c.LogLevel)

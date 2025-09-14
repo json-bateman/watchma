@@ -189,7 +189,7 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.Game.Step = types.Voting
-		items, err := h.jellyfin.FetchJellyfinMovies()
+		items, err := h.movieService.FetchJellyfinMovies()
 		if err != nil {
 		}
 

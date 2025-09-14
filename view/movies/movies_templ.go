@@ -158,7 +158,7 @@ func SubmitButton(movies []types.JellyfinItem, baseURL string, selectedMovies []
 			return templ_7745c5c3_Err
 		}
 		for _, m := range movies {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"relative w-40 md:w-64\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"relative w-40 h-60 md:w-64 md:h-96\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

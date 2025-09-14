@@ -14,23 +14,23 @@ import (
 
 // WebHandler holds dependencies needed by web handlers
 type WebHandler struct {
-	settings    *config.Settings
-	jellyfin    *services.JellyfinService
-	logger      *slog.Logger
-	roomService *services.RoomService
-	sseClients  map[string]map[chan string]bool
+	settings     *config.Settings
+	movieService services.MovieService
+	logger       *slog.Logger
+	roomService  *services.RoomService
+	sseClients   map[string]map[chan string]bool
 
 	mu sync.RWMutex
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(cfg *config.Settings, jf *services.JellyfinService, l *slog.Logger, rs *services.RoomService) *WebHandler {
+func NewWebHandler(cfg *config.Settings, ms services.MovieService, l *slog.Logger, rs *services.RoomService) *WebHandler {
 	return &WebHandler{
-		settings:    cfg,
-		jellyfin:    jf,
-		logger:      l,
-		roomService: rs,
-		sseClients:  make(map[string]map[chan string]bool),
+		settings:     cfg,
+		movieService: ms,
+		logger:       l,
+		roomService:  rs,
+		sseClients:   make(map[string]map[chan string]bool),
 	}
 }
 

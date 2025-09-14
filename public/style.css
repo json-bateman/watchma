@@ -38,6 +38,8 @@
     --text-6xl--line-height: 1;
     --text-7xl: 4.5rem;
     --text-7xl--line-height: 1;
+    --text-8xl: 6rem;
+    --text-8xl--line-height: 1;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --tracking-wide: 0.025em;
@@ -227,8 +229,8 @@
   .my-4 {
     margin-block: calc(var(--spacing) * 4);
   }
-  .my-16 {
-    margin-block: calc(var(--spacing) * 16);
+  .my-12 {
+    margin-block: calc(var(--spacing) * 12);
   }
   .mt-6 {
     margin-top: calc(var(--spacing) * 6);
@@ -677,6 +679,12 @@
     @media (width >= 48rem) {
       font-size: var(--text-6xl);
       line-height: var(--tw-leading, var(--text-6xl--line-height));
+    }
+  }
+  .md\:text-8xl {
+    @media (width >= 48rem) {
+      font-size: var(--text-8xl);
+      line-height: var(--tw-leading, var(--text-8xl--line-height));
     }
   }
 }

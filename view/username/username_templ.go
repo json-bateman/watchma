@@ -43,7 +43,7 @@ func UsernameForm() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/username\" class=\"flex flex-col w-full space-y-3 items-center justify-center mt-6\"><div class=\"flex flex-col\"><input class=\"input\" type=\"text\" name=\"username\" id=\"username\" placeholder=\"Enter your username\" required></div><button class=\"btn\" type=\"submit\">Set Username</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/username\" class=\"flex flex-col w-full space-y-3 items-center justify-center mt-6\"><span class=\" flex flex-wrap gap-3 text-text mt-8 justify-center text-center\">Enter Username</span><div class=\"flex flex-col\"><input class=\"input\" type=\"text\" name=\"username\" id=\"username\" placeholder=\"Enter your username\" required></div><button class=\"btn\" type=\"submit\">Set Username</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

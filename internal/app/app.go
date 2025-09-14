@@ -13,10 +13,10 @@ import (
 )
 
 type App struct {
-	Settings *config.Settings
-	Logger   *slog.Logger
-	Router   *chi.Mux
-	Jellyfin *services.JellyfinService
+	Settings     *config.Settings
+	Logger       *slog.Logger
+	Router       *chi.Mux
+	MovieService services.MovieService
 }
 
 func New() *App {
@@ -29,7 +29,12 @@ func (a *App) Initialize() error {
 	a.Logger = config.NewColorLog(a.Settings.LogLevel)
 	slog.SetDefault(a.Logger)
 
-	a.Jellyfin = services.NewClient(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL)
+	// Use dummy data if Jellyfin credentials aren't provided
+	if a.Settings.UseDummyData {
+		a.MovieService = services.NewDummyMovieService()
+	} else {
+		a.MovieService = services.NewJellyfinService(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL)
+	}
 
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
@@ -38,7 +43,7 @@ func (a *App) Initialize() error {
 
 	roomService := services.NewRoomService()
 
-	webHandler := web.NewWebHandler(a.Settings, a.Jellyfin, a.Logger, roomService)
+	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService)
 	webHandler.SetupRoutes(a.Router)
 
 	return nil

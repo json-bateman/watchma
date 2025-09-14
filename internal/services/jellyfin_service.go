@@ -14,7 +14,7 @@ type JellyfinService struct {
 	httpClient *http.Client
 }
 
-func NewClient(apiKey, baseURL string) *JellyfinService {
+func NewJellyfinService(apiKey, baseURL string) *JellyfinService {
 	return &JellyfinService{
 		apiKey:     apiKey,
 		baseURL:    baseURL,

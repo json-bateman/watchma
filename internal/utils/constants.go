@@ -6,5 +6,5 @@ const (
 	ROOM_START_EVENT       = "Room Start Event"
 	ROOM_FINISH_EVENT      = "Room Finish Event"
 	ROOM_LIST_UPDATE_EVENT = "Room List Update Event"
-	USERNAME_COOKIE        = "jelly_user"
+	USERNAME_COOKIE        = "Watchma_Username"
 )
