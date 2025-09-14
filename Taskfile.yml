@@ -34,16 +34,25 @@ tasks:
     cmd: templ generate
 
   build:
-    desc: Build everything for production
+    desc: Build everything for development
     deps: [css:build, templ:build]
     cmds:
       - go build -o ./tmp/main ./cmd/main.go
+
+  release:
+    desc: Build release package for deployment
+    deps: [css:build, templ:build]
+    cmds:
+      - mkdir -p ./release
+      - go build -o ./release/watchma ./cmd/main.go
+      - echo "Release built in ./release/"
 
   # Utility tasks
   clean:
     desc: Clean build artifacts
     cmds:
       - rm -rf ./tmp/*
+      - rm -rf ./release/*
       - rm -f ./public/style.css
       - find . -name "*_templ.go" -delete
 
