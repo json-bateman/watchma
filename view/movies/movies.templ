@@ -94,9 +94,9 @@ templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
 	<section id="moviesRoom" class="h-full" data-signals-movies>
 		<div class="flex flex-col justify-center h-full items-center">
 			if len(winnerMovies) > 1 {
-				<span class="text-3xl md:text-5xl text-shadow-hard">And the Winners are:</span>
+				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>
 			} else {
-				<span class="text-3xl md:text-5xl text-shadow-hard">And the Winner is:</span>
+				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winner is:</span>
 			}
 			<div class="text-text flex flex-col items-center justify-center">
 				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">

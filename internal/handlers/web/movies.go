@@ -59,12 +59,12 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	var moviesReq types.MovieRequest
 	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&moviesReq); err != nil {
-		utils.SendSSEError(w, r, "Invalid Request Body", http.StatusBadRequest)
+		utils.SendSSEError(w, r, "Invalid Request Body")
 		return
 	}
 
 	if len(moviesReq.Movies) == 0 {
-		utils.SendSSEError(w, r, "Must include at least 1 movie id.", http.StatusBadRequest)
+		utils.SendSSEError(w, r, "Must include at least 1 movie id.")
 		return
 	}
 	room, ok := h.roomService.GetRoom(roomName)

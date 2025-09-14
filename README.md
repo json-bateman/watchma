@@ -1,5 +1,4 @@
-
-## ![](public/github-title.png) 
+## <p align="center">![Watchma](public/watchma.png)</p>
 
 <a  target="_blank" href="https://data-star.dev/" ><img src="public/datastar-rocket.png" width="32"/></a> + <a target="_blank" href="https://templ.guide/"><img src="public/templ.svg" width="120"/></a> + <a target="_blank" href="https://tailwindcss.com/"><img src="public/tailwind.png" width="36"/></a>
 
@@ -40,4 +39,3 @@ directory so the endpoints can use the environment variables in their requests. 
 API key in each of it's requests.
 [here's](https://docs.usebruno.com/secrets-management/dotenv-file) some info on how to store bruno
 secrets.
-

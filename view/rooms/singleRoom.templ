@@ -6,7 +6,6 @@ import (
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/internal/types"
 	"github.com/json-bateman/jellyfin-grabber/view/common"
-	"github.com/starfederation/datastar-go/datastar"
 	"strings"
 )
 
@@ -59,7 +58,7 @@ templ SingleRoom(room *services.Room, username string) {
 					<div
 						id="container"
 						class="shadow-brutalist border-primary border-4"
-						data-on-load={ datastar.GetSSE(fmt.Sprintf("/sse/%s", room.Name)) }
+						data-on-load={ fmt.Sprintf("@get('/sse/%s')", room.Name) }
 					>
 						<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5"></div>
 					</div>

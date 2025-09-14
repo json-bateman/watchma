@@ -27,7 +27,7 @@ func GetUsernameFromCookie(r *http.Request) string {
 	return cookie.Value
 }
 
-func SendSSEError(w http.ResponseWriter, r *http.Request, message string, statusCode int) {
+func SendSSEError(w http.ResponseWriter, r *http.Request, message string) {
 	sse := datastar.NewSSE(w, r)
 	sse.PatchElementf(`<div id="error" class="error-message text-lg text-red-500">%s</div>`, message)
 }

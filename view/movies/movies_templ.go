@@ -265,12 +265,12 @@ func GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) templ.Co
 			return templ_7745c5c3_Err
 		}
 		if len(winnerMovies) > 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<span class=\"text-3xl md:text-5xl text-shadow-hard\">And the Winners are:</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<span class=\"text-4xl md:text-6xl text-shadow-hard\">And the Winners are:</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<span class=\"text-3xl md:text-5xl text-shadow-hard\">And the Winner is:</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<span class=\"text-4xl md:text-6xl text-shadow-hard\">And the Winner is:</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

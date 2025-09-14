@@ -145,26 +145,37 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 	username := utils.GetUsernameFromCookie(r)
 
 	room, ok := h.roomService.GetRoom(roomName)
-	if ok {
-		room.RemoveUser(username)
-		allUsers := room.GetAllUsers()
-		if len(allUsers) == 0 {
-			h.roomService.DeleteRoom(roomName)
-			h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
-			return
-		}
-		if room.Game.Host == username {
-			// If host leaves transfer to random other user
-			for userName := range room.Users {
-				room.Game.Host = userName
-				break
-			}
-		}
-
-		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
-		// Broadcast room list update to join page clients
-		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
+	if !ok {
+		// Room doesn't exist
+		utils.WriteJSONError(w, http.StatusNotFound, "Room not found")
+		return
 	}
+
+	room.RemoveUser(username)
+	allUsers := room.GetAllUsers()
+	if len(allUsers) == 0 {
+		h.roomService.DeleteRoom(roomName)
+		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
+		utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
+			"ok":      true,
+			"room":    roomName,
+			"event":   utils.ROOM_UPDATE_EVENT,
+			"message": "Room deleted - last user left",
+		})
+		return
+	}
+
+	if room.Game.Host == username {
+		// If host leaves transfer to random other user
+		for userName := range room.Users {
+			room.Game.Host = userName
+			break
+		}
+	}
+
+	h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
+	// Broadcast room list update to join page clients
+	h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"ok":    true,
