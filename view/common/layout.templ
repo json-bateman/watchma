@@ -11,22 +11,25 @@ templ Layout(title string) {
 			<!-- google fonts -->
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-			<link href="https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap" rel="stylesheet"/>
+			<link href="https://fonts.googleapis.com/css2?family=Spicy+Rice" rel="stylesheet"/>
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+			<link href="https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow" rel="stylesheet"/>
 			<!-- stylesheet -->
 			<link href="/public/style.css" rel="stylesheet"/>
 			<title>{ title }</title>
 		</head>
-		<body class="bg-background min-h-svh">
+		<body class="bg-background min-h-svh font-serif">
 			<main class="min-h-full flex flex-col p-4">
 				<header class="mb-4 flex justify-between">
 					@homeIcon()
 					@themeToggle()
 				</header>
 				<!-- Here's where the pages are injected -->
-				<div class="grow flex flex-col text-text font-sans">
+				<div class="grow flex flex-col text-text ">
 					{ children... }
 				</div>
-				<footer class="border-t-3 pt-2 mt-8 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
+				<footer class="border-t-3  text-shadow-hard pt-2 mt-8 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
 					<span>JsonB { time.Now().Year() } </span>
 					<a href="https://github.com/json-bateman" class="w-6 h-6">
 						<img src="/public/github-logo.svg"/>

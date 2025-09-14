@@ -8,10 +8,21 @@ import (
 	"slices"
 )
 
-templ MoviesPage(movies []types.JellyfinItem, baseURL string, room *services.Room) {
-	@common.Layout("Movies page") {
-		@Movies(movies, baseURL, room)
+func getWinnerMovies(moviesSortedByVote []types.MovieVote) []types.MovieVote {
+	if len(moviesSortedByVote) == 0 {
+		return []types.MovieVote{}
 	}
+
+	maxVotes := moviesSortedByVote[0].Votes
+	var winners []types.MovieVote
+
+	for _, movie := range moviesSortedByVote {
+		if movie.Votes == maxVotes {
+			winners = append(winners, movie)
+		}
+	}
+
+	return winners
 }
 
 templ Movies(movies []types.JellyfinItem, baseURL string, room *services.Room) {
@@ -30,7 +41,7 @@ templ Movies(movies []types.JellyfinItem, baseURL string, room *services.Room) {
 				<div data-signals-movies="[]">
 					<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
 						for _, m := range movies {
-							<label id="movieSwap" class="block w-40 md:w-64 border-2 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-2">
+							<label id="movieSwap" class="block w-40 h-60 md:w-64 md:h-96 border-2 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-2">
 								<input
 									class="hidden"
 									type="checkbox"
@@ -52,6 +63,7 @@ templ Movies(movies []types.JellyfinItem, baseURL string, room *services.Room) {
 }
 
 templ SubmitButton(movies []types.JellyfinItem, baseURL string, selectedMovies []string) {
+	// This updates both the id="moviesSubmit" and the id="movieContainer" simultaneously when sent though SSE with PatchElementTempl!
 	<button type="button" id="moviesSubmit" class="btn-success cursor-not-allowed">Movies Submitted!</button>
 	<div id="movieContainer" class="mt-6">
 		<div class="text-primary text-xl text-center mb-4">Waiting on remaining players...</div>
@@ -78,20 +90,31 @@ templ SubmitButton(movies []types.JellyfinItem, baseURL string, selectedMovies [
 }
 
 templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
-	<section id="moviesRoom" data-signals-movies>
-		<div class="flex flex-col justify-center items-center">
-			<span class="text-4xl text-primary">And Your Winner Is...</span>
+	{{ winnerMovies := getWinnerMovies(moviesSortedByVote) }}
+	<section id="moviesRoom" class="h-full" data-signals-movies>
+		<div class="flex flex-col justify-center h-full items-center">
+			if len(winnerMovies) > 1 {
+				<span class="text-3xl md:text-5xl text-shadow-hard">And the Winners are:</span>
+			} else {
+				<span class="text-3xl md:text-5xl text-shadow-hard">And the Winner is:</span>
+			}
 			<div class="text-text flex flex-col items-center justify-center">
-				<div id="movieContainer" class="glow-border flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
-					<div class="block w-72 md:w-96">
-						<img
-							src={ baseURL + "/Items/" + moviesSortedByVote[0].Movie.Id + "/Images/Primary?tag=" + moviesSortedByVote[0].Movie.ImageTags.Primary }
-							alt={ "Cover for " + moviesSortedByVote[0].Movie.Name }
-							class="w-full h-full object-cover"
-						/>
-					</div>
+				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
+					for _, movie := range winnerMovies {
+						<div class="block glow-border w-72 md:w-96">
+							<img
+								src={ baseURL + "/Items/" + movie.Movie.Id + "/Images/Primary?tag=" + movie.Movie.ImageTags.Primary }
+								alt={ "Cover for " + movie.Movie.Name }
+								class="w-full h-full object-cover"
+							/>
+						</div>
+					}
 				</div>
-				<div class="mt-6 text-3xl">With { moviesSortedByVote[0].Votes } Vote(s)!</div>
+				if moviesSortedByVote[0].Votes > 1 {
+					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { moviesSortedByVote[0].Votes } Votes!</div>
+				} else {
+					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { moviesSortedByVote[0].Votes } Vote!</div>
+				}
 			</div>
 		</div>
 	</section>

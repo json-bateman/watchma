@@ -24,20 +24,17 @@ templ SingleRoom(room *services.Room, username string) {
 			<div class="flex max-w-[800px] flex-col justify-between grow">
 				<div>
 					<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">
-						<div class="text-text flex flex-wrap justify-between items-center font-black uppercase mb-4 border-b-4 border-white pb-2">
+						<div class="text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2">
 							<span class="text-4xl tracking-widest">{ room.Name }</span>
-							if username == room.Game.Host {
-								<span class="text-primary">You are the host!</span>
-							}
 						</div>
 						<div class="grid grid-cols-2 gap-4">
 							<div class="bg-white text-black p-3 border-2 border-black">
-								<div class="text-xs font-black uppercase tracking-wide">MOVIES</div>
-								<div class="text-3xl font-black">{ room.Game.MovieNumber }</div>
+								<div class="text-xs  uppercase tracking-wide">MOVIES</div>
+								<div class="text-3xl ">{ room.Game.MovieNumber }</div>
 							</div>
 							<div class="bg-white text-black p-3 border-2 border-black">
-								<div class="text-xs font-black uppercase tracking-wide">MAX PLAYERS</div>
-								<div class="text-3xl font-black">{ room.Game.MaxPlayers }</div>
+								<div class="text-xs  uppercase tracking-wide">MAX PLAYERS</div>
+								<div class="text-3xl ">{ room.Game.MaxPlayers }</div>
 							</div>
 						</div>
 					</div>
@@ -64,7 +61,7 @@ templ SingleRoom(room *services.Room, username string) {
 						class="shadow-brutalist border-primary border-4"
 						data-on-load={ datastar.GetSSE(fmt.Sprintf("/sse/%s", room.Name)) }
 					>
-						<div id="chat" class="h-96 overflow-y-auto p-4 bg-primary/5"></div>
+						<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5"></div>
 					</div>
 				</div>
 			</div>
@@ -85,7 +82,7 @@ templ SingleRoom(room *services.Room, username string) {
 }
 
 templ ChatBox(messages []types.Message) {
-	<div id="chat" class="h-96 overflow-y-auto bg-primary/5 p-4">
+	<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5">
 		for _, m := range messages {
 			<div class="mb-2 flex">
 				<span style={ getUserColor(m.Username, "color") } class="font-bold text-accent">{ strings.Trim(m.Username," ") }</span>
@@ -107,6 +104,9 @@ templ UserBox(room *services.Room, username string) {
 		}
 	}
 	<div id="users" class="flex flex-col">
+		if username == room.Game.Host {
+			<span class="text-primary flex text-xl">You are the host!</span>
+		}
 		<div class="flex h-28 justify-between bg-background border-4 border-primary p-4 shadow-brutalist">
 			<div class="w-20 text-text text-xl flex flex-col justify-center items-center">
 				<span>READY</span>
@@ -124,14 +124,14 @@ templ UserBox(room *services.Room, username string) {
 				if username == room.Game.Host {
 					if len(users) == totalReady && totalReady > 1 {
 						<button
-							class="btn-success font-black uppercase tracking-wide"
+							class="btn-success  uppercase tracking-wide"
 							data-on-click={ fmt.Sprintf("@post('/room/%s/start')", room.Name) }
 						>
 							Start Game!
 						</button>
 					} else {
 						<button
-							class="btn-disabled font-black uppercase tracking-wide"
+							class="btn-disabled  uppercase tracking-wide"
 						>
 							Start Game!
 						</button>
@@ -164,7 +164,7 @@ templ UserBox(room *services.Room, username string) {
 templ Button(room *services.Room) {
 	<div id="users" class="flex flex-col">
 		<div class="flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4">
-			<div class="text-text text-xl font-black uppercase tracking-wider">
+			<div class="text-text text-xl  uppercase tracking-wider">
 				<span>Players:&nbsp</span>
 				<span class="text-2xl">{ len(room.Users) }</span>
 			</div>

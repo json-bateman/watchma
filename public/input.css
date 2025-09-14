@@ -49,7 +49,7 @@ Theme Variables
 
   :root[data-theme="burgundy-dark"] {
     --text: 95.28% 0.0121 43.28;
-    --background: 10.81% 0.0154 37.87;
+    --background: 18.81% 0.0154 37.87;
     --primary: 59.8% 0.1269 42.74;
     --secondary: 37.7% 0.0752 43.97;
     --accent: 48.36% 0.1086 43.1;
@@ -58,7 +58,8 @@ Theme Variables
   :root {
     /* font-families */
     /* --ff-serif: "IBM Plex Serif", serif; */
-    --ff-serif: "Rubik Doodle Shadow", system-ui;
+    /* --ff-serif: "Rubik Doodle Shadow", system-ui; */
+    --ff-serif: "Spicy Rice", serif;
     --ff-sans: "Mulish", sans-serif;
     /* burgundy-light defaults to minimize screen flash */
     --text: 16.7% 0.0195 43.33;
@@ -95,7 +96,7 @@ Applied Tailwind Styles
 -------------------- */
 
 .btn {
-  @apply flex bg-primary/80 border-primary justify-center items-center py-1 border-3 text-white w-52 cursor-pointer hover:bg-primary/90 h-9;
+  @apply text-text flex bg-primary/80 border-primary justify-center items-center py-1 border-3 w-52 cursor-pointer hover:bg-primary/90 h-9;
   box-shadow: 2px 2px 0px oklch(var(--primary) / 0.8);
 }
 
@@ -128,7 +129,7 @@ Applied Tailwind Styles
 }
 
 .select {
-  @apply bg-primary/5 text-text border-3 border-primary pl-1 py-1 text-lg h-9;
+  @apply bg-primary/5 text-text border-3 border-primary pl-1 text-lg h-9;
   box-shadow: 3px 3px 0px var(--color-secondary);
 }
 
@@ -143,6 +144,10 @@ Regular CSS Styles
 
 .shadow-brutalist {
   box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
+}
+
+.text-shadow-hard {
+  text-shadow: 3px 3px 0 var(--color-secondary);
 }
 
 .shadow-dance-text {

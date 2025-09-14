@@ -10,7 +10,7 @@ type GameStep int
 
 const (
 	Lobby = iota
-	Movies
+	Voting
 	Results
 )
 

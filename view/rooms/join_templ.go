@@ -48,7 +48,7 @@ func JoinPage(rooms map[string]*services.Room) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text mt-8 flex flex-col items-center justify-center px-4\"><div class=\"text-text text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2\">Available Rooms</div><div class=\"w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist\"><table class=\"w-full border-collapse\"><thead class=\"bg-primary text-background\"><tr><th class=\"th-join\">Room Name</th><th class=\"th-join\">Movies</th><th class=\"th-join\">Players</th><th class=\"p-2 tracking-wider\">Action</th></tr></thead>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"text-text mt-8 flex flex-col items-center justify-center px-4\"><div class=\"text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2\">Available Rooms</div><div class=\"w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist\"><table class=\"w-full border-collapse\"><thead class=\"bg-primary text-background\"><tr><th class=\"th-join\">Room Name</th><th class=\"th-join\">Movies</th><th class=\"th-join\">Players</th><th class=\"p-2 tracking-wider\">Action</th></tr></thead>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -189,46 +189,51 @@ func RoomListBody(rooms map[string]*services.Room) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				} else if room.Game.Step != types.Lobby {
+				} else if room.Game.Step == types.Voting {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<span class=\"hover:text-orange-500\">In Progress</span>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
+				} else if room.Game.Step == types.Results {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"hover:text-orange-500\">Finishing</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<a class=\"hover:text-primary\" href=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a class=\"hover:text-primary\" href=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var11 templ.SafeURL
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("room/" + room.Name))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/join.templ`, Line: 57, Col: 78}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/join.templ`, Line: 61, Col: 78}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\">Join </a>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\">Join </a>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " <tr><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-1\"><div class=\"flex text-text justify-center\"><a href=\"/host\" class=\"text-2xl hover:text-primary transition-all\">+\t</a></div></td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " <tr><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-2\"></td><td class=\"py-1\"><div class=\"flex text-text justify-center\"><a href=\"/host\" class=\"text-2xl hover:text-primary transition-all\">+\t</a></div></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<tr><td colspan=\"4\" class=\"p-8 text-center\"><div class=\"flex flex-col items-center\"><div class=\"text-2xl font-bold text-primary mb-4\">No Active Rooms</div><div class=\"text-lg mb-6 text-text/80\">Be the first to start a movie showdown!</div><a href=\"/host\" class=\"btn uppercase tracking-wider\">Host New Room</a></div></td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<tr><td colspan=\"4\" class=\"p-8 text-center\"><div class=\"flex flex-col items-center\"><div class=\"text-2xl font-bold text-primary mb-4\">No Active Rooms</div><div class=\"text-lg mb-6 text-text/80\">Be the first to start a movie showdown!</div><a href=\"/host\" class=\"btn uppercase tracking-wider\">Host New Room</a></div></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -57,7 +57,7 @@ func NoRoom(room string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span> &emsp;doesn't exist!</div><a href=\"/join\" class=\"btn-secondary\">Find Rooms to Join</a></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span> &nbsp;doesn't exist!</div><a href=\"/join\" class=\"btn-secondary\">Find Rooms to Join</a></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -147,6 +147,20 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.RemoveUser(username)
+		allUsers := room.GetAllUsers()
+		if len(allUsers) == 0 {
+			h.roomService.DeleteRoom(roomName)
+			h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
+			return
+		}
+		if room.Game.Host == username {
+			// If host leaves transfer to random other user
+			for userName := range room.Users {
+				room.Game.Host = userName
+				break
+			}
+		}
+
 		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
 		// Broadcast room list update to join page clients
 		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
@@ -163,7 +177,7 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		room.Game.Step = types.Movies
+		room.Game.Step = types.Voting
 		items, err := h.jellyfin.FetchJellyfinMovies()
 		if err != nil {
 		}

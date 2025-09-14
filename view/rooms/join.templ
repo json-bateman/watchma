@@ -10,7 +10,7 @@ import (
 templ JoinPage(rooms map[string]*services.Room) {
 	@common.Layout("Join Page") {
 		<section class="text-text mt-8 flex flex-col items-center justify-center px-4">
-			<div class="text-text text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
+			<div class="text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
 				Available Rooms
 			</div>
 			<div class="w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist">
@@ -49,9 +49,13 @@ templ RoomListBody(rooms map[string]*services.Room) {
 							<span class="hover:text-red-400">
 								Full!
 							</span>
-						} else if room.Game.Step != types.Lobby {
+						} else if room.Game.Step == types.Voting {
 							<span class="hover:text-orange-500">
 								In Progress
+							</span>
+						} else if room.Game.Step == types.Results {
+							<span class="hover:text-orange-500">
+								Finishing
 							</span>
 						} else {
 							<a class="hover:text-primary" href={ templ.SafeURL("room/" + room.Name) }>

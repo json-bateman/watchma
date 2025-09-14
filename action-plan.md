@@ -17,15 +17,16 @@
     how that would work, might have to just replace the entire screen via SSE? (I solved this by
     just overwriting the whole page with an SSE event)
     - [X] Make Join table update with kept alive SSE connection (see side quest)
-    - [ ] Clean up rooms after 10s of being empty?
-    - [ ] Delete room if host leaves or pass host?
+    - [X] Clean up rooms after all players leave.
+    - [X] Delete room if host leaves or pass host? (Pass host to random person)
 
 - Game flow
     - [X] move from lobby state to movies state
     - [X] People vote (don't need SSE, everyone can have own instance)
     - [X] Submit button to submit choices
     - [X] View results!
-    - [ ] Fix map sorting, when there's ties, users can get different results on final screen
+    - [X] Fix map sorting, when there's ties, users can get different results on final screen
+    (sort of fixed, now just displays ties)
 
 - Deploy
     - [ ] Deploy this as a docker container so people can download and use with their Jellyfin servers

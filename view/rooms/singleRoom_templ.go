@@ -69,7 +69,7 @@ func SingleRoom(room *services.Room, username string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"></span><div class=\"flex max-w-[800px] flex-col justify-between grow\"><div><div class=\"bg-background border-4 border-primary p-6 shadow-brutalist mb-6\"><div class=\"text-text flex flex-wrap justify-between items-center font-black uppercase mb-4 border-b-4 border-white pb-2\"><span class=\"text-4xl tracking-widest\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"></span><div class=\"flex max-w-[800px] flex-col justify-between grow\"><div><div class=\"bg-background border-4 border-primary p-6 shadow-brutalist mb-6\"><div class=\"text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2\"><span class=\"text-4xl tracking-widest\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -82,43 +82,33 @@ func SingleRoom(room *services.Room, username string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if username == room.Game.Host {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"text-primary\">You are the host!</span>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"grid grid-cols-2 gap-4\"><div class=\"bg-white text-black p-3 border-2 border-black\"><div class=\"text-xs font-black uppercase tracking-wide\">MOVIES</div><div class=\"text-3xl font-black\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></div><div class=\"grid grid-cols-2 gap-4\"><div class=\"bg-white text-black p-3 border-2 border-black\"><div class=\"text-xs  uppercase tracking-wide\">MOVIES</div><div class=\"text-3xl \">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(room.Game.MovieNumber)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 36, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 33, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><div class=\"bg-white text-black p-3 border-2 border-black\"><div class=\"text-xs font-black uppercase tracking-wide\">MAX PLAYERS</div><div class=\"text-3xl font-black\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><div class=\"bg-white text-black p-3 border-2 border-black\"><div class=\"text-xs  uppercase tracking-wide\">MAX PLAYERS</div><div class=\"text-3xl \">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(room.Game.MaxPlayers)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 40, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 37, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -126,57 +116,57 @@ func SingleRoom(room *services.Room, username string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><!-- Chatbox --><div><div class=\"flex gap-2\"><input class=\"input mb-2\" placeholder=\"chat message...\" data-bind-message data-on-keydown=\"if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';\"> <button data-on-click=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><!-- Chatbox --><div><div class=\"flex gap-2\"><input class=\"input mb-2\" placeholder=\"chat message...\" data-bind-message data-on-keydown=\"if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';\"> <button data-on-click=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("@post('/message');$message='';")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 56, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 53, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"btn !w-16\">Send</button></div><div id=\"container\" class=\"shadow-brutalist border-primary border-4\" data-on-load=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"btn !w-16\">Send</button></div><div id=\"container\" class=\"shadow-brutalist border-primary border-4\" data-on-load=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(datastar.GetSSE(fmt.Sprintf("/sse/%s", room.Name)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 65, Col: 71}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 62, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><div id=\"chat\" class=\"h-96 overflow-y-auto p-4 bg-primary/5\"></div></div></div></div><script>\n                window.addEventListener('DOMContentLoaded', () => {\n                    fetch(\"/room/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><div id=\"chat\" class=\"h-96 tracking-wide overflow-y-auto p-4 bg-primary/5\"></div></div></div></div><script>\n                window.addEventListener('DOMContentLoaded', () => {\n                    fetch(\"/room/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Var9, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 73, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 70, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "/join\", {\n                        method: \"POST\",\n                    });\n                });\n                <!-- User cleanup on page leave, prefer this over visibility change because unload events -->\n                <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->\n                window.addEventListener('pagehide', () => {\n                    navigator.sendBeacon(\"/room/")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "/join\", {\n                        method: \"POST\",\n                    });\n                });\n                <!-- User cleanup on page leave, prefer this over visibility change because unload events -->\n                <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->\n                window.addEventListener('pagehide', () => {\n                    navigator.sendBeacon(\"/room/")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Var10, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(room.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 80, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 77, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "/leave\");\n                });\n            </script></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "/leave\");\n                });\n            </script></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -211,56 +201,56 @@ func ChatBox(messages []types.Message) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div id=\"chat\" class=\"h-96 overflow-y-auto bg-primary/5 p-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div id=\"chat\" class=\"h-96 tracking-wide overflow-y-auto p-4 bg-primary/5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, m := range messages {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"mb-2 flex\"><span style=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"mb-2 flex\"><span style=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(getUserColor(m.Username, "color"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 91, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 88, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"font-bold text-accent\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"font-bold text-accent\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Trim(m.Username, " "))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 91, Col: 114}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 88, Col: 114}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> <span class=\"text-gray-600\">:&nbsp;</span> <span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span> <span class=\"text-gray-600\">:&nbsp;</span> <span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(m.Message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 93, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `view/rooms/singleRoom.templ`, Line: 90, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -297,7 +287,17 @@ func UserBox(room *services.Room, username string) templ.Component {
 				totalReady++
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div id=\"users\" class=\"flex flex-col\"><div class=\"flex h-28 justify-between bg-background border-4 border-primary p-4 shadow-brutalist\"><div class=\"w-20 text-text text-xl flex flex-col justify-center items-center\"><span>READY</span><div class=\"pl-2 pt-2 bg-secondary shadow-hard flex justify-center items-center px-2 py-1 text-center\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div id=\"users\" class=\"flex flex-col\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if username == room.Game.Host {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"text-primary flex text-xl\">You are the host!</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"flex h-28 justify-between bg-background border-4 border-primary p-4 shadow-brutalist\"><div class=\"w-20 text-text text-xl flex flex-col justify-center items-center\"><span>READY</span><div class=\"pl-2 pt-2 bg-secondary shadow-hard flex justify-center items-center px-2 py-1 text-center\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -342,7 +342,7 @@ func UserBox(room *services.Room, username string) templ.Component {
 		}
 		if username == room.Game.Host {
 			if len(users) == totalReady && totalReady > 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<button class=\"btn-success font-black uppercase tracking-wide\" data-on-click=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<button class=\"btn-success  uppercase tracking-wide\" data-on-click=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -360,7 +360,7 @@ func UserBox(room *services.Room, username string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<button class=\"btn-disabled font-black uppercase tracking-wide\">Start Game!</button>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<button class=\"btn-disabled  uppercase tracking-wide\">Start Game!</button>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -464,7 +464,7 @@ func Button(room *services.Room) templ.Component {
 			templ_7745c5c3_Var24 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div id=\"users\" class=\"flex flex-col\"><div class=\"flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4\"><div class=\"text-text text-xl font-black uppercase tracking-wider\"><span>Players:&nbsp</span> <span class=\"text-2xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div id=\"users\" class=\"flex flex-col\"><div class=\"flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4\"><div class=\"text-text text-xl  uppercase tracking-wider\"><span>Players:&nbsp</span> <span class=\"text-2xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
