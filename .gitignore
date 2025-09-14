@@ -1,4 +1,6 @@
 .DS_Store
 *.env*
 tmp/
+bin/
+release/
 __debug
