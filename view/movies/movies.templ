@@ -49,7 +49,7 @@ templ Movies(movies []types.JellyfinItem, baseURL string, room *services.Room) {
 									data-bind-movies
 								/>
 								<img
-									src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+									src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450" }
 									alt={ "Cover for " + m.Name }
 									class="w-full h-full object-cover"
 								/>
@@ -73,13 +73,13 @@ templ SubmitButton(movies []types.JellyfinItem, baseURL string, selectedMovies [
 					if slices.Contains(selectedMovies, m.Id) {
 						<img
 							class="w-full h-full object-cover cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"
-							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450" }
 							alt={ "Cover for " + m.Name }
 						/>
 					} else {
 						<img
 							class="w-full h-full object-cover cursor-not-allowed border-2"
-							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450"}
 							alt={ "Cover for " + m.Name }
 						/>
 					}
@@ -103,7 +103,7 @@ templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
 					for _, movie := range winnerMovies {
 						<div class="block glow-border w-72 md:w-96">
 							<img
-								src={ baseURL + "/Items/" + movie.Movie.Id + "/Images/Primary?tag=" + movie.Movie.ImageTags.Primary }
+								src={ baseURL + "/Items/" + movie.Movie.Id + "/Images/Primary?tag=" + movie.Movie.ImageTags.Primary + "&width=300&height=450"}
 								alt={ "Cover for " + movie.Movie.Name }
 								class="w-full h-full object-cover"
 							/>
