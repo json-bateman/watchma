@@ -11,7 +11,7 @@ templ Shuffle(movies []types.JellyfinItem, baseURL string) {
 				for _, m := range movies {
 					<label class="block w-40 md:w-64 border border-3 ring-0">
 						<img
-							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary }
+							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450" }
 							alt={ "Cover for " + m.Name }
 							class="w-full h-full object-cover"
 						/>
