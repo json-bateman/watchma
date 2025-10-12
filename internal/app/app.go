@@ -38,14 +38,10 @@ func (a *App) Initialize() error {
 	} else {
 		a.MovieService = services.NewJellyfinService(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL)
 	}
-
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
 
 	config.SetupFileServer(a.Logger, a.Router)
-
-	roomService := services.NewRoomService()
-	movieOfTheDayService := services.NewMovieOfTheDayService(a.MovieService)
 
 	nc, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
@@ -60,6 +56,9 @@ func (a *App) Initialize() error {
 		"url", nc.ConnectedUrl(), "server_id", nc.ConnectedServerId(),
 		"max_payload", nc.MaxPayload())
 
+	eventPublisher := services.NewEventPublisher(a.NATS, a.Logger)
+	roomService := services.NewRoomService(eventPublisher, a.Logger)
+	movieOfTheDayService := services.NewMovieOfTheDayService(a.MovieService)
 	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService, a.NATS)
 	webHandler.SetupRoutes(a.Router)
 

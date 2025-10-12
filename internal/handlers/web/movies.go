@@ -94,7 +94,7 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	}
 	// If all players have selected movies, push them to final screen
 	if playersComplete == len(room.Users) {
-		h.BroadcastToRoom(roomName, utils.ROOM_FINISH_EVENT)
+		h.roomService.FinishGame(room.Name)
 	} else {
 		// If not, render successfully submitted movies button
 		buttonAndMovies := movies.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, user.SelectedMovies)

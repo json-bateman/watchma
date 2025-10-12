@@ -23,10 +23,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if ok && myRoom.Game.MaxPlayers > len(myRoom.Users) {
-		myRoom.AddUser(username)
-		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
-		// Broadcast room list update to join page clients
-		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
+		h.roomService.AddUserToRoom(myRoom.Name, username)
 	} else {
 		component := rooms.RoomFull(roomName)
 		templ.Handler(component).ServeHTTP(w, r)
@@ -144,31 +141,21 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room.RemoveUser(username)
+	h.roomService.RemoveUserFromRoom(room.Name, username)
+
 	allUsers := room.GetAllUsers()
 	if len(allUsers) == 0 {
-		h.roomService.DeleteRoom(roomName)
-		h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
-		utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-			"ok":      true,
-			"room":    roomName,
-			"event":   utils.ROOM_UPDATE_EVENT,
-			"message": "Room deleted - last user left",
-		})
+		h.roomService.DeleteRoom(room.Name)
 		return
 	}
 
 	if room.Game.Host == username {
 		// If host leaves transfer to random other user
-		for userName := range room.Users {
-			room.Game.Host = userName
+		for newHostUsername := range room.Users {
+			h.roomService.TransferHost(room.Name, newHostUsername)
 			break
 		}
 	}
-
-	h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
-	// Broadcast room list update to join page clients
-	h.BroadcastToJoinClients(utils.ROOM_LIST_UPDATE_EVENT)
 
 	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
 		"ok":    true,
@@ -202,14 +189,8 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 		}
 		room.Game.Movies = randMovies
 
-		h.BroadcastToRoom(roomName, utils.ROOM_START_EVENT)
+		h.roomService.StartGame(roomName, room.Game.Movies)
 	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"ok":    true,
-		"room":  room.Name,
-		"event": utils.ROOM_START_EVENT,
-	})
 }
 
 func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
@@ -218,20 +199,8 @@ func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
 
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		u, found := room.GetUser(username)
-		if found && u.Ready {
-			u.Ready = false
-		} else {
-			u.Ready = true
-		}
-		h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
+		h.roomService.ToggleUserReady(room.Name, username)
 	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"ok":    true,
-		"room":  room.Name,
-		"event": utils.ROOM_UPDATE_EVENT,
-	})
 }
 
 func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) {
@@ -253,20 +222,6 @@ func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) 
 	req.Username = username
 	room, ok := h.roomService.GetRoom(req.Room)
 	if ok {
-		room.RoomMessages = append(room.RoomMessages, req)
-		h.BroadcastToRoom(room.Name, utils.MESSAGE_SENT_EVENT)
-	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"ok":    true,
-		"room":  req.Room,
-		"event": utils.MESSAGE_SENT_EVENT,
-	})
-}
-
-func (h *WebHandler) BroadcastToRoom(roomName, message string) {
-	subject := utils.RoomSubject(roomName)
-	if err := h.NatsPublish(subject, []byte(message)); err != nil {
-		h.logger.Error("Failed to broadcast to room", "room", roomName, "error", err)
+		h.roomService.AddMessage(room.Name, req)
 	}
 }

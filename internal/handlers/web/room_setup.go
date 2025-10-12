@@ -85,10 +85,5 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 		Votes:       make(map[*types.JellyfinItem]int),
 	})
 
-	h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
-}
-
-func (h *WebHandler) BroadcastToJoinClients(message string) {
-	_ = h.NatsPublish(utils.NATS_LOBBY_ROOMS, []byte(message))
 }
