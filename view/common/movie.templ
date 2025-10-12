@@ -1,0 +1,47 @@
+package common
+
+import (
+    "fmt"
+    
+    "github.com/json-bateman/jellyfin-grabber/internal/types"
+)
+
+type MovieTitleImageOptions struct {
+    Width       int
+    Height      int
+    Class       string
+}
+
+templ MovieTitleImage(
+    movie types.JellyfinItem,
+    baseURL string,
+    options MovieTitleImageOptions,
+) {
+
+{{
+   if options.Width == 0 {
+		options.Width = 300
+	}
+
+	if options.Height == 0 {
+		options.Height = 450
+	}
+
+    imgClass := "w-full h-full object-cover " + options.Class;
+
+    src := fmt.Sprintf(
+        "%s/Items/%s/Images/Primary?tag=%s&width=%d&height=%d",
+        baseURL,
+        movie.Id,
+        movie.ImageTags.Primary,
+        options.Width,
+        options.Height,
+    )
+}}
+
+    <img
+        src={ src }
+        alt={ "Cover for " + movie.Name }
+        class={ imgClass }
+    />
+}
