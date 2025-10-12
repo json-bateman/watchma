@@ -36,6 +36,7 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 
 	if items == nil || len(items.Items) == 0 {
 		log.Printf("no movies found")
+		return
 	}
 
 	rand.Shuffle(len(items.Items), func(i, j int) {

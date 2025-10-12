@@ -16,7 +16,7 @@ type App struct {
 	Settings     *config.Settings
 	Logger       *slog.Logger
 	Router       *chi.Mux
-	MovieService services.MovieService
+	MovieService services.ExternalMovieService
 }
 
 func New() *App {
@@ -42,8 +42,9 @@ func (a *App) Initialize() error {
 	config.SetupFileServer(a.Logger, a.Router)
 
 	roomService := services.NewRoomService()
+	movieOfTheDayService := services.NewMovieOfTheDayService(a.MovieService)
 
-	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService)
+	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService)
 	webHandler.SetupRoutes(a.Router)
 
 	return nil
