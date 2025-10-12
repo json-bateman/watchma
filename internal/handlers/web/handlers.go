@@ -14,23 +14,25 @@ import (
 
 // WebHandler holds dependencies needed by web handlers
 type WebHandler struct {
-	settings     *config.Settings
-	movieService services.MovieService
-	logger       *slog.Logger
-	roomService  *services.RoomService
-	sseClients   map[string]map[chan string]bool
+	settings             *config.Settings
+	movieService         services.ExternalMovieService
+	logger               *slog.Logger
+	roomService          *services.RoomService
+	movieOfTheDayService *services.MovieOfTheDayService
+	sseClients           map[string]map[chan string]bool
 
 	mu sync.RWMutex
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(cfg *config.Settings, ms services.MovieService, l *slog.Logger, rs *services.RoomService) *WebHandler {
+func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService) *WebHandler {
 	return &WebHandler{
-		settings:     cfg,
-		movieService: ms,
-		logger:       l,
-		roomService:  rs,
-		sseClients:   make(map[string]map[chan string]bool),
+		settings:             cfg,
+		movieService:         ms,
+		logger:               l,
+		roomService:          rs,
+		movieOfTheDayService: motds,
+		sseClients:           make(map[string]map[chan string]bool),
 	}
 }
 
@@ -66,6 +68,13 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 }
 
 func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
-	component := view.IndexPage("Movie Showdown")
+	movieOfTheDay, err := h.movieOfTheDayService.GetMovieOfTheDay()
+
+	if err != nil {
+		// TODO: handle case where no movie of the day was found...
+		return
+	}
+
+	component := view.IndexPage("Movie Showdown", movieOfTheDay, h.settings.JellyfinBaseURL)
 	templ.Handler(component).ServeHTTP(w, r)
 }

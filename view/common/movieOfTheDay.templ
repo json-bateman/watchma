@@ -1,0 +1,10 @@
+package common
+
+import "github.com/json-bateman/jellyfin-grabber/internal/types"
+
+templ MovieOfTheDay(movie types.JellyfinItem, baseURL string) {
+	<div class="text-center">
+		<h2 class="text-4xl mb-4">Movie of the Day</h2>
+		@MovieTitleImage(movie, baseURL, MovieTitleImageOptions{Class: "rounded-md"})
+	</div>
+}

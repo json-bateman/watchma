@@ -48,11 +48,7 @@ templ Movies(movies []types.JellyfinItem, baseURL string, room *services.Room) {
 									value={ m.Id }
 									data-bind-movies
 								/>
-								<img
-									src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450" }
-									alt={ "Cover for " + m.Name }
-									class="w-full h-full object-cover"
-								/>
+								@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{})
 							</label>
 						}
 					</div>
@@ -71,17 +67,9 @@ templ SubmitButton(movies []types.JellyfinItem, baseURL string, selectedMovies [
 			for _, m := range movies {
 				<div class="relative w-40 h-60 md:w-64 md:h-96">
 					if slices.Contains(selectedMovies, m.Id) {
-						<img
-							class="w-full h-full object-cover cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"
-							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450" }
-							alt={ "Cover for " + m.Name }
-						/>
+						@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"})
 					} else {
-						<img
-							class="w-full h-full object-cover cursor-not-allowed border-2"
-							src={ baseURL + "/Items/" + m.Id + "/Images/Primary?tag=" + m.ImageTags.Primary + "&width=300&height=450"}
-							alt={ "Cover for " + m.Name }
-						/>
+						@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2"})
 					}
 				</div>
 			}
@@ -100,13 +88,9 @@ templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
 			}
 			<div class="text-text flex flex-col items-center justify-center">
 				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
-					for _, movie := range winnerMovies {
+					for _, movieVote := range winnerMovies {
 						<div class="block glow-border w-72 md:w-96">
-							<img
-								src={ baseURL + "/Items/" + movie.Movie.Id + "/Images/Primary?tag=" + movie.Movie.ImageTags.Primary + "&width=300&height=450"}
-								alt={ "Cover for " + movie.Movie.Name }
-								class="w-full h-full object-cover"
-							/>
+							@common.MovieTitleImage(*movieVote.Movie, baseURL, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"})
 						</div>
 					}
 				</div>
