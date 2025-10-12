@@ -6,6 +6,9 @@
     - [X] Configure nats messaging system (removed, don't need the complexity for a small single server)
     - [X] Room service to handle all of the apps rooms
 
+- Nats again
+    - [ ] Reintroduce NATS, so I have a simple library and one location for all events
+
 - Room flow
     - [X] host page to host a room (done with form)
     - [X] table for all active rooms
@@ -27,13 +30,18 @@
     - [X] View results!
     - [X] Fix map sorting, when there's ties, users can get different results on final screen
     (sort of fixed, now just displays ties)
+    - [ ] Change game flow, start game --> players add movies, host chooses the max
+    number of movies people can add, maybe set timer to 1 minute
+    - [ ] players add movies --> Aggregate all choices to vote on.
+    - [ ] Stretch goal tournament, for now maybe just display winner(s)?
+    - [ ] Post game lobby? Links to various things about the movie?
 
 - Deploy
     - [ ] Deploy this as a docker container so people can download and use with their Jellyfin servers
     - [ ] Figure out how to set env variables and upload stuff to dockerhub for unRAID
 
 - Side quests
-    - [ ] Figure out if there's a way to remove javascript for setting theme on page load in Layout
+    - [ ] Figure out if there's a way to remove javascript for setting theme on page load in Layou
     if there is, whole page can be replaced with SSE, and I can remove header and footer when game
         starts
     - [ ] make skeleton loader for movies?? 

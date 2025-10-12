@@ -4,7 +4,9 @@ import "github.com/json-bateman/jellyfin-grabber/internal/types"
 
 templ MovieOfTheDay(movie types.JellyfinItem, baseURL string) {
 	<div class="text-center">
-		<h2 class="text-4xl mb-4">Movie of the Day</h2>
-		@MovieTitleImage(movie, baseURL, MovieTitleImageOptions{Class: "rounded-md"})
+		<h2 class="text-4xl my-4">Movie of the Day</h2>
+		<div class="flex contain-content shadow-hard">
+			@MovieTitleImage(movie, baseURL, MovieTitleImageOptions{Class: "border-primary border-3"})
+		</div>
 	</div>
 }

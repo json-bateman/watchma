@@ -3,13 +3,13 @@ package web
 import (
 	"log/slog"
 	"net/http"
-	"sync"
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/json-bateman/jellyfin-grabber/view"
+	"github.com/nats-io/nats.go"
 )
 
 // WebHandler holds dependencies needed by web handlers
@@ -19,20 +19,18 @@ type WebHandler struct {
 	logger               *slog.Logger
 	roomService          *services.RoomService
 	movieOfTheDayService *services.MovieOfTheDayService
-	sseClients           map[string]map[chan string]bool
-
-	mu sync.RWMutex
+	NATS                 *nats.Conn
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService) *WebHandler {
+func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService, nc *nats.Conn) *WebHandler {
 	return &WebHandler{
 		settings:             cfg,
 		movieService:         ms,
 		logger:               l,
 		roomService:          rs,
 		movieOfTheDayService: motds,
-		sseClients:           make(map[string]map[chan string]bool),
+		NATS:                 nc,
 	}
 }
 
@@ -59,7 +57,6 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Post("/host", h.HostForm)
 		r.Post("/message", h.PublishChatMessage)
 		r.Post("/room/{roomName}/movies", h.SubmitMovies)
-		r.Post("/room/{roomName}/join", h.JoinRoom)
 		r.Post("/room/{roomName}/leave", h.LeaveRoom)
 		r.Post("/room/{roomName}/ready", h.Ready)
 		r.Post("/room/{roomName}/start", h.StartGame)
@@ -77,4 +74,9 @@ func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	component := view.IndexPage("Movie Showdown", movieOfTheDay, h.settings.JellyfinBaseURL)
 	templ.Handler(component).ServeHTTP(w, r)
+}
+
+func (h *WebHandler) NatsPublish(subj string, data []byte) error {
+	h.logger.Info("NATS publish", "subject", subj, "bytes", len(data))
+	return h.NATS.Publish(subj, data)
 }

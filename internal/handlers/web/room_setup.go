@@ -19,9 +19,6 @@ func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
-	client := make(chan string, 100)
-
-	h.AddJoinClient(client)
 
 	// Send initial room list to new client
 	roomList := rooms.RoomListBody(h.roomService.Rooms)
@@ -29,27 +26,27 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("Error patching initial room list")
 	}
 
-	// Cleanup when connection closes
-	defer func() {
-		h.RemoveJoinClient(client)
-		close(client)
-	}()
+	sub, err := h.NATS.SubscribeSync(utils.NATS_LOBBY_ROOMS)
+	defer sub.Unsubscribe()
+	if err != nil {
+		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
+		return
+	}
 
 	for {
-		select {
-		case message := <-client:
-			switch message {
-			case utils.ROOM_LIST_UPDATE_EVENT:
-				roomList := rooms.RoomListBody(h.roomService.Rooms)
-				if err := sse.PatchElementTempl(roomList); err != nil {
-					fmt.Println("Error patching room list")
-					return
-				}
-			default: // discard for now, maybe error?
-			}
-
-		case <-r.Context().Done():
+		msg, err := sub.NextMsgWithContext(r.Context())
+		if err != nil {
+			// context canceled or sub closed
 			return
+		}
+		switch string(msg.Data) {
+		case utils.ROOM_LIST_UPDATE_EVENT:
+			roomList := rooms.RoomListBody(h.roomService.Rooms)
+			if err := sse.PatchElementTempl(roomList); err != nil {
+				fmt.Println("Error patching room list")
+				return
+			}
+		default: // discard unknown non-matching messages
 		}
 	}
 }
@@ -88,39 +85,10 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 		Votes:       make(map[*types.JellyfinItem]int),
 	})
 
+	h.BroadcastToRoom(roomName, utils.ROOM_UPDATE_EVENT)
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
 }
 
 func (h *WebHandler) BroadcastToJoinClients(message string) {
-	h.mu.RLock()
-	if clients, ok := h.sseClients["join"]; ok {
-		for client := range clients {
-			select {
-			case client <- message:
-			default:
-				// Client buffer full, skip
-			}
-		}
-	}
-	h.mu.RUnlock()
-}
-
-func (h *WebHandler) AddJoinClient(client chan string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	if h.sseClients["join"] == nil {
-		h.sseClients["join"] = make(map[chan string]bool)
-	}
-	h.sseClients["join"][client] = true
-}
-
-func (h *WebHandler) RemoveJoinClient(client chan string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	delete(h.sseClients["join"], client)
-	if len(h.sseClients["join"]) == 0 {
-		delete(h.sseClients, "join")
-	}
+	_ = h.NatsPublish(utils.NATS_LOBBY_ROOMS, []byte(message))
 }

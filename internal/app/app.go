@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/json-bateman/jellyfin-grabber/internal/config"
 	"github.com/json-bateman/jellyfin-grabber/internal/handlers/web"
 	"github.com/json-bateman/jellyfin-grabber/internal/services"
+	"github.com/nats-io/nats.go"
 )
 
 type App struct {
@@ -17,6 +19,7 @@ type App struct {
 	Logger       *slog.Logger
 	Router       *chi.Mux
 	MovieService services.ExternalMovieService
+	NATS         *nats.Conn
 }
 
 func New() *App {
@@ -44,7 +47,20 @@ func (a *App) Initialize() error {
 	roomService := services.NewRoomService()
 	movieOfTheDayService := services.NewMovieOfTheDayService(a.MovieService)
 
-	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService)
+	nc, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		return fmt.Errorf("connect NATS: %w", err)
+	}
+	// Verify round-trip (ensures we’re really up)
+	if err := nc.FlushTimeout(2 * time.Second); err != nil {
+		return fmt.Errorf("nats flush failed: %w", err)
+	}
+	a.NATS = nc
+	a.Logger.Info("NATS connected",
+		"url", nc.ConnectedUrl(), "server_id", nc.ConnectedServerId(),
+		"max_payload", nc.MaxPayload())
+
+	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService, a.NATS)
 	webHandler.SetupRoutes(a.Router)
 
 	return nil
@@ -52,6 +68,7 @@ func (a *App) Initialize() error {
 
 func (a *App) Run() error {
 	a.Logger.Info("Starting server", "port", a.Settings.Port)
+	//TODO: maybe a.NATS.Drain() here, need to look into how to gracefully shutdown NATS
 	port := fmt.Sprintf(":%d", a.Settings.Port)
 	return http.ListenAndServe(port, a.Router)
 }

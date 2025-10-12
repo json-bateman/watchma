@@ -9,8 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/json-bateman/jellyfin-grabber/view/common"
+import "github.com/json-bateman/jellyfin-grabber/internal/types"
 
-func IndexPage(name string) templ.Component {
+func IndexPage(name string, movieOfTheDay types.JellyfinItem, baseURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +44,15 @@ func IndexPage(name string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center\"><span class=\"font-bold shadow-dance-text\">Watchma</span></div><div class=\"flex justify-center gap-4 my-12\"><a href=\"host\" class=\"btn-accent\">Host Room</a> <a href=\"join\" class=\"btn-accent\">Join Room</a></div><div class=\"flex justify-center\"><a href=\"shuffle/8\" class=\"btn\">Shuffle 8</a></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center\"><span class=\"font-bold shadow-dance-text\">Watchma</span></div><div class=\"flex justify-center gap-4 my-12\"><a href=\"host\" class=\"btn-accent\">Host Room</a> <a href=\"join\" class=\"btn-accent\">Join Room</a></div><div class=\"flex justify-center\"><a href=\"shuffle/8\" class=\"btn\">Shuffle 8</a></div><div class=\"flex justify-center mt-12\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = common.MovieOfTheDay(movieOfTheDay, baseURL).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

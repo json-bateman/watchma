@@ -64,18 +64,6 @@ templ SingleRoom(room *services.Room, username string) {
 					</div>
 				</div>
 			</div>
-			<script>
-                window.addEventListener('DOMContentLoaded', () => {
-                    fetch("/room/{{ room.Name }}/join", {
-                        method: "POST",
-                    });
-                });
-                <!-- User cleanup on page leave, prefer this over visibility change because unload events -->
-                <!-- https://developer.mozilla.org/en-US/docs/Web/API/Window/pagehide_event -->
-                window.addEventListener('pagehide', () => {
-                    navigator.sendBeacon("/room/{{ room.Name }}/leave");
-                });
-            </script>
 		</section>
 	}
 }
