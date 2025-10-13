@@ -1,7 +1,9 @@
 package movies
 
-import "github.com/json-bateman/jellyfin-grabber/view/common"
-import "github.com/json-bateman/jellyfin-grabber/internal/types"
+import (
+	"watchma/pkg/types"
+	"watchma/view/common"
+)
 
 templ Shuffle(movies []types.JellyfinItem, baseURL string) {
 	@common.Layout("Movies page") {

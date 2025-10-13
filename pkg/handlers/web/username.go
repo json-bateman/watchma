@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
-	"github.com/json-bateman/jellyfin-grabber/internal/utils"
-	"github.com/json-bateman/jellyfin-grabber/view/username"
+	"watchma/pkg/utils"
+	"watchma/view/username"
 )
 
 func (h *WebHandler) Username(w http.ResponseWriter, r *http.Request) {

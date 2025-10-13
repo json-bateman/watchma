@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/json-bateman/jellyfin-grabber/internal/utils"
+	"watchma/pkg/utils"
 )
 
 // RequireUsername middleware checks for jelly_user cookie for web routes

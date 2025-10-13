@@ -10,11 +10,11 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
-	"github.com/json-bateman/jellyfin-grabber/internal/utils"
-	"github.com/json-bateman/jellyfin-grabber/view/movies"
-	"github.com/json-bateman/jellyfin-grabber/view/rooms"
 	"github.com/starfederation/datastar-go/datastar"
+	"watchma/pkg/types"
+	"watchma/pkg/utils"
+	"watchma/view/movies"
+	"watchma/view/rooms"
 )
 
 func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {

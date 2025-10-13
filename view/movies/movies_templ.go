@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/json-bateman/jellyfin-grabber/internal/services"
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
-	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"slices"
+	"watchma/pkg/services"
+	"watchma/pkg/types"
+	"watchma/view/common"
 )
 
 func getWinnerMovies(moviesSortedByVote []types.MovieVote) []types.MovieVote {

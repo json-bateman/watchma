@@ -6,10 +6,10 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
-	"github.com/json-bateman/jellyfin-grabber/internal/config"
-	"github.com/json-bateman/jellyfin-grabber/internal/services"
-	"github.com/json-bateman/jellyfin-grabber/view"
 	"github.com/nats-io/nats.go"
+	"watchma/pkg/config"
+	"watchma/pkg/services"
+	"watchma/view"
 )
 
 // WebHandler holds dependencies needed by web handlers

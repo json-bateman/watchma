@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
-	"github.com/json-bateman/jellyfin-grabber/internal/utils"
+	"watchma/pkg/types"
+	"watchma/pkg/utils"
 )
 
 // All mutation and publish events are done by the RoomService

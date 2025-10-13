@@ -8,10 +8,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/json-bateman/jellyfin-grabber/internal/config"
-	"github.com/json-bateman/jellyfin-grabber/internal/handlers/web"
-	"github.com/json-bateman/jellyfin-grabber/internal/services"
 	"github.com/nats-io/nats.go"
+	"watchma/pkg/config"
+	"watchma/pkg/handlers/web"
+	"watchma/pkg/services"
 )
 
 type App struct {

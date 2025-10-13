@@ -1,4 +1,4 @@
-module github.com/json-bateman/jellyfin-grabber
+module watchma
 
 go 1.24
 

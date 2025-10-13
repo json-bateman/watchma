@@ -8,8 +8,10 @@ package movies
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/json-bateman/jellyfin-grabber/view/common"
-import "github.com/json-bateman/jellyfin-grabber/internal/types"
+import (
+	"watchma/pkg/types"
+	"watchma/view/common"
+)
 
 func Shuffle(movies []types.JellyfinItem, baseURL string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {

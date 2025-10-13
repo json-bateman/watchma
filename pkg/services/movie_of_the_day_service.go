@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
+	"watchma/pkg/types"
 )
 
 type MovieOfTheDayService struct {

@@ -2,8 +2,7 @@ package main
 
 import (
 	"log"
-
-	"github.com/json-bateman/jellyfin-grabber/internal/app"
+	"watchma/pkg/app"
 )
 
 func main() {

@@ -3,8 +3,8 @@ package services
 import (
 	"log/slog"
 
-	"github.com/json-bateman/jellyfin-grabber/internal/utils"
 	"github.com/nats-io/nats.go"
+	"watchma/pkg/utils"
 )
 
 type EventPublisher struct {

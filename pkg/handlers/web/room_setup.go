@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/a-h/templ"
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
-	"github.com/json-bateman/jellyfin-grabber/internal/utils"
-	"github.com/json-bateman/jellyfin-grabber/view/rooms"
 	"github.com/starfederation/datastar-go/datastar"
+	"watchma/pkg/types"
+	"watchma/pkg/utils"
+	"watchma/view/rooms"
 )
 
 func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {

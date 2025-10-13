@@ -1,7 +1,9 @@
 package rooms
 
-import "github.com/json-bateman/jellyfin-grabber/view/common"
-import "strings"
+import (
+	"watchma/view/common"
+	"strings"
+)
 
 templ NoRoom(room string) {
 	@common.Layout(room) {

@@ -1,8 +1,6 @@
 package services
 
-import (
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
-)
+import "watchma/pkg/types"
 
 type DummyMovieService struct{}
 

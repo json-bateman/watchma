@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
+	"watchma/pkg/types"
 )
 
 type JellyfinService struct {

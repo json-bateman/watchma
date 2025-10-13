@@ -9,10 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/json-bateman/jellyfin-grabber/internal/services"
-	"github.com/json-bateman/jellyfin-grabber/internal/types"
-	"github.com/json-bateman/jellyfin-grabber/view/common"
 	"github.com/starfederation/datastar-go/datastar"
+	"watchma/pkg/services"
+	"watchma/pkg/types"
+	"watchma/view/common"
 )
 
 func JoinPage(rooms map[string]*services.Room) templ.Component {
