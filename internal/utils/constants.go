@@ -12,6 +12,8 @@ const (
 // NATS
 const (
 	NATS_LOBBY_ROOMS = "app.lobby.rooms"
+	NATS_PUB         = "NATS: Published"
+	NATS_SUB         = "NATS: Subscribed"
 )
 
 // RoomSubject returns the NATS subject for a specific room

@@ -24,7 +24,7 @@ func (ep *EventPublisher) Publish(subject string, data []byte) error {
 		ep.logger.Error("Failed to publish event", "subject", subject, "error", err)
 		return err
 	}
-	ep.logger.Debug("Published event", "subject", subject, "bytes", len(data))
+	ep.logger.Debug(utils.NATS_PUB, "subject", subject, "msg", string(data))
 	return nil
 }
 

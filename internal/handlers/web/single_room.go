@@ -69,6 +69,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	// Subscribe to room-specific NATS subject
 	roomSubject := utils.RoomSubject(roomName)
 	sub, err := h.NATS.SubscribeSync(roomSubject)
+	h.logger.Debug(utils.NATS_SUB, "subject", roomSubject)
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
 		return
@@ -156,12 +157,6 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-
-	utils.WriteJSONResponse(w, http.StatusOK, map[string]any{
-		"ok":    true,
-		"room":  room.Name,
-		"event": utils.ROOM_UPDATE_EVENT,
-	})
 }
 
 func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {

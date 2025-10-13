@@ -57,7 +57,6 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Post("/host", h.HostForm)
 		r.Post("/message", h.PublishChatMessage)
 		r.Post("/room/{roomName}/movies", h.SubmitMovies)
-		r.Post("/room/{roomName}/leave", h.LeaveRoom)
 		r.Post("/room/{roomName}/ready", h.Ready)
 		r.Post("/room/{roomName}/start", h.StartGame)
 		r.Post("/room/{roomName}", h.SubmitMovies)

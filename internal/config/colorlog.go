@@ -19,8 +19,6 @@ const (
 	ColorGray   = "\033[1;90m"
 )
 
-const LevelNATS slog.Level = slog.Level(2)
-
 // ColorLog is our app's logger
 type ColorLog struct {
 	level slog.Level
@@ -42,9 +40,6 @@ func (h *ColorLog) Handle(_ context.Context, r slog.Record) error {
 	var levelLabel string
 
 	switch {
-	case r.Level == LevelNATS:
-		color = ColorBlue
-		levelLabel = "NATS"
 	case r.Level >= slog.LevelError:
 		color = ColorRed
 		levelLabel = "ERROR"
@@ -54,6 +49,9 @@ func (h *ColorLog) Handle(_ context.Context, r slog.Record) error {
 	case r.Level >= slog.LevelInfo:
 		color = ColorGreen
 		levelLabel = "INFO"
+	case r.Level >= slog.LevelDebug:
+		color = ColorBlue
+		levelLabel = "DEBUG"
 	default:
 		color = ColorGray
 		levelLabel = "OTHER"

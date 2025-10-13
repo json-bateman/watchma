@@ -27,6 +27,7 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sub, err := h.NATS.SubscribeSync(utils.NATS_LOBBY_ROOMS)
+	h.logger.Debug(utils.NATS_SUB, "subject", utils.NATS_LOBBY_ROOMS)
 	defer sub.Unsubscribe()
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)

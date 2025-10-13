@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  nats:
+    build:
+      context: .
+      dockerfile: Dockerfile.nats
+    container_name: nats-server
+    ports:
+      - "4222:4222"  # Client connections
+      - "8222:8222"  # HTTP monitoring
+      - "6222:6222"  # Cluster routing (optional)
+    restart: unless-stopped
+    volumes:
+      - ./nats-server.conf:/nats-server.conf:ro
