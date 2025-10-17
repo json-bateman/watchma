@@ -31,3 +31,12 @@ Must have a Jellyfin server with API key in your `.env` for this to run properly
 
 ### Using Bruno (basically offline postman)
 I have some of the api endpoints saved in the _bruno folder [install bruno](https://www.usebruno.com/) if you want to use these endpoints. Make sure to copy your `.env` file in the root of the `_bruno` directory so the endpoints can use the environment variables in their requests. Jellyfin requires an API key in each of it's requests. [here's](https://docs.usebruno.com/secrets-management/dotenv-file) some info on how to store bruno secrets.
+
+### The Layers / Setup
+I have this project split into distinct layers to keep things organized. 
+
+- handlers/: Handle HTTP Requests / Responses related to `watchma`.
+- services/: Handle all of the business logic. Grab data from external services (i.e. Jellyfin)
+- database/repository: Handles the CRUD operations directly on the database. 
+
+- view/: Where all the `.templ` files live that do the actual rendering of the HTTP strings.

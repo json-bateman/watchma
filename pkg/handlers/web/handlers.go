@@ -19,17 +19,19 @@ type WebHandler struct {
 	logger               *slog.Logger
 	roomService          *services.RoomService
 	movieOfTheDayService *services.MovieOfTheDayService
+	authService          *services.AuthService
 	NATS                 *nats.Conn
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService, nc *nats.Conn) *WebHandler {
+func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService, authSvc *services.AuthService, nc *nats.Conn) *WebHandler {
 	return &WebHandler{
 		settings:             cfg,
 		movieService:         ms,
 		logger:               l,
 		roomService:          rs,
 		movieOfTheDayService: motds,
+		authService:          authSvc,
 		NATS:                 nc,
 	}
 }
@@ -39,9 +41,11 @@ func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *sl
 func (h *WebHandler) SetupRoutes(r chi.Router) {
 	// Public web routes
 	r.Get("/", h.Index)
+	r.Get("/login", h.Login)
 	r.Get("/username", h.Username)
 	r.Get("/shuffle/{number}", h.Shuffle)
 
+	r.Post("/login", h.HandleLogin)
 	r.Post("/username", h.SetUsername)
 
 	// Protected web routes

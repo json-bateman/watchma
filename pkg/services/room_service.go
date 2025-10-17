@@ -18,7 +18,7 @@ type RoomService struct {
 	logger *slog.Logger
 }
 
-// Room is now a PURE DATA STRUCTURE (no mutation methods)
+// Room is a PURE DATA STRUCTURE (no mutation methods)
 type Room struct {
 	Name         string
 	Game         *types.GameSession

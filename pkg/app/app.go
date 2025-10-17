@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"watchma/pkg/config"
+	"watchma/pkg/database"
+	"watchma/pkg/database/repository"
+	"watchma/pkg/handlers/web"
+	"watchma/pkg/services"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/nats-io/nats.go"
-	"watchma/pkg/config"
-	"watchma/pkg/handlers/web"
-	"watchma/pkg/services"
 )
 
 type App struct {
@@ -20,6 +23,10 @@ type App struct {
 	Router       *chi.Mux
 	MovieService services.ExternalMovieService
 	NATS         *nats.Conn
+	DB           *database.DB
+	UserRepo     *repository.UserRepository
+	SessionRepo  *repository.SessionRepository
+	AuthService  *services.AuthService
 }
 
 func New() *App {
@@ -32,12 +39,24 @@ func (a *App) Initialize() error {
 	a.Logger = config.NewColorLog(a.Settings.LogLevel)
 	slog.SetDefault(a.Logger)
 
+	// Initialize database with goose migrations
+	db, err := database.New("./watchma.db", a.Logger)
+	if err != nil {
+		return fmt.Errorf("initialize database: %w", err)
+	}
+
+	a.DB = db
+	a.UserRepo = repository.NewUserRepository(db.DB, a.Logger)
+	a.SessionRepo = repository.NewSessionRepository(db.DB)
+	a.AuthService = services.NewAuthService(a.UserRepo, a.SessionRepo, a.Logger)
+
 	// Use dummy data if Jellyfin credentials aren't provided
 	if a.Settings.UseDummyData {
 		a.MovieService = services.NewDummyMovieService()
 	} else {
 		a.MovieService = services.NewJellyfinService(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL)
 	}
+
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
 
@@ -59,7 +78,7 @@ func (a *App) Initialize() error {
 	eventPublisher := services.NewEventPublisher(a.NATS, a.Logger)
 	roomService := services.NewRoomService(eventPublisher, a.Logger)
 	movieOfTheDayService := services.NewMovieOfTheDayService(a.MovieService)
-	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService, a.NATS)
+	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService, a.AuthService, a.NATS)
 	webHandler.SetupRoutes(a.Router)
 
 	return nil
@@ -67,7 +86,16 @@ func (a *App) Initialize() error {
 
 func (a *App) Run() error {
 	a.Logger.Info("Starting server", "port", a.Settings.Port)
-	//TODO: maybe a.NATS.Drain() here, need to look into how to gracefully shutdown NATS
+
+	defer func() {
+		if a.DB != nil {
+			a.DB.Close()
+		}
+		if a.NATS != nil {
+			a.NATS.Close()
+		}
+	}()
+
 	port := fmt.Sprintf(":%d", a.Settings.Port)
 	return http.ListenAndServe(port, a.Router)
 }
