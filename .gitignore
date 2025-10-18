@@ -7,3 +7,4 @@ __debug
 .sqlfluff
 **/*_templ.go
 **/style.css
+watchma.db
