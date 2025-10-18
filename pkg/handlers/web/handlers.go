@@ -58,6 +58,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Get("/sse/join", h.JoinSSE)
 		r.Get("/room/{roomName}", h.SingleRoom)
 		r.Get("/sse/{roomName}", h.SingleRoomSSE)
+		r.Get("/draft", h.JoinDraft)
 
 		r.Post("/host", h.HostForm)
 		r.Post("/message", h.PublishChatMessage)
