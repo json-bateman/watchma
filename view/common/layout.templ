@@ -34,7 +34,7 @@ templ Layout(pc PageContext) {
 					<div class="flex items-center gap-4">
 						@homeIcon()
 						if pc.User != nil {
-							<span class="px-2 py-1 border-2 border-primary bg-primary/10 shadow-hard">
+							<span class="px-2 py-1 border-3 text-text text-xs tracking-wide border-primary bg-primary/10 shadow-hard">
 								{ utils.CapitalizeFirst(pc.User.Username) }
 							</span>
 						}
@@ -76,7 +76,7 @@ templ Layout(pc PageContext) {
 templ themeToggle() {
 	<select
 		id="theme-toggler"
-		class="select shadow-xl shadow-hard"
+		class="select-sm shadow-xl shadow-hard"
 		data-bind-theme
 		data-on-change="
             localStorage.setItem('theme', event.target.value);

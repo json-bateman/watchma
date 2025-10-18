@@ -132,6 +132,11 @@ Applied Tailwind Styles
   box-shadow: 3px 3px 0px var(--color-secondary);
 }
 
+.select-sm {
+  @apply bg-primary/5 text-text border-3 border-primary text-xs;
+  box-shadow: 3px 3px 0px var(--color-secondary);
+}
+
 .th-join {
   @apply p-2 tracking-wider border-r-2 border-background/50;
 }
@@ -150,8 +155,7 @@ Regular CSS Styles
 }
 
 .shadow-dance-text {
-  animation: shadow-accordian 3s cubic-bezier(0.455, 0.03, 0.515, 0.955)
-    forwards;
+  animation: shadow-accordian 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
 }
 
 @keyframes shadow-accordian {
