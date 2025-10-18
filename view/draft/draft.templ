@@ -1,9 +1,109 @@
 package draft
 
-import "watchma/view/common"
+import (
+	"watchma/pkg/types"
+	"watchma/view/common"
+)
 
-templ Draft() {
+templ Draft(state types.DraftState, movies []types.JellyfinItem, baseUrl string) {
 	@common.Layout("Watchma - Draft") {
-		<div>Hello world</div>
+		@container() {
+			<div class="w-full flex justify-between items-center">
+				<section class="flex gap-4">
+					@search()
+					@filters()
+				</section>
+				<section>
+					@actions(state)
+				</section>
+			</div>
+			<section class="mt-4">
+				@selectedMovies(state.SelectedMovies)
+			</section>
+			<section class="mt-4">
+				@moviesList(movies, state.SelectedMovies, baseUrl)
+			</section>
+		}
 	}
+}
+
+templ container() {
+	<div>
+		{ children... }
+	</div>
+}
+
+templ search() {
+	<input class="input" aria-label="Search movies" placeholder="Search..." aria-placeholder="search..."/>
+}
+
+templ filters() {
+	<select class="select" aria-label="Filter movies by genre">
+		<option value="" selected>All genres &nbsp;</option>
+	</select>
+	<select class="select" aria-label="Sort movies">
+		<option value="" selected>No sort &nbsp;</option>
+	</select>
+}
+
+templ actions(state types.DraftState) {
+	{{
+		selectedCount := len(state.SelectedMovies)
+		disabled := selectedCount == 0
+	}}
+	<div class="flex items-center gap-2">
+		<span>Selected { selectedCount } of { state.MaxVotes } movies</span>
+		<button
+			id="submit"
+			if disabled {
+				class="btn-disabled"
+				disabled
+				aria-disabled
+			} else {
+				class="btn"
+			}
+		>Submit</button>
+	</div>
+}
+
+templ selectedMovies(movies []types.JellyfinItem) {
+	<div class="flex gap-2">
+		for _, movie := range movies {
+			<div class="inline-flex items-center pl-3 py-1 bg-primary text-sm text-text">
+				{ movie.Name }
+				<button type="button" class="pl-2 pr-3 cursor-pointer">
+					<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+					<span class="sr-only">Remove tag</span>
+				</button>
+			</div>
+		}
+	</div>
+}
+
+func containsMovie(movies []types.JellyfinItem, id string) bool {
+	for _, m := range movies {
+		if m.Id == id {
+			return true
+		}
+	}
+	return false
+}
+
+templ moviesList(movies []types.JellyfinItem, selectedMovies []types.JellyfinItem, baseUrl string) {
+	<div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+		for _, movie := range movies {
+			<input
+				class="hidden"
+				type="checkbox"
+				value={ movie.Id }
+				checked={ containsMovie(selectedMovies, movie.Id) }
+				aria-label={ movie.Name }
+			/>
+			@common.MovieTitleImage(movie, baseUrl, common.MovieTitleImageOptions{
+				Class: "aspect-[2/3] w-full object-cover",
+			})
+		}
+	</div>
 }

@@ -49,3 +49,9 @@ type MovieVote struct {
 	Movie *JellyfinItem
 	Votes int
 }
+
+type DraftState struct {
+	SelectedMovies []JellyfinItem
+	IsReady        bool
+	MaxVotes       int
+}

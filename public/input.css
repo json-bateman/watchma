@@ -88,7 +88,6 @@ Theme Variables
     background: var(--color-background);
     caret-color: var(--color-text);
   }
-
 }
 
 /* --------------------
@@ -121,7 +120,7 @@ Applied Tailwind Styles
 }
 
 .label {
-  @apply text-primary
+  @apply text-primary;
 }
 
 .input {
@@ -134,16 +133,16 @@ Applied Tailwind Styles
 }
 
 .th-join {
-  @apply p-2 tracking-wider border-r-2 border-background/50
+  @apply p-2 tracking-wider border-r-2 border-background/50;
 }
-
 
 /* ---------------
 Regular CSS Styles
 --------------- */
 
 .shadow-brutalist {
-  box-shadow: 3px 3px 0px var(--color-secondary), 6px 6px 0px var(--color-accent);
+  box-shadow: 3px 3px 0px var(--color-secondary),
+    6px 6px 0px var(--color-accent);
 }
 
 .text-shadow-hard {
@@ -151,40 +150,44 @@ Regular CSS Styles
 }
 
 .shadow-dance-text {
-  animation: shadow-accordian 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+  animation: shadow-accordian 3s cubic-bezier(0.455, 0.03, 0.515, 0.955)
+    forwards;
 }
 
 @keyframes shadow-accordian {
   0% {
-    text-shadow: -1px 1px 0 var(--color-secondary), -3px 3px 0 var(--color-primary)
+    text-shadow: -1px 1px 0 var(--color-secondary),
+      -3px 3px 0 var(--color-primary);
   }
 
   50% {
-    text-shadow: -12px 12px 0 var(--color-primary), -30px 30px 0 var(--color-secondary)
+    text-shadow: -12px 12px 0 var(--color-primary),
+      -30px 30px 0 var(--color-secondary);
   }
 
   100% {
-    text-shadow: -1px 1px 0 var(--color-secondary), -3px 3px 0 var(--color-primary)
+    text-shadow: -1px 1px 0 var(--color-secondary),
+      -3px 3px 0 var(--color-primary);
   }
 }
 
 .glow-border {
   /* gold */
-  border: 4px solid #FFD700;
+  border: 4px solid #ffd700;
   animation: pulse-glow 4s linear infinite;
 }
 
 @keyframes pulse-glow {
   0% {
-    box-shadow: 0 0 5px 1px #FFD700;
+    box-shadow: 0 0 5px 1px #ffd700;
   }
 
   50% {
-    box-shadow: 0 0 30px 6px #FFD700;
+    box-shadow: 0 0 30px 6px #ffd700;
   }
 
   100% {
-    box-shadow: 0 0 5px 1px #FFD700;
+    box-shadow: 0 0 5px 1px #ffd700;
   }
 }
 
@@ -209,12 +212,12 @@ Regular CSS Styles
 
 .loader::after,
 .loader::before {
-  content: '';
+  content: "";
   box-sizing: border-box;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2px solid #FFF;
+  border: 2px solid #fff;
   position: absolute;
   left: 0;
   top: 0;

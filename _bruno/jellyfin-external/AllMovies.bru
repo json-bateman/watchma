@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{JELLYFIN_BASE_URL}}/Items?IncludeItemTypes=Movie&Recursive=true
+  url: {{JELLYFIN_BASE_URL}}/Items?IncludeItemTypes=Movie&Recursive=true&fields=Genres
   body: none
   auth: inherit
 }
@@ -13,6 +13,7 @@ get {
 params:query {
   IncludeItemTypes: Movie
   Recursive: true
+  fields: Genres
 }
 
 headers {

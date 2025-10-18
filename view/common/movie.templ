@@ -26,7 +26,10 @@ templ MovieTitleImage(
 		options.Height = 450
 	}
 
-	imgClass := "w-full h-full object-cover " + options.Class
+	imgClass := "w-full h-full object-cover"
+	if options.Class != "" {
+		imgClass = options.Class
+	}
 
 	src := fmt.Sprintf(
 		"%s/Items/%s/Images/Primary?tag=%s&width=%d&height=%d",

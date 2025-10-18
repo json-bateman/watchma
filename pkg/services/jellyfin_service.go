@@ -45,7 +45,7 @@ func (c *JellyfinService) FetchJellyfinMovies() (*types.JellyfinItems, error) {
 	}
 
 	c.logger.Info("Fetching Jellyfin movies")
-	req, err := c.newJellyfinRequest("GET", "/Items?IncludeItemTypes=Movie&Recursive=true")
+	req, err := c.newJellyfinRequest("GET", "/Items?IncludeItemTypes=Movie&Recursive=true&Fields=Genres")
 	if err != nil {
 		return nil, err
 	}
