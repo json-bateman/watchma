@@ -13,6 +13,7 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
+	"watchma/view/common"
 	"watchma/view/movies"
 	"watchma/view/rooms"
 )
@@ -29,17 +30,27 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	if ok && myRoom.Game.MaxPlayers > len(myRoom.Users) {
 		h.roomService.AddUserToRoom(myRoom.Name, user.Username)
 	} else {
-		component := rooms.RoomFull(roomName)
-		templ.Handler(component).ServeHTTP(w, r)
-	}
-
-	if !ok {
-		component := rooms.NoRoom(roomName)
+		component := rooms.RoomFull(common.PageContext{
+			Title: roomName,
+			User:  user,
+		})
 		templ.Handler(component).ServeHTTP(w, r)
 		return
 	}
 
-	component := rooms.SingleRoom(myRoom, user.Username)
+	if !ok {
+		component := rooms.NoRoom(common.PageContext{
+			Title: roomName,
+			User:  user,
+		}, roomName)
+		templ.Handler(component).ServeHTTP(w, r)
+		return
+	}
+
+	component := rooms.SingleRoom(common.PageContext{
+		Title: myRoom.Name,
+		User:  user,
+	}, myRoom, user.Username)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 

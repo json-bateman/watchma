@@ -19,6 +19,7 @@ tasks:
     desc: Run all watchers in parallel
     cmds:
       - |
+        sqlc generate
         tailwindcss -i ./public/input.css -o ./public/style.css --watch &
         templ generate --watch &
         if [ "$OS" = "Windows_NT" ]; then

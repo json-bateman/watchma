@@ -5,8 +5,8 @@ import (
 	"watchma/view/common"
 )
 
-templ IndexPage(name string, movieOfTheDay types.JellyfinItem, baseURL string) {
-	@common.Layout("Watchma") {
+templ IndexPage(pc common.PageContext, movieOfTheDay types.JellyfinItem, baseURL string) {
+	@common.Layout(pc) {
 		<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
 			<span class="font-bold shadow-dance-text">Watchma</span>
 		</div>

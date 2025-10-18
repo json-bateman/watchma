@@ -4,16 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"watchma/pkg/database/repository"
 
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-// Context key type for storing user data
-type contextKey string
-
-const userContextKey contextKey = "user"
+const userContextKey string = "user"
 
 func WriteJSONError(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
@@ -28,7 +26,7 @@ func WriteJSONResponse(w http.ResponseWriter, status int, data any) {
 }
 
 func GetSessionToken(r *http.Request) string {
-	cookie, err := r.Cookie(SESSION_COOKIE)
+	cookie, err := r.Cookie(SESSION_COOKIE_NAME)
 	if err != nil {
 		return ""
 	}
@@ -59,4 +57,14 @@ func GetUserFromContext(r *http.Request) *repository.User {
 		return nil
 	}
 	return user
+}
+
+func CapitalizeFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	// Convert first rune (character) to upper case
+	runes := []rune(s)
+	runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]
+	return string(runes)
 }

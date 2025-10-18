@@ -2,8 +2,8 @@ package rooms
 
 import "watchma/view/common"
 
-templ RoomFull(room string) {
-	@common.Layout(room) {
+templ RoomFull(pc common.PageContext) {
+	@common.Layout(pc) {
 		<section class="flex flex-col items-center mt-8">
 			<div class="flex items-center text-primary text-3xl mb-8">
 				<span class="text-text tracking-wide">Room is Full!</span>

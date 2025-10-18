@@ -14,8 +14,8 @@ type ChatMessage struct {
 	Message  string `json:"message"`
 }
 
-templ SingleRoom(room *services.Room, username string) {
-	@common.Layout(room.Name) {
+templ SingleRoom(pc common.PageContext, room *services.Room, username string) {
+	@common.Layout(pc) {
 		<section id="moviesRoom" class="flex justify-center grow">
 			<!-- janky(?) way to set the subject field for the message payload
     TODO: make this not janky -->

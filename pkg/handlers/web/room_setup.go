@@ -9,11 +9,16 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
+	"watchma/view/common"
 	"watchma/view/rooms"
 )
 
 func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
-	component := rooms.JoinPage(h.roomService.Rooms)
+	user := utils.GetUserFromContext(r)
+	component := rooms.JoinPage(common.PageContext{
+		Title: "Join Page",
+		User:  user,
+	}, h.roomService.Rooms)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -53,7 +58,11 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
-	component := rooms.HostPage("username")
+	user := utils.GetUserFromContext(r)
+	component := rooms.HostPage(common.PageContext{
+		Title: "Host Room",
+		User:  user,
+	})
 	templ.Handler(component).ServeHTTP(w, r)
 }
 

@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-templ NoRoom(room string) {
-	@common.Layout(room) {
+templ NoRoom(pc common.PageContext, room string) {
+	@common.Layout(pc) {
 		<section class="flex flex-col items-center mt-8">
 			<div class="flex items-center text-primary text-3xl mb-8">
 				<span class="text-text tracking-wide">{ strings.ToUpper(room) }</span>

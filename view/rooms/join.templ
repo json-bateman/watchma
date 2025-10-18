@@ -1,4 +1,4 @@
-package rooms 
+package rooms
 
 import (
 	"watchma/pkg/services"
@@ -7,8 +7,8 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-templ JoinPage(rooms map[string]*services.Room) {
-	@common.Layout("Join Page") {
+templ JoinPage(pc common.PageContext, rooms map[string]*services.Room) {
+	@common.Layout(pc) {
 		<section class="text-text mt-8 flex flex-col items-center justify-center px-4">
 			<div class="text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
 				Available Rooms

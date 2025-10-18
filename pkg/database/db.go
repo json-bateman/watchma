@@ -20,17 +20,14 @@ type DB struct {
 
 // New creates a new database connection and runs migrations
 func New(dbPath string, logger *slog.Logger) (*DB, error) {
-	// Open SQLite database
 	sqlDB, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}
 
-	// Configure connection pool
 	sqlDB.SetMaxOpenConns(1) // SQLite works best with 1 connection for writes
 	sqlDB.SetMaxIdleConns(1)
 
-	// Test connection
 	if err := sqlDB.Ping(); err != nil {
 		return nil, fmt.Errorf("ping database: %w", err)
 	}

@@ -6,7 +6,7 @@ const (
 	ROOM_START_EVENT       = "Room Start Event"
 	ROOM_FINISH_EVENT      = "Room Finish Event"
 	ROOM_LIST_UPDATE_EVENT = "Room List Update Event"
-	SESSION_COOKIE         = "watchma_session"
+	SESSION_COOKIE_NAME    = "watchma_session"
 )
 
 // NATS

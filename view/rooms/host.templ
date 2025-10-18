@@ -1,9 +1,9 @@
-package rooms 
+package rooms
 
 import "watchma/view/common"
 
-templ HostPage(username string) {
-	@common.Layout("Host Page") {
+templ HostPage(pc common.PageContext) {
+	@common.Layout(pc) {
 		<section class="text-text  flex flex-col items-center justify-center">
 			<div class="text-2xl tracking-wider mb-2">HOST ROOM</div>
 			<form action="/host" method="POST" class="flex flex-col gap-2">

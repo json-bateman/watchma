@@ -5,8 +5,8 @@ import (
 	"watchma/view/common"
 )
 
-templ Draft(state types.DraftState, movies []types.JellyfinItem, baseUrl string) {
-	@common.Layout("Watchma - Draft") {
+templ Draft(pc common.PageContext, state types.DraftState, movies []types.JellyfinItem, baseUrl string) {
+	@common.Layout(pc) {
 		@container() {
 			<div class="w-full flex justify-between items-center">
 				<section class="flex gap-4">

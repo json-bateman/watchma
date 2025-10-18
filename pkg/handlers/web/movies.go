@@ -14,11 +14,13 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
+	"watchma/view/common"
 	"watchma/view/movies"
 )
 
 func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 	number := chi.URLParam(r, "number")
+	user := utils.GetUserFromContext(r)
 
 	intVal, err := strconv.Atoi(number)
 	if err != nil {
@@ -50,7 +52,10 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		randMovies = items.Items
 	}
 
-	component := movies.Shuffle(randMovies, h.settings.JellyfinBaseURL)
+	component := movies.Shuffle(common.PageContext{
+		Title: "Movies",
+		User:  user,
+	}, randMovies, h.settings.JellyfinBaseURL)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 

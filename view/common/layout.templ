@@ -1,8 +1,17 @@
 package common 
 
-import "time"
+import (
+	"time"
+	"watchma/pkg/database/repository"
+	"watchma/pkg/utils"
+)
 
-templ Layout(title string) {
+type PageContext struct {
+	Title string
+	User  *repository.User
+}
+
+templ Layout(pc PageContext) {
 	<html data-theme="burgundy-light" lang="en">
 		<head>
 			<meta charset="UTF-8"/>
@@ -17,12 +26,19 @@ templ Layout(title string) {
 			<link href="https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow" rel="stylesheet"/>
 			<!-- stylesheet -->
 			<link href="/public/style.css" rel="stylesheet"/>
-			<title>{ title }</title>
+			<title>{ pc.Title }</title>
 		</head>
 		<body class="bg-background min-h-svh font-serif">
 			<main class="min-h-full flex flex-col p-4">
 				<header class="mb-4 flex justify-between">
-					@homeIcon()
+					<div class="flex items-center gap-4">
+						@homeIcon()
+						if pc.User != nil {
+							<span class="px-2 py-1 border-2 border-primary bg-primary/10 shadow-hard">
+								{ utils.CapitalizeFirst(pc.User.Username) }
+							</span>
+						}
+					</div>
 					@themeToggle()
 				</header>
 				<!-- Here's where the pages are injected -->
@@ -60,7 +76,7 @@ templ Layout(title string) {
 templ themeToggle() {
 	<select
 		id="theme-toggler"
-		class="select shadow-xl shadow-brutalist"
+		class="select shadow-xl shadow-hard"
 		data-bind-theme
 		data-on-change="
             localStorage.setItem('theme', event.target.value);

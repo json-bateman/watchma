@@ -40,7 +40,7 @@ func (h *WebHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Set session token as HTTP-only cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     utils.SESSION_COOKIE,
+		Name:     utils.SESSION_COOKIE_NAME,
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,

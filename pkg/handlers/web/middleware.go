@@ -2,6 +2,7 @@ package web
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -17,17 +18,16 @@ func (h *WebHandler) RequireLogin(next http.Handler) http.Handler {
 			return
 		}
 
-		// Get session token from cookie
 		token := utils.GetSessionToken(r)
 		if token == "" {
+			h.logger.Debug(fmt.Sprintf("User redirected to login, no %s cookie", utils.SESSION_COOKIE_NAME))
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		// Fetch user by session token (optimized JOIN query)
 		user, err := h.authService.GetUserBySessionToken(token)
 		if err == sql.ErrNoRows {
-			// Invalid or expired session
+			h.logger.Info("User redirected to login, session token invalid", "error", err.Error())
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
