@@ -19,11 +19,15 @@ import (
 
 func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
+	user := utils.GetUserFromContext(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if ok && myRoom.Game.MaxPlayers > len(myRoom.Users) {
-		h.roomService.AddUserToRoom(myRoom.Name, username)
+		h.roomService.AddUserToRoom(myRoom.Name, user.Username)
 	} else {
 		component := rooms.RoomFull(roomName)
 		templ.Handler(component).ServeHTTP(w, r)
@@ -35,7 +39,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	component := rooms.SingleRoom(myRoom, username)
+	component := rooms.SingleRoom(myRoom, user.Username)
 	templ.Handler(component).ServeHTTP(w, r)
 }
 
@@ -43,13 +47,18 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 // Events to the client in real-time
 func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
+	user := utils.GetUserFromContext(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	sse := datastar.NewSSE(w, r)
 
 	// Send existing user list to new client
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		userBox := rooms.UserBox(myRoom, username)
+		userBox := rooms.UserBox(myRoom, user.Username)
 		if err := sse.PatchElementTempl(userBox); err != nil {
 			h.logger.Error("Error patching initial user list")
 		}
@@ -89,7 +98,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		}
 		switch string(msg.Data) {
 		case utils.ROOM_UPDATE_EVENT:
-			userBox := rooms.UserBox(myRoom, username)
+			userBox := rooms.UserBox(myRoom, user.Username)
 			if err := sse.PatchElementTempl(userBox); err != nil {
 				h.logger.Error("Error patching user list", "error", err)
 				return
@@ -133,7 +142,11 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
+	user := utils.GetUserFromContext(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	room, ok := h.roomService.GetRoom(roomName)
 	if !ok {
@@ -142,7 +155,7 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.roomService.RemoveUserFromRoom(room.Name, username)
+	h.roomService.RemoveUserFromRoom(room.Name, user.Username)
 
 	allUsers := room.GetAllUsers()
 	if len(allUsers) == 0 {
@@ -150,7 +163,7 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if room.Game.Host == username {
+	if room.Game.Host == user.Username {
 		// If host leaves transfer to random other user
 		for newHostUsername := range room.Users {
 			h.roomService.TransferHost(room.Name, newHostUsername)
@@ -190,11 +203,15 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
+	user := utils.GetUserFromContext(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		h.roomService.ToggleUserReady(room.Name, username)
+		h.roomService.ToggleUserReady(room.Name, user.Username)
 	}
 }
 
@@ -208,13 +225,13 @@ func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	username := utils.GetUsernameFromCookie(r)
-	if username == "" {
-		utils.WriteJSONError(w, http.StatusBadRequest, "Username not found")
+	user := utils.GetUserFromContext(r)
+	if user == nil {
+		utils.WriteJSONError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
-	req.Username = username
+	req.Username = user.Username
 	room, ok := h.roomService.GetRoom(req.Room)
 	if ok {
 		h.roomService.AddMessage(room.Name, req)

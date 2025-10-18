@@ -41,18 +41,15 @@ func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *sl
 // Web Routes should return web elements (I.E. SSE, HTML)
 func (h *WebHandler) SetupRoutes(r chi.Router) {
 	// Public web routes
-	r.Get("/", h.Index)
 	r.Get("/login", h.Login)
-	r.Get("/username", h.Username)
-	r.Get("/shuffle/{number}", h.Shuffle)
-
 	r.Post("/login", h.HandleLogin)
-	r.Post("/username", h.SetUsername)
 
 	// Protected web routes
 	r.Group(func(r chi.Router) {
-		r.Use(RequireUsername)
+		r.Use(h.RequireLogin)
 
+		r.Get("/", h.Index)
+		r.Get("/shuffle/{number}", h.Shuffle)
 		r.Get("/host", h.Host)
 		r.Get("/join", h.Join)
 		r.Get("/sse/join", h.JoinSSE)

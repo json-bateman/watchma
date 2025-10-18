@@ -58,7 +58,12 @@ func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
-	username := utils.GetUsernameFromCookie(r)
+	user := utils.GetUserFromContext(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
@@ -82,7 +87,7 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 	h.roomService.AddRoom(roomName, &types.GameSession{
 		MovieNumber: movies,
 		MaxPlayers:  maxPlayers,
-		Host:        username,
+		Host:        user.Username,
 		Votes:       make(map[*types.JellyfinItem]int),
 	})
 

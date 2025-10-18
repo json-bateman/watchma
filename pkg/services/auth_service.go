@@ -57,6 +57,11 @@ func (s *AuthService) LoginOrCreate(username, password string) (*repository.User
 
 }
 
+// GetUserBySessionToken fetches a user by their session token
+func (s *AuthService) GetUserBySessionToken(token string) (*repository.User, error) {
+	return s.userRepo.GetUserBySessionToken(token)
+}
+
 func generateRandomToken() string {
 	b := make([]byte, 32) // 32 bytes = 256 bits of randomness
 	rand.Read(b)

@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 
+	"watchma/pkg/utils"
 	"watchma/view/login"
 
 	"github.com/a-h/templ"
@@ -39,7 +40,7 @@ func (h *WebHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Set session token as HTTP-only cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
+		Name:     utils.SESSION_COOKIE,
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,

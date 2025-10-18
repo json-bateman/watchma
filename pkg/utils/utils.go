@@ -1,11 +1,19 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
+	"watchma/pkg/database/repository"
+
 	"github.com/starfederation/datastar-go/datastar"
 )
+
+// Context key type for storing user data
+type contextKey string
+
+const userContextKey contextKey = "user"
 
 func WriteJSONError(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
@@ -19,8 +27,8 @@ func WriteJSONResponse(w http.ResponseWriter, status int, data any) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func GetUsernameFromCookie(r *http.Request) string {
-	cookie, err := r.Cookie(USERNAME_COOKIE)
+func GetSessionToken(r *http.Request) string {
+	cookie, err := r.Cookie(SESSION_COOKIE)
 	if err != nil {
 		return ""
 	}
@@ -35,4 +43,20 @@ func SendSSEError(w http.ResponseWriter, r *http.Request, message string) {
 func ClearSSEError(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 	sse.PatchElements(`<div id="error" class="hidden"></div>`)
+}
+
+// SetUserContext stores user data in the request context
+func SetUserContext(r *http.Request, user *repository.User) *http.Request {
+	ctx := context.WithValue(r.Context(), userContextKey, user)
+	return r.WithContext(ctx)
+}
+
+// GetUserFromContext retrieves user data from the request context
+// Returns nil if no user is found in context
+func GetUserFromContext(r *http.Request) *repository.User {
+	user, ok := r.Context().Value(userContextKey).(*repository.User)
+	if !ok {
+		return nil
+	}
+	return user
 }

@@ -1,40 +1,43 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"time"
+
+	"watchma/pkg/database/sqlcgen"
 )
 
 type SessionRepository struct {
-	db *sql.DB
+	queries *sqlcgen.Queries
 }
 
 func NewSessionRepository(db *sql.DB) *SessionRepository {
-	return &SessionRepository{db: db}
+	return &SessionRepository{
+		queries: sqlcgen.New(db),
+	}
 }
 
 // Create stores a session token for a user
 func (r *SessionRepository) Create(userID int64, token string) error {
+	ctx := context.Background()
 	expiresAt := time.Now().AddDate(100, 0, 0) // far future (never expires)
-	_, err := r.db.Exec(
-		"INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)",
-		userID, token, expiresAt,
-	)
-	return err
+
+	return r.queries.CreateSession(ctx, sqlcgen.CreateSessionParams{
+		UserID:    userID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+	})
 }
 
 // GetUserID returns the user ID for a given session token
 func (r *SessionRepository) GetUserID(token string) (int64, error) {
-	var userID int64
-	err := r.db.QueryRow(
-		"SELECT user_id FROM refresh_tokens WHERE token = ?",
-		token,
-	).Scan(&userID)
-	return userID, err
+	ctx := context.Background()
+	return r.queries.GetUserIDByToken(ctx, token)
 }
 
 // Delete removes a session (for logout)
 func (r *SessionRepository) Delete(token string) error {
-	_, err := r.db.Exec("DELETE FROM refresh_tokens WHERE token = ?", token)
-	return err
+	ctx := context.Background()
+	return r.queries.DeleteSession(ctx, token)
 }

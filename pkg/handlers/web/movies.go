@@ -56,7 +56,12 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	username := utils.GetUsernameFromCookie(r)
+	currentUser := utils.GetUserFromContext(r)
+	if currentUser == nil {
+		utils.SendSSEError(w, r, "Unauthorized")
+		return
+	}
+
 	var moviesReq types.MovieRequest
 	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&moviesReq); err != nil {
@@ -69,7 +74,7 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room, ok := h.roomService.GetRoom(roomName)
-	user, ok2 := room.GetUser(username)
+	user, ok2 := room.GetUser(currentUser.Username)
 	if ok && ok2 {
 		for _, movieID := range moviesReq.Movies {
 			// Find the JellyfinItem that matches this ID
