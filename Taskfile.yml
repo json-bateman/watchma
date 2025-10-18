@@ -21,7 +21,11 @@ tasks:
       - |
         tailwindcss -i ./public/input.css -o ./public/style.css --watch &
         templ generate --watch &
-        air &
+        if [ "$OS" = "Windows_NT" ]; then
+          air -build.cmd "templ generate; if (\$?) { go build -o tmp/main.exe ./cmd }" -build.bin "tmp/main.exe" &
+        else
+          air &
+        fi
         wait
 
   # Build tasks
