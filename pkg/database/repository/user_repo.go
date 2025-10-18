@@ -69,6 +69,7 @@ func (r *UserRepository) GetByUsername(username string) (*User, error) {
 	)
 	if err == sql.ErrNoRows {
 		s := fmt.Sprintf("query user: %s --- Not found", username)
+
 		r.l.Error(s)
 		return nil, sql.ErrNoRows
 	}
