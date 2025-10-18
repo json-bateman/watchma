@@ -16,6 +16,7 @@ type JellyfinItem struct {
 		Thumb   string `json:"Thumb"`
 	} `json:"ImageTags"`
 	BackdropImageTags []string `json:"BackdropImageTags"`
+	Genres            []string `json:"Genres"`
 }
 
 // JellyfinItems represents an array of full movie/tv show json from Jellyfin's API
