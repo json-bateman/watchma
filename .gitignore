@@ -5,5 +5,5 @@ bin/
 release/
 __debug
 .sqlfluff
-*_templ.go
-style.css
+**/*_templ.go
+**/style.css
