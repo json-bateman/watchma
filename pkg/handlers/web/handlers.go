@@ -4,12 +4,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/a-h/templ"
-	"github.com/go-chi/chi/v5"
-	"github.com/nats-io/nats.go"
 	"watchma/pkg/config"
 	"watchma/pkg/services"
 	"watchma/view"
+
+	"github.com/a-h/templ"
+	"github.com/go-chi/chi/v5"
+	"github.com/nats-io/nats.go"
 )
 
 // WebHandler holds dependencies needed by web handlers
@@ -63,7 +64,6 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Post("/room/{roomName}/movies", h.SubmitMovies)
 		r.Post("/room/{roomName}/ready", h.Ready)
 		r.Post("/room/{roomName}/start", h.StartGame)
-		r.Post("/room/{roomName}", h.SubmitMovies)
 	})
 }
 

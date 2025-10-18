@@ -54,7 +54,7 @@ func (a *App) Initialize() error {
 	if a.Settings.UseDummyData {
 		a.MovieService = services.NewDummyMovieService()
 	} else {
-		a.MovieService = services.NewJellyfinService(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL)
+		a.MovieService = services.NewJellyfinService(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL, a.Logger)
 	}
 
 	a.Router = chi.NewRouter()
