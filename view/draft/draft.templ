@@ -5,7 +5,7 @@ import (
 	"watchma/view/common"
 )
 
-templ Draft(pc common.PageContext, state types.DraftState, movies []types.JellyfinItem, baseUrl string) {
+templ Draft(pc common.PageContext, state types.DraftState, movies []types.Movie, baseUrl string) {
 	@common.Layout(pc) {
 		@container() {
 			<div class="w-full flex justify-between items-center">
@@ -72,7 +72,7 @@ templ actions(state types.DraftState) {
 	</div>
 }
 
-templ selectedMovies(movies []types.JellyfinItem) {
+templ selectedMovies(movies []types.Movie) {
 	<div class="flex gap-2">
 		for _, movie := range movies {
 			<div class="inline-flex items-center pl-3 py-1 bg-primary text-sm text-text">
@@ -88,7 +88,7 @@ templ selectedMovies(movies []types.JellyfinItem) {
 	</div>
 }
 
-func containsMovie(movies []types.JellyfinItem, id string) bool {
+func containsMovie(movies []types.Movie, id string) bool {
 	for _, m := range movies {
 		if m.Id == id {
 			return true
@@ -97,7 +97,7 @@ func containsMovie(movies []types.JellyfinItem, id string) bool {
 	return false
 }
 
-templ moviesList(movies []types.JellyfinItem, selectedMovies []types.JellyfinItem, baseUrl string) {
+templ moviesList(movies []types.Movie, selectedMovies []types.Movie, baseUrl string) {
 	<div id="movie-list" class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
 		for _, movie := range movies {
 			<input

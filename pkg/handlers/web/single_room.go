@@ -189,23 +189,23 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
 		room.Game.Step = types.Voting
-		items, err := h.movieService.FetchJellyfinMovies()
+		movies, err := h.movieService.GetMovies()
 		if err != nil {
 		}
 
-		if items == nil || len(items.Items) == 0 {
+		if len(movies) == 0 {
 			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", room.Name))
 		}
 
-		rand.Shuffle(len(items.Items), func(i, j int) {
-			items.Items[i], items.Items[j] = items.Items[j], items.Items[i]
+		rand.Shuffle(len(movies), func(i, j int) {
+			movies[i], movies[j] = movies[j], movies[i]
 		})
 
-		var randMovies []types.JellyfinItem
-		if len(items.Items) >= room.Game.MovieNumber {
-			randMovies = items.Items[:room.Game.MovieNumber]
+		randMovies := []types.Movie{}
+		if len(movies) >= room.Game.MovieNumber {
+			randMovies = movies[:room.Game.MovieNumber]
 		} else {
-			randMovies = items.Items
+			randMovies = movies
 		}
 		room.Game.Movies = randMovies
 

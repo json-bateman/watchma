@@ -10,6 +10,7 @@ import (
 	"watchma/pkg/database"
 	"watchma/pkg/database/repository"
 	"watchma/pkg/handlers/web"
+	"watchma/pkg/providers"
 	"watchma/pkg/services"
 
 	"github.com/go-chi/chi/v5"
@@ -21,7 +22,7 @@ type App struct {
 	Settings     *config.Settings
 	Logger       *slog.Logger
 	Router       *chi.Mux
-	MovieService services.ExternalMovieService
+	MovieService *services.MovieService
 	NATS         *nats.Conn
 	DB           *database.DB
 	UserRepo     *repository.UserRepository
@@ -50,12 +51,19 @@ func (a *App) Initialize() error {
 	a.SessionRepo = repository.NewSessionRepository(db.DB)
 	a.AuthService = services.NewAuthService(a.UserRepo, a.SessionRepo, a.Logger)
 
-	// Use dummy data if Jellyfin credentials aren't provided
+	var movieProvider providers.MovieProvider
 	if a.Settings.UseDummyData {
-		a.MovieService = services.NewDummyMovieService()
+		movieProvider = providers.NewDummyMovieProvider()
 	} else {
-		a.MovieService = services.NewJellyfinService(a.Settings.JellyfinApiKey, a.Settings.JellyfinBaseURL, a.Logger)
+
+		movieProvider = providers.NewCachingMovieProvider(
+			providers.NewJellyfinMovieProvider(
+				a.Settings.JellyfinApiKey,
+				a.Settings.JellyfinBaseURL,
+				a.Logger),
+			time.Minute)
 	}
+	a.MovieService = services.NewMovieService(movieProvider)
 
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)

@@ -5,7 +5,7 @@ import (
 	"watchma/view/common"
 )
 
-templ Shuffle(pc common.PageContext, movies []types.JellyfinItem, baseURL string) {
+templ Shuffle(pc common.PageContext, movies []types.Movie, baseURL string) {
 	@common.Layout(pc) {
 		<section class="flex flex-col justify-center items-center mb-6">
 			<span class="text-3xl mb-4">Shuffled Movies</span>

@@ -164,7 +164,7 @@ func (rs *RoomService) AddMessage(roomName string, msg types.Message) bool {
 	return true
 }
 
-func (rs *RoomService) StartGame(roomName string, movies []types.JellyfinItem) bool {
+func (rs *RoomService) StartGame(roomName string, movies []types.Movie) bool {
 	room, ok := rs.GetRoom(roomName)
 	if !ok {
 		return false
@@ -216,7 +216,7 @@ func (rs *RoomService) SubmitVotes(roomName string, username string, movies []st
 
 	if ok && ok2 {
 		for _, movieID := range movies {
-			// Find the JellyfinItem that matches this ID
+			// Find the Movie that matches this ID
 			for i := range room.Game.Movies {
 				if room.Game.Movies[i].Id == movieID {
 					room.Game.Votes[&room.Game.Movies[i]]++
