@@ -79,36 +79,19 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		utils.SendSSEError(w, r, "Must include at least 1 movie id.")
 		return
 	}
-	room, ok := h.roomService.GetRoom(roomName)
-	user, ok2 := room.GetPlayer(currentUser.Username)
-	if ok && ok2 {
-		for _, movieID := range moviesReq.Movies {
-			// Find the JellyfinItem that matches this ID
-			for i := range room.Game.Movies {
-				if room.Game.Movies[i].Id == movieID {
-					room.Game.Votes[&room.Game.Movies[i]]++
-					break
-				}
-			}
-			user.SelectedMovies = append(user.SelectedMovies, movieID)
-		}
-	}
-	user.HasSelectedMovies = true
+
+	h.roomService.SubmitVotes(roomName, currentUser.Username, moviesReq.Movies)
+	isVotingFinished := h.roomService.GetIsVotingFinished(roomName)
 
 	sse := datastar.NewSSE(w, r)
 
-	playersComplete := 0
-	for _, user := range room.Players {
-		if user.HasSelectedMovies {
-			playersComplete++
-		}
-	}
-	// If all players have selected movies, push them to final screen
-	if playersComplete == len(room.Players) {
-		h.roomService.FinishGame(room.Name)
+	if isVotingFinished {
+		h.roomService.FinishGame(roomName)
 	} else {
-		// If not, render successfully submitted movies button
-		buttonAndMovies := movies.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, user.SelectedMovies)
+		room, _ := h.roomService.GetRoom(roomName)
+		player, _ := room.GetPlayer(currentUser.Username)
+
+		buttonAndMovies := movies.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.SelectedMovies)
 		sse.PatchElementTempl(buttonAndMovies)
 	}
 }

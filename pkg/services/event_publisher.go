@@ -3,8 +3,9 @@ package services
 import (
 	"log/slog"
 
-	"github.com/nats-io/nats.go"
 	"watchma/pkg/utils"
+
+	"github.com/nats-io/nats.go"
 )
 
 type EventPublisher struct {
@@ -31,9 +32,11 @@ func (ep *EventPublisher) Publish(subject string, data []byte) error {
 // Helper methods for common patterns
 func (ep *EventPublisher) PublishRoomEvent(roomName, event string) error {
 	subject := utils.RoomSubject(roomName)
+	ep.logger.Debug(utils.NATS_PUB, "subject", subject, "msg", event)
 	return ep.Publish(subject, []byte(event))
 }
 
 func (ep *EventPublisher) PublishLobbyEvent(event string) error {
+	ep.logger.Debug(utils.NATS_PUB, "msg", event)
 	return ep.Publish(utils.NATS_LOBBY_ROOMS, []byte(event))
 }
