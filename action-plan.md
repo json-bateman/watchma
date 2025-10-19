@@ -7,7 +7,7 @@
     - [X] Room service to handle all of the apps rooms
 
 - Nats again
-    - [ ] Reintroduce NATS, so I have a simple library and one location for all events
+    - [X] Reintroduce NATS, so I have a simple library and one location for all events
 
 - Room flow
     - [X] host page to host a room (done with form)
