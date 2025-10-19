@@ -18,7 +18,7 @@ import (
 // WebHandler holds dependencies needed by web handlers
 type WebHandler struct {
 	settings             *config.Settings
-	movieService         services.ExternalMovieService
+	movieService         *services.MovieService
 	logger               *slog.Logger
 	roomService          *services.RoomService
 	movieOfTheDayService *services.MovieOfTheDayService
@@ -27,7 +27,7 @@ type WebHandler struct {
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(cfg *config.Settings, ms services.ExternalMovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService, authSvc *services.AuthService, nc *nats.Conn) *WebHandler {
+func NewWebHandler(cfg *config.Settings, ms *services.MovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService, authSvc *services.AuthService, nc *nats.Conn) *WebHandler {
 	return &WebHandler{
 		settings:             cfg,
 		movieService:         ms,

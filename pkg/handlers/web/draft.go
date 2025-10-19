@@ -76,7 +76,7 @@ var testDraftState = types.DraftState{
 
 func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
 	user := utils.GetUserFromContext(r)
-	movies, _ := h.movieService.FetchJellyfinMovies()
+	movies, _ := h.movieService.GetMovies()
 
 	templ.WithChildren(r.Context(), draft.Container(testDraftState, movies.Items, h.settings.JellyfinBaseURL))
 

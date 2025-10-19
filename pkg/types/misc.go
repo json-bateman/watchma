@@ -17,11 +17,11 @@ const (
 
 type GameSession struct {
 	Host          string
-	Movies        []JellyfinItem
+	Movies        []Movie
 	MovieNumber   int
 	MaxPlayers    int
 	MaxDraftCount int
-	Votes         map[*JellyfinItem]int // MovieID -> vote count
+	Votes         map[*Movie]int // MovieID -> vote count
 	Step          GameStep
 }
 
@@ -50,12 +50,12 @@ type Message struct {
 
 // MovieVote represents a struct for holding final votes
 type MovieVote struct {
-	Movie *JellyfinItem
+	Movie *Movie
 	Votes int
 }
 
 type DraftState struct {
-	SelectedMovies []JellyfinItem
+	SelectedMovies []Movie
 	IsReady        bool
 	MaxVotes       int
 }

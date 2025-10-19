@@ -8,13 +8,13 @@ import (
 )
 
 type MovieOfTheDayService struct {
-	movieService ExternalMovieService
-	movie        types.JellyfinItem
+	movieService *MovieService
+	movie        types.Movie
 	day          time.Time
 }
 
-func NewMovieOfTheDayService(movieService ExternalMovieService) *MovieOfTheDayService {
-	return &MovieOfTheDayService{movieService, types.JellyfinItem{}, time.Time{}}
+func NewMovieOfTheDayService(movieService *MovieService) *MovieOfTheDayService {
+	return &MovieOfTheDayService{movieService, types.Movie{}, time.Time{}}
 }
 
 // GetMovieOfTheDay returns a unique movie for the current UTC day.
@@ -25,7 +25,7 @@ func NewMovieOfTheDayService(movieService ExternalMovieService) *MovieOfTheDaySe
 // caches it, and returns it.
 //
 // Returns an error if fetching movies fails or if no movies are available.
-func (motds *MovieOfTheDayService) GetMovieOfTheDay() (types.JellyfinItem, error) {
+func (motds *MovieOfTheDayService) GetMovieOfTheDay() (types.Movie, error) {
 	now := time.Now().UTC()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 
@@ -33,20 +33,20 @@ func (motds *MovieOfTheDayService) GetMovieOfTheDay() (types.JellyfinItem, error
 		return motds.movie, nil
 	}
 
-	movies, err := motds.movieService.FetchJellyfinMovies()
+	movies, err := motds.movieService.GetMovies()
 	if err != nil {
-		return types.JellyfinItem{}, fmt.Errorf("failed to fetch movies: %w", err)
+		return types.Movie{}, fmt.Errorf("failed to fetch movies: %w", err)
 	}
 
-	if len(movies.Items) == 0 {
-		return types.JellyfinItem{}, fmt.Errorf("no movies available")
+	if len(movies) == 0 {
+		return types.Movie{}, fmt.Errorf("no movies available")
 	}
 
 	// Pick a new movie deterministically with seeded RNG based on today's date
 	rng := rand.New(rand.NewSource(today.Unix()))
-	index := rng.Intn(len(movies.Items))
+	index := rng.Intn(len(movies))
 
-	motds.movie = movies.Items[index]
+	motds.movie = movies[index]
 	motds.day = today
 
 	return motds.movie, nil

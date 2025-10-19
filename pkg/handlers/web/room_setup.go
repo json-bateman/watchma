@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/a-h/templ"
-	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
 	"watchma/view/common"
 	"watchma/view/rooms"
+
+	"github.com/a-h/templ"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +98,7 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 		MovieNumber: movies,
 		MaxPlayers:  maxPlayers,
 		Host:        user.Username,
-		Votes:       make(map[*types.JellyfinItem]int),
+		Votes:       make(map[*types.Movie]int),
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)

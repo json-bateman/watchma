@@ -30,27 +30,27 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items, err := h.movieService.FetchJellyfinMovies()
+	_movies, err := h.movieService.GetMovies()
 	if err != nil {
 		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
 		return
 	}
 
-	if items == nil || len(items.Items) == 0 {
+	if len(_movies) == 0 {
 		log.Printf("no movies found")
 		return
 	}
 
-	rand.Shuffle(len(items.Items), func(i, j int) {
-		items.Items[i], items.Items[j] = items.Items[j], items.Items[i]
+	rand.Shuffle(len(_movies), func(i, j int) {
+		_movies[i], _movies[j] = _movies[j], _movies[i]
 	})
 
-	var randMovies []types.JellyfinItem
-	if len(items.Items) >= intVal {
-		randMovies = items.Items[:intVal]
+	var randMovies []types.Movie
+	if len(_movies) >= intVal {
+		randMovies = _movies[:intVal]
 	} else {
-		randMovies = items.Items
+		randMovies = _movies
 	}
 
 	component := movies.Shuffle(common.PageContext{

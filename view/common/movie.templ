@@ -13,7 +13,7 @@ type MovieTitleImageOptions struct {
 }
 
 templ MovieTitleImage(
-	movie types.JellyfinItem,
+	movie types.Movie,
 	baseURL string,
 	options MovieTitleImageOptions,
 ) {
@@ -35,7 +35,7 @@ templ MovieTitleImage(
 		"%s/Items/%s/Images/Primary?tag=%s&width=%d&height=%d",
 		baseURL,
 		movie.Id,
-		movie.ImageTags.Primary,
+		movie.PrimaryImageTag,
 		options.Width,
 		options.Height,
 	)
