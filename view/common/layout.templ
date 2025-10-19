@@ -51,6 +51,8 @@ templ Layout(pc PageContext) {
 						<img src="/public/github-logo.svg"/>
 					</a>
 				</footer>
+				<!-- Helpful inspector element for data-star -->
+				<dataspa-inspector></dataspa-inspector>
 			</main>
 			<script>
                 function getSystemTheme() {
@@ -69,6 +71,8 @@ templ Layout(pc PageContext) {
             </script>
 			<!-- Datastar -->
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+			<!-- Inspector -->
+			<script defer type="module" src="https://cdn.jsdelivr.net/gh/dataSPA/dataSPA-inspector@main/dataspa-inspector.bundled.js"></script>
 		</body>
 	</html>
 }
