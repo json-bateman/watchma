@@ -9,13 +9,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/a-h/templ"
-	"github.com/go-chi/chi/v5"
-	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
 	"watchma/view/common"
 	"watchma/view/movies"
+
+	"github.com/a-h/templ"
+	"github.com/go-chi/chi/v5"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +80,7 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room, ok := h.roomService.GetRoom(roomName)
-	user, ok2 := room.GetUser(currentUser.Username)
+	user, ok2 := room.GetPlayer(currentUser.Username)
 	if ok && ok2 {
 		for _, movieID := range moviesReq.Movies {
 			// Find the JellyfinItem that matches this ID
@@ -97,13 +98,13 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 
 	playersComplete := 0
-	for _, user := range room.Users {
+	for _, user := range room.Players {
 		if user.HasSelectedMovies {
 			playersComplete++
 		}
 	}
 	// If all players have selected movies, push them to final screen
-	if playersComplete == len(room.Users) {
+	if playersComplete == len(room.Players) {
 		h.roomService.FinishGame(room.Name)
 	} else {
 		// If not, render successfully submitted movies button

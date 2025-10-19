@@ -3,10 +3,10 @@ package rooms
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"watchma/pkg/services"
 	"watchma/pkg/types"
 	"watchma/view/common"
-	"strings"
 )
 
 type ChatMessage struct {
@@ -83,14 +83,14 @@ templ ChatBox(messages []types.Message) {
 templ UserBox(room *services.Room, username string) {
 	{{
 	totalReady := 0
-	users := room.UsersByJoinTime()
+	players := room.PlayersByJoinTime()
 	}}
-	for _, u := range users {
-		if u.Ready {
+	for _, p := range players {
+		if p.Ready {
 			{{ totalReady++ }}
 		}
 	}
-	<div id="users" class="flex flex-col">
+	<div id="players" class="flex flex-col">
 		if username == room.Game.Host {
 			<span class="text-primary flex text-xl">You are the host!</span>
 		}
@@ -98,7 +98,7 @@ templ UserBox(room *services.Room, username string) {
 			<div class="w-20 text-text text-xl flex flex-col justify-center items-center">
 				<span>READY</span>
 				<div class="pl-2 pt-2 bg-secondary shadow-hard flex justify-center items-center px-2 py-1 text-center">
-					<span>{ totalReady }/{ len(users) }</span>
+					<span>{ totalReady }/{ len(players) }</span>
 				</div>
 			</div>
 			<div>
@@ -109,7 +109,7 @@ templ UserBox(room *services.Room, username string) {
 					Ready Up!
 				</button>
 				if username == room.Game.Host {
-					if len(users) == totalReady && totalReady > 1 {
+					if len(players) == totalReady && totalReady > 1 {
 						<button
 							class="btn-success  uppercase tracking-wide"
 							data-on-click={ fmt.Sprintf("@post('/room/%s/start')", room.Name) }
@@ -127,20 +127,20 @@ templ UserBox(room *services.Room, username string) {
 			</div>
 		</div>
 		<div class="flex flex-wrap gap-4 my-4">
-			for _, u := range users {
-				if u.Ready {
+			for _, p := range players {
+				if p.Ready {
 					<div
 						class="text-white text-xl shadow-hard-success border-4 border-green-600 justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
-						style={ getUserColor(u.Name, "background-color") }
+						style={ getUserColor(p.Username, "background-color") }
 					>
-						<span>{ u.Name }</span>
+						<span>{ p.Username }</span>
 					</div>
 				} else {
 					<div
 						class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
-						style={ getUserColor(u.Name, "background-color") }
+						style={ getUserColor(p.Username, "background-color") }
 					>
-						<span>{ u.Name }</span>
+						<span>{ p.Username }</span>
 					</div>
 				}
 			}
@@ -149,11 +149,11 @@ templ UserBox(room *services.Room, username string) {
 }
 
 templ Button(room *services.Room) {
-	<div id="users" class="flex flex-col">
+	<div id="players" class="flex flex-col">
 		<div class="flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4">
 			<div class="text-text text-xl  uppercase tracking-wider">
 				<span>Players:&nbsp</span>
-				<span class="text-2xl">{ len(room.Users) }</span>
+				<span class="text-2xl">{ len(room.Players) }</span>
 			</div>
 			<button
 				class="btn"
@@ -163,12 +163,12 @@ templ Button(room *services.Room) {
 			</button>
 		</div>
 		<div class="flex flex-wrap gap-4">
-			for _, u := range room.Users {
+			for _, p := range room.Players {
 				<div
 					class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
-					style={ getUserColor(u.Name, "background-color") }
+					style={ getUserColor(p.Username, "background-color") }
 				>
-					<span>{ u.Name }</span>
+					<span>{ p.Username }</span>
 				</div>
 			}
 		</div>

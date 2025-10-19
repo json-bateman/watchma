@@ -8,14 +8,15 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/a-h/templ"
-	"github.com/go-chi/chi/v5"
-	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
 	"watchma/view/common"
 	"watchma/view/movies"
 	"watchma/view/rooms"
+
+	"github.com/a-h/templ"
+	"github.com/go-chi/chi/v5"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
@@ -27,8 +28,8 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	myRoom, ok := h.roomService.GetRoom(roomName)
-	if ok && myRoom.Game.MaxPlayers > len(myRoom.Users) {
-		h.roomService.AddUserToRoom(myRoom.Name, user.Username)
+	if ok && myRoom.Game.MaxPlayers > len(myRoom.Players) {
+		h.roomService.AddPlayerToRoom(myRoom.Name, user.Username)
 	} else {
 		component := rooms.RoomFull(common.PageContext{
 			Title: roomName,
@@ -166,9 +167,9 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.roomService.RemoveUserFromRoom(room.Name, user.Username)
+	h.roomService.RemovePlayerFromRoom(room.Name, user.Username)
 
-	allUsers := room.GetAllUsers()
+	allUsers := room.GetAllPlayers()
 	if len(allUsers) == 0 {
 		h.roomService.DeleteRoom(room.Name)
 		return
@@ -176,7 +177,7 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 
 	if room.Game.Host == user.Username {
 		// If host leaves transfer to random other user
-		for newHostUsername := range room.Users {
+		for newHostUsername := range room.Players {
 			h.roomService.TransferHost(room.Name, newHostUsername)
 			break
 		}
@@ -222,7 +223,7 @@ func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
 
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		h.roomService.ToggleUserReady(room.Name, user.Username)
+		h.roomService.TogglePlayerReady(room.Name, user.Username)
 	}
 }
 

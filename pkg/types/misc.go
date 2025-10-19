@@ -10,17 +10,19 @@ type GameStep int
 
 const (
 	Lobby = iota
+	Draft
 	Voting
 	Results
 )
 
 type GameSession struct {
-	Host        string
-	Movies      []JellyfinItem
-	MovieNumber int
-	MaxPlayers  int
-	Votes       map[*JellyfinItem]int // MovieID -> vote count
-	Step        GameStep
+	Host          string
+	Movies        []JellyfinItem
+	MovieNumber   int
+	MaxPlayers    int
+	MaxDraftCount int
+	Votes         map[*JellyfinItem]int // MovieID -> vote count
+	Step          GameStep
 }
 
 // MovieRequest represents a request containing movie IDs
@@ -28,11 +30,13 @@ type MovieRequest struct {
 	Movies []string `json:"movies"`
 }
 
-type User struct {
-	Name              string
+type Player struct {
+	Username          string
 	JoinedAt          time.Time
 	Ready             bool
-	SelectedMovies    []string //MovieID
+	DraftedMovies     []string // MovieId
+	SelectedMovies    []string // MovieId
+	HasFinishedDraft  bool
 	HasSelectedMovies bool
 }
 

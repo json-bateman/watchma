@@ -1,10 +1,10 @@
 package rooms
 
 import (
+	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/services"
 	"watchma/pkg/types"
 	"watchma/view/common"
-	"github.com/starfederation/datastar-go/datastar"
 )
 
 templ JoinPage(pc common.PageContext, rooms map[string]*services.Room) {
@@ -40,12 +40,12 @@ templ RoomListBody(rooms map[string]*services.Room) {
 					<td class="py-2">
 						<div class="flex justify-center items-center">
 							<div class="bg-accent px-2 py-1 rounded font-bold">
-								{ len(room.Users) }/{ room.Game.MaxPlayers }
+								{ len(room.Players) }/{ room.Game.MaxPlayers }
 							</div>
 						</div>
 					</td>
 					<td class="hover:cursor-pointer transition-all py-2">
-						if room.Game.MaxPlayers == len(room.Users) {
+						if room.Game.MaxPlayers == len(room.Players) {
 							<span class="hover:text-red-400">
 								Full!
 							</span>
