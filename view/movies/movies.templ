@@ -90,7 +90,7 @@ templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
 				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
 					for _, movieVote := range winnerMovies {
 						<div class="block glow-border w-72 md:w-96">
-							@common.MovieTitleImage(*movieVote.Movie, baseURL, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"})
+							@common.MovieTitleImage(*movieVote.Movie, baseURL, common.MovieTitleImageOptions{})
 						</div>
 					}
 				</div>
