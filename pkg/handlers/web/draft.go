@@ -27,7 +27,7 @@ func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
 				PremiereDate:    "1999-03-31T00:00:00Z",
 				CriticRating:    88,
 				CommunityRating: 8.7,
-				RunTimeTicks:    81600000000, // 2h 16m in ticks
+				RunTimeTicks:    81600000000,
 				ProductionYear:  1999,
 				ImageTags: struct {
 					Primary string `json:"Primary"`
@@ -47,7 +47,7 @@ func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
 				PremiereDate:    "2010-07-16T00:00:00Z",
 				CriticRating:    87,
 				CommunityRating: 8.8,
-				RunTimeTicks:    88800000000, // 2h 28m in ticks
+				RunTimeTicks:    88800000000,
 				ProductionYear:  2010,
 				ImageTags: struct {
 					Primary string `json:"Primary"`

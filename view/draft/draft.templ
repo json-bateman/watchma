@@ -34,7 +34,13 @@ templ container() {
 }
 
 templ search() {
-	<input class="input" aria-label="Search movies" placeholder="Search..." aria-placeholder="search..."/>
+	<input
+		class="input"
+		aria-label="Search movies"
+		placeholder="Search..."
+		aria-placeholder="Search..."
+		data-bind-search
+	/>
 }
 
 templ filters() {
@@ -92,7 +98,7 @@ func containsMovie(movies []types.JellyfinItem, id string) bool {
 }
 
 templ moviesList(movies []types.JellyfinItem, selectedMovies []types.JellyfinItem, baseUrl string) {
-	<div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+	<div id="movie-list" class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
 		for _, movie := range movies {
 			<input
 				class="hidden"
