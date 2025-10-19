@@ -55,7 +55,6 @@ func (a *App) Initialize() error {
 	if a.Settings.UseDummyData {
 		movieProvider = providers.NewDummyMovieProvider()
 	} else {
-
 		movieProvider = providers.NewCachingMovieProvider(
 			providers.NewJellyfinMovieProvider(
 				a.Settings.JellyfinApiKey,
