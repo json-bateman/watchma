@@ -13,6 +13,9 @@ templ Draft(pc common.PageContext, state types.DraftState, movies []types.Movie,
 }
 
 templ Container(state types.DraftState, movies []types.Movie, baseUrl string) {
+	{{
+		showSelectedMovies := len(state.SelectedMovies) > 0
+	}}
 	<div id="draftContainer" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
 			<section class="flex gap-4 flex-wrap">
@@ -25,9 +28,11 @@ templ Container(state types.DraftState, movies []types.Movie, baseUrl string) {
 				@submit(state)
 			</section>
 		</div>
-		<section class="mt-4">
-			@selectedMovies(state.SelectedMovies)
-		</section>
+		if showSelectedMovies {
+			<section class="mt-4">
+				@selectedMovies(state.SelectedMovies)
+			</section>
+		}
 		<section class="mt-4">
 			@moviesList(movies, state.SelectedMovies, baseUrl)
 		</section>
