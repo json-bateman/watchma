@@ -19,15 +19,11 @@ import (
 )
 
 type App struct {
-	Settings     *config.Settings
-	Logger       *slog.Logger
-	Router       *chi.Mux
-	MovieService *services.MovieService
-	NATS         *nats.Conn
-	DB           *database.DB
-	UserRepo     *repository.UserRepository
-	SessionRepo  *repository.SessionRepository
-	AuthService  *services.AuthService
+	Settings *config.Settings
+	Logger   *slog.Logger
+	Router   *chi.Mux
+	NATS     *nats.Conn
+	DB       *database.DB
 }
 
 func New() *App {
@@ -46,10 +42,27 @@ func (a *App) Initialize() error {
 		return fmt.Errorf("initialize database: %w", err)
 	}
 
+	nc, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		return fmt.Errorf("connect NATS: %w", err)
+	}
+
+	// Verify round-trip (ensures we’re really up)
+	if err := nc.FlushTimeout(2 * time.Second); err != nil {
+		return fmt.Errorf("nats flush failed: %w", err)
+	}
+
+	a.NATS = nc
+	a.Logger.Info(
+		"NATS connected",
+		"url", nc.ConnectedUrl(),
+		"server_id", nc.ConnectedServerId(),
+		"max_payload", nc.MaxPayload(),
+	)
+
 	a.DB = db
-	a.UserRepo = repository.NewUserRepository(db.DB, a.Logger)
-	a.SessionRepo = repository.NewSessionRepository(db.DB)
-	a.AuthService = services.NewAuthService(a.UserRepo, a.SessionRepo, a.Logger)
+	userRepo := repository.NewUserRepository(db.DB, a.Logger)
+	sessionRepo := repository.NewSessionRepository(db.DB)
 
 	var movieProvider providers.MovieProvider
 	if a.Settings.UseDummyData {
@@ -62,31 +75,29 @@ func (a *App) Initialize() error {
 				a.Logger),
 			time.Minute)
 	}
-	a.MovieService = services.NewMovieService(movieProvider)
+
+	eventPublisher := services.NewEventPublisher(a.NATS, a.Logger)
+	authService := services.NewAuthService(userRepo, sessionRepo, a.Logger)
+	movieService := services.NewMovieService(movieProvider)
+	roomService := services.NewRoomService(eventPublisher, a.Logger)
+	movieOfTheDayService := services.NewMovieOfTheDayService(movieService)
+
+	webHandler := web.NewWebHandler(
+		a.Settings,
+		a.Logger,
+		a.NATS,
+		&web.WebHandlerServices{
+			MovieService:         movieService,
+			RoomService:          roomService,
+			MovieOfTheDayService: movieOfTheDayService,
+			AuthService:          authService,
+		},
+	)
 
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
-
-	config.SetupFileServer(a.Logger, a.Router)
-
-	nc, err := nats.Connect(nats.DefaultURL)
-	if err != nil {
-		return fmt.Errorf("connect NATS: %w", err)
-	}
-	// Verify round-trip (ensures we’re really up)
-	if err := nc.FlushTimeout(2 * time.Second); err != nil {
-		return fmt.Errorf("nats flush failed: %w", err)
-	}
-	a.NATS = nc
-	a.Logger.Info("NATS connected",
-		"url", nc.ConnectedUrl(), "server_id", nc.ConnectedServerId(),
-		"max_payload", nc.MaxPayload())
-
-	eventPublisher := services.NewEventPublisher(a.NATS, a.Logger)
-	roomService := services.NewRoomService(eventPublisher, a.Logger)
-	movieOfTheDayService := services.NewMovieOfTheDayService(a.MovieService)
-	webHandler := web.NewWebHandler(a.Settings, a.MovieService, a.Logger, roomService, movieOfTheDayService, a.AuthService, a.NATS)
 	webHandler.SetupRoutes(a.Router)
+	config.SetupFileServer(a.Logger, a.Router)
 
 	return nil
 }

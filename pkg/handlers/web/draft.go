@@ -37,14 +37,14 @@ var testDraftState = types.DraftState{
 }
 
 func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
-	movies, _ := h.movieService.GetMovies()
+	movies, _ := h.services.MovieService.GetMovies()
 	response := NewPageResponse(draft.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
 	h.RenderPage(response, w, r)
 }
 
 func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
-	movies, _ := h.movieService.GetMovies()
+	movies, _ := h.services.MovieService.GetMovies()
 	sse := datastar.NewSSE(w, r)
 
 	// This business logic needs to be put into roomService later
@@ -70,7 +70,7 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 
 func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
-	movies, _ := h.movieService.GetMovies()
+	movies, _ := h.services.MovieService.GetMovies()
 	sse := datastar.NewSSE(w, r)
 
 	// This business logic needs to be put into roomService later

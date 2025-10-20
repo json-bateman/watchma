@@ -12,27 +12,28 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+type WebHandlerServices struct {
+	MovieService         *services.MovieService
+	RoomService          *services.RoomService
+	MovieOfTheDayService *services.MovieOfTheDayService
+	AuthService          *services.AuthService
+}
+
 // WebHandler holds dependencies needed by web handlers
 type WebHandler struct {
-	settings             *config.Settings
-	movieService         *services.MovieService
-	logger               *slog.Logger
-	roomService          *services.RoomService
-	movieOfTheDayService *services.MovieOfTheDayService
-	authService          *services.AuthService
-	NATS                 *nats.Conn
+	settings *config.Settings
+	services *WebHandlerServices
+	logger   *slog.Logger
+	NATS     *nats.Conn
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(cfg *config.Settings, ms *services.MovieService, l *slog.Logger, rs *services.RoomService, motds *services.MovieOfTheDayService, authSvc *services.AuthService, nc *nats.Conn) *WebHandler {
+func NewWebHandler(settings *config.Settings, logger *slog.Logger, nc *nats.Conn, services *WebHandlerServices) *WebHandler {
 	return &WebHandler{
-		settings:             cfg,
-		movieService:         ms,
-		logger:               l,
-		roomService:          rs,
-		movieOfTheDayService: motds,
-		authService:          authSvc,
-		NATS:                 nc,
+		settings: settings,
+		logger:   logger,
+		NATS:     nc,
+		services: services,
 	}
 }
 
@@ -68,7 +69,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 }
 
 func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
-	movieOfTheDay, err := h.movieOfTheDayService.GetMovieOfTheDay()
+	movieOfTheDay, err := h.services.MovieOfTheDayService.GetMovieOfTheDay()
 
 	if err != nil {
 		// TODO: handle case where no movie of the day was found...

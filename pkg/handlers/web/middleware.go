@@ -25,7 +25,7 @@ func (h *WebHandler) RequireLogin(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := h.authService.GetUserBySessionToken(token)
+		user, err := h.services.AuthService.GetUserBySessionToken(token)
 		if err == sql.ErrNoRows {
 			h.logger.Info("User redirected to login, session token invalid", "error", err.Error())
 			http.Redirect(w, r, "/login", http.StatusSeeOther)

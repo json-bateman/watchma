@@ -31,7 +31,7 @@ func (h *WebHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Login or create user
-	user, token, err := h.authService.LoginOrCreate(username, password)
+	user, token, err := h.services.AuthService.LoginOrCreate(username, password)
 	if err != nil {
 		h.logger.Error("Login failed", "error", err, "username", username)
 		http.Error(w, "Login failed", http.StatusUnauthorized)

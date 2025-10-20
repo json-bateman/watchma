@@ -26,7 +26,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	myRoom, ok := h.roomService.GetRoom(roomName)
+	myRoom, ok := h.services.RoomService.GetRoom(roomName)
 
 	if !ok {
 		response := NewPageResponse(rooms.NoRoom(roomName), roomName)
@@ -40,7 +40,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.roomService.AddPlayerToRoom(myRoom.Name, user.Username)
+	h.services.RoomService.AddPlayerToRoom(myRoom.Name, user.Username)
 
 	response := NewPageResponse(rooms.SingleRoom(myRoom, user.Username), myRoom.Name)
 	h.RenderPage(response, w, r)
@@ -59,7 +59,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 
 	// Send existing user list to new client
-	myRoom, ok := h.roomService.GetRoom(roomName)
+	myRoom, ok := h.services.RoomService.GetRoom(roomName)
 	if ok {
 		userBox := rooms.UserBox(myRoom, user.Username)
 		if err := sse.PatchElementTempl(userBox); err != nil {
@@ -151,25 +151,25 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room, ok := h.roomService.GetRoom(roomName)
+	room, ok := h.services.RoomService.GetRoom(roomName)
 	if !ok {
 		// Room doesn't exist
 		utils.WriteJSONError(w, http.StatusNotFound, "Room not found")
 		return
 	}
 
-	h.roomService.RemovePlayerFromRoom(room.Name, user.Username)
+	h.services.RoomService.RemovePlayerFromRoom(room.Name, user.Username)
 
 	allUsers := room.GetAllPlayers()
 	if len(allUsers) == 0 {
-		h.roomService.DeleteRoom(room.Name)
+		h.services.RoomService.DeleteRoom(room.Name)
 		return
 	}
 
 	if room.Game.Host == user.Username {
 		// If host leaves transfer to random other user
 		for newHostUsername := range room.Players {
-			h.roomService.TransferHost(room.Name, newHostUsername)
+			h.services.RoomService.TransferHost(room.Name, newHostUsername)
 			break
 		}
 	}
@@ -177,10 +177,10 @@ func (h *WebHandler) LeaveRoom(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.roomService.GetRoom(roomName)
+	room, ok := h.services.RoomService.GetRoom(roomName)
 	if ok {
 		room.Game.Step = types.Voting
-		movies, err := h.movieService.GetMovies()
+		movies, err := h.services.MovieService.GetMovies()
 		if err != nil {
 		}
 
@@ -200,7 +200,7 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 		}
 		room.Game.Movies = randMovies
 
-		h.roomService.StartGame(roomName, room.Game.Movies)
+		h.services.RoomService.StartGame(roomName, room.Game.Movies)
 	}
 }
 
@@ -212,9 +212,9 @@ func (h *WebHandler) Ready(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room, ok := h.roomService.GetRoom(roomName)
+	room, ok := h.services.RoomService.GetRoom(roomName)
 	if ok {
-		h.roomService.TogglePlayerReady(room.Name, user.Username)
+		h.services.RoomService.TogglePlayerReady(room.Name, user.Username)
 	}
 }
 
@@ -235,8 +235,8 @@ func (h *WebHandler) PublishChatMessage(w http.ResponseWriter, r *http.Request) 
 	}
 
 	req.Username = user.Username
-	room, ok := h.roomService.GetRoom(req.Room)
+	room, ok := h.services.RoomService.GetRoom(req.Room)
 	if ok {
-		h.roomService.AddMessage(room.Name, req)
+		h.services.RoomService.AddMessage(room.Name, req)
 	}
 }

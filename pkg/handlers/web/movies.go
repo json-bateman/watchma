@@ -27,7 +27,7 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_movies, err := h.movieService.GetMovies()
+	_movies, err := h.services.MovieService.GetMovies()
 	if err != nil {
 		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
@@ -74,15 +74,15 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.roomService.SubmitVotes(roomName, currentUser.Username, moviesReq.Movies)
-	isVotingFinished := h.roomService.GetIsVotingFinished(roomName)
+	h.services.RoomService.SubmitVotes(roomName, currentUser.Username, moviesReq.Movies)
+	isVotingFinished := h.services.RoomService.GetIsVotingFinished(roomName)
 
 	sse := datastar.NewSSE(w, r)
 
 	if isVotingFinished {
-		h.roomService.FinishGame(roomName)
+		h.services.RoomService.FinishGame(roomName)
 	} else {
-		room, _ := h.roomService.GetRoom(roomName)
+		room, _ := h.services.RoomService.GetRoom(roomName)
 		player, _ := room.GetPlayer(currentUser.Username)
 
 		buttonAndMovies := movies.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.SelectedMovies)
