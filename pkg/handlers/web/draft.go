@@ -162,9 +162,6 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(movies); err != nil {
-		h.logger.Error("Error encoding movie list", "error", err)
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
+	response := NewPageResponse(draft.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
+	h.RenderPage(response, w, r)
 }

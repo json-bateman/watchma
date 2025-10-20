@@ -40,7 +40,7 @@ templ search() {
 		placeholder="Search..."
 		aria-placeholder="Search..."
 		data-bind-search
-		data-on-input__debounce.200ms={ datastar.PostSSE("/draft/query") }
+		data-on-input__debounce.500ms={ datastar.PostSSE("/draft/query") }
 	/>
 }
 
@@ -140,7 +140,7 @@ func containsMovie(movies []types.Movie, id string) bool {
 }
 
 templ moviesList(movies []types.Movie, selectedMovies []types.Movie, baseUrl string) {
-	<div id="movie-list" class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+	<div id="movie-list" class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 ">
 		for _, movie := range movies {
 			<label
 				id={ movie.Id }
