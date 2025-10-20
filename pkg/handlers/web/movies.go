@@ -58,14 +58,14 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	currentUser := utils.GetUserFromContext(r)
 	if currentUser == nil {
-		utils.SendSSEError(w, r, "Unauthorized")
+		h.logger.Error("No User found from session cookie")
 		return
 	}
 
 	var moviesReq types.MovieRequest
 	fmt.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&moviesReq); err != nil {
-		utils.SendSSEError(w, r, "Invalid Request Body")
+		h.logger.Error("Error decoding movie request", "moviesReq", moviesReq)
 		return
 	}
 

@@ -1,6 +1,8 @@
 package web
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"watchma/pkg/types"
 	"watchma/view/draft"
@@ -106,11 +108,17 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 }
 
 type SortFilter struct {
-	Search string `json:"input"`
+	Search string `json:"search"`
 	Genre  string `json:"genre"`
 	Sort   string `json:"sort"`
 }
 
 func (h *WebHandler) SortAndFilterMovies(w http.ResponseWriter, r *http.Request) {
 
+	var sortFilter SortFilter
+	if err := json.NewDecoder(r.Body).Decode(&sortFilter); err != nil {
+		h.logger.Error("Error decoding SortFilter", "SortFilter", sortFilter)
+		return
+	}
+	fmt.Printf("%+v", sortFilter)
 }

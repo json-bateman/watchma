@@ -44,7 +44,12 @@ templ search() {
 }
 
 templ filters() {
-	<select data-bind-genre class="select" aria-label="Filter movies by genre">
+	<select
+		data-bind-genre
+		class="select"
+		aria-label="Filter movies by genre"
+		data-on-change={ datastar.PostSSE("/draft/filter") }
+	>
 		<option value="" selected>All genres&emsp;</option>
 		<option value="action">Action</option>
 	</select>
