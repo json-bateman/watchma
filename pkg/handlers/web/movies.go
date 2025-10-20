@@ -3,9 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"log/slog"
-	"math/rand"
+
 	"net/http"
 	"strconv"
 
@@ -17,40 +15,27 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
+// Shuffle returns a page with a shuffled list of movies, up to the number requested in the query parameters
 func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 	number := chi.URLParam(r, "number")
 
-	intVal, err := strconv.Atoi(number)
+	numberOfMovies, err := strconv.Atoi(number)
 	if err != nil {
-		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		http.Error(w, "param must be a number", http.StatusBadRequest)
 		return
 	}
 
-	_movies, err := h.services.MovieService.GetMovies()
+	shuffledMovies, err := h.services.MovieService.GetShuffledMovies()
 	if err != nil {
-		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
-		http.Error(w, "Unable to load movies", http.StatusInternalServerError)
+		http.Error(w, "failed to get movies", http.StatusInternalServerError)
 		return
 	}
 
-	if len(_movies) == 0 {
-		log.Printf("no movies found")
-		return
+	if len(shuffledMovies) > numberOfMovies {
+		shuffledMovies = shuffledMovies[:numberOfMovies]
 	}
 
-	rand.Shuffle(len(_movies), func(i, j int) {
-		_movies[i], _movies[j] = _movies[j], _movies[i]
-	})
-
-	var randMovies []types.Movie
-	if len(_movies) >= intVal {
-		randMovies = _movies[:intVal]
-	} else {
-		randMovies = _movies
-	}
-
-	response := NewPageResponse(movies.Shuffle(randMovies, h.settings.JellyfinBaseURL), "Movies")
+	response := NewPageResponse(movies.Shuffle(shuffledMovies, h.settings.JellyfinBaseURL), "Movies")
 	h.RenderPage(response, w, r)
 }
 

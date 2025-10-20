@@ -46,17 +46,20 @@ func (p *JellyfinMovieProvider) FetchMovies() ([]types.Movie, error) {
 	p.logger.Info("Fetching Jellyfin movies")
 	req, err := p.makeRequest("GET", "/Items?IncludeItemTypes=Movie&Recursive=true&Fields=Genres")
 	if err != nil {
+		slog.Error("Error parsing jellyfin movie request\n" + err.Error())
 		return nil, err
 	}
 
 	resp, err := p.httpClient.Do(req)
 	if err != nil {
+		slog.Error("Error fetching jellyfin movies!\n" + err.Error())
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	var result jellyfinResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		slog.Error("Error decoding jellyfin movies!\n" + err.Error())
 		return nil, err
 	}
 
