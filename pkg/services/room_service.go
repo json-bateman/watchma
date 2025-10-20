@@ -207,7 +207,9 @@ func (rs *RoomService) GetRoom(roomName string) (*Room, bool) {
 	return room, ok
 }
 
-func (rs *RoomService) SubmitVotes(roomName string, username string, movies []string) {
+// Submits movie votes for a given user and returns whether the voting period is concluded
+// for the given room. When voting is concluded, we can advance the step
+func (rs *RoomService) SubmitVotes(roomName string, username string, movies []string) bool {
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()
 
@@ -230,6 +232,8 @@ func (rs *RoomService) SubmitVotes(roomName string, username string, movies []st
 	rs.logger.Info("Player submitted votes", "roomName", roomName, "player", username, "votes", movies)
 
 	player.HasSelectedMovies = true
+
+	return rs.GetIsVotingFinished(roomName)
 }
 
 func (rs *RoomService) GetIsVotingFinished(roomName string) bool {
