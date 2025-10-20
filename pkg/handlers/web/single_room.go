@@ -10,11 +10,9 @@ import (
 
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
-	"watchma/view/common"
 	"watchma/view/movies"
 	"watchma/view/rooms"
 
-	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -22,37 +20,30 @@ import (
 func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	user := utils.GetUserFromContext(r)
+
 	if user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	myRoom, ok := h.roomService.GetRoom(roomName)
-	if ok && myRoom.Game.MaxPlayers > len(myRoom.Players) {
-		h.roomService.AddPlayerToRoom(myRoom.Name, user.Username)
-	} else {
-		component := rooms.RoomFull(common.PageContext{
-			Title: roomName,
-			User:  user,
-		})
-		templ.Handler(component).ServeHTTP(w, r)
-		return
-	}
 
 	if !ok {
-		component := rooms.NoRoom(common.PageContext{
-			Title: roomName,
-			User:  user,
-		}, roomName)
-		templ.Handler(component).ServeHTTP(w, r)
+		response := NewPageResponse(rooms.NoRoom(roomName), roomName)
+		h.RenderPage(response, w, r)
 		return
 	}
 
-	component := rooms.SingleRoom(common.PageContext{
-		Title: myRoom.Name,
-		User:  user,
-	}, myRoom, user.Username)
-	templ.Handler(component).ServeHTTP(w, r)
+	if myRoom.Game.MaxPlayers <= len(myRoom.Players) {
+		response := NewPageResponse(rooms.RoomFull(), roomName)
+		h.RenderPage(response, w, r)
+		return
+	}
+
+	h.roomService.AddPlayerToRoom(myRoom.Name, user.Username)
+
+	response := NewPageResponse(rooms.SingleRoom(myRoom, user.Username), myRoom.Name)
+	h.RenderPage(response, w, r)
 }
 
 // Function that does the heavy lifting by keeping the SSE channel open and sending

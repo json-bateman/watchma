@@ -5,20 +5,18 @@ import (
 	"watchma/view/common"
 )
 
-templ IndexPage(pc common.PageContext, movieOfTheDay types.Movie, baseURL string) {
-	@common.Layout(pc) {
-		<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
-			<span class="font-bold shadow-dance-text">Watchma</span>
-		</div>
-		<div class="flex justify-center gap-4 my-12">
-			<a href="host" class="btn-accent">Host Room</a>
-			<a href="join" class="btn-accent">Join Room</a>
-		</div>
-		<div class="flex justify-center">
-			<a href="shuffle/8" class="btn">Shuffle 8</a>
-		</div>
-		<div class="flex justify-center mt-12">
-			@common.MovieOfTheDay(movieOfTheDay, baseURL)
-		</div>
-	}
+templ IndexPage(movieOfTheDay types.Movie, baseURL string) {
+	<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
+		<span class="font-bold shadow-dance-text">Watchma</span>
+	</div>
+	<div class="flex justify-center gap-4 my-12">
+		<a href="host" class="btn-accent">Host Room</a>
+		<a href="join" class="btn-accent">Join Room</a>
+	</div>
+	<div class="flex justify-center">
+		<a href="shuffle/8" class="btn">Shuffle 8</a>
+	</div>
+	<div class="flex justify-center mt-12">
+		@common.MovieOfTheDay(movieOfTheDay, baseURL)
+	</div>
 }

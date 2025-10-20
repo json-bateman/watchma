@@ -5,17 +5,15 @@ import (
 	"watchma/view/common"
 )
 
-templ Shuffle(pc common.PageContext, movies []types.Movie, baseURL string) {
-	@common.Layout(pc) {
-		<section class="flex flex-col justify-center items-center mb-6">
-			<span class="text-3xl mb-4">Shuffled Movies</span>
-			<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
-				for _, m := range movies {
-					<label class="block w-40 md:w-64 border border-3 ring-0">
-						@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{})
-					</label>
-				}
-			</div>
-		</section>
-	}
+templ Shuffle(movies []types.Movie, baseURL string) {
+	<section class="flex flex-col justify-center items-center mb-6">
+		<span class="text-3xl mb-4">Shuffled Movies</span>
+		<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
+			for _, m := range movies {
+				<label class="block w-40 md:w-64 border border-3 ring-0">
+					@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{})
+				</label>
+			}
+		</div>
+	</section>
 }

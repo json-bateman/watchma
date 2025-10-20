@@ -7,20 +7,14 @@ import (
 
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
-	"watchma/view/common"
 	"watchma/view/rooms"
 
-	"github.com/a-h/templ"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
-	user := utils.GetUserFromContext(r)
-	component := rooms.JoinPage(common.PageContext{
-		Title: "Join Page",
-		User:  user,
-	}, h.roomService.Rooms)
-	templ.Handler(component).ServeHTTP(w, r)
+	response := NewPageResponse(rooms.JoinPage(h.roomService.Rooms), "Join page")
+	h.RenderPage(response, w, r)
 }
 
 func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
@@ -59,12 +53,8 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
-	user := utils.GetUserFromContext(r)
-	component := rooms.HostPage(common.PageContext{
-		Title: "Host Room",
-		User:  user,
-	})
-	templ.Handler(component).ServeHTTP(w, r)
+	response := NewPageResponse(rooms.HostPage(), "Host Room")
+	h.RenderPage(response, w, r)
 }
 
 func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {

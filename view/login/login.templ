@@ -3,32 +3,30 @@ package login
 import "watchma/view/common"
 
 templ LoginForm() {
-	@common.Layout(common.PageContext{Title: "Login", User: nil}) {
-		<form method="POST" action="/login" class="flex flex-col w-full space-y-3 items-center justify-center mt-6">
-			<span class=" flex flex-wrap gap-3 text-text mt-8 justify-center text-center">Enter Username</span>
-			<div class="flex flex-col">
-				<input
-					class="input"
-					type="text"
-					name="username"
-					id="username"
-					placeholder="Enter your username"
-					required
-				/>
-			</div>
-			<span class=" flex flex-wrap gap-3 text-text justify-center text-center">Enter Password</span>
-			<div class="flex flex-col">
-				<input
-					class="input"
-					type="text"
-					name="password"
-					id="password"
-					placeholder="Enter your password"
-					required
-				/>
-			</div>
-			<button class="btn" type="submit">Create User / Login</button>
-			@common.Error()
-		</form>
-	}
+	<form method="POST" action="/login" class="flex flex-col w-full space-y-3 items-center justify-center mt-6">
+		<span class=" flex flex-wrap gap-3 text-text mt-8 justify-center text-center">Enter Username</span>
+		<div class="flex flex-col">
+			<input
+				class="input"
+				type="text"
+				name="username"
+				id="username"
+				placeholder="Enter your username"
+				required
+			/>
+		</div>
+		<span class=" flex flex-wrap gap-3 text-text justify-center text-center">Enter Password</span>
+		<div class="flex flex-col">
+			<input
+				class="input"
+				type="text"
+				name="password"
+				id="password"
+				placeholder="Enter your password"
+				required
+			/>
+		</div>
+		<button class="btn" type="submit">Create User / Login</button>
+		@common.Error()
+	</form>
 }

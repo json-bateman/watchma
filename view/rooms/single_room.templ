@@ -6,7 +6,6 @@ import (
 	"strings"
 	"watchma/pkg/services"
 	"watchma/pkg/types"
-	"watchma/view/common"
 )
 
 type ChatMessage struct {
@@ -14,58 +13,56 @@ type ChatMessage struct {
 	Message  string `json:"message"`
 }
 
-templ SingleRoom(pc common.PageContext, room *services.Room, username string) {
-	@common.Layout(pc) {
-		<section id="moviesRoom" class="flex justify-center grow">
-			<!-- janky(?) way to set the subject field for the message payload
+templ SingleRoom(room *services.Room, username string) {
+	<section id="moviesRoom" class="flex justify-center grow">
+		<!-- janky(?) way to set the subject field for the message payload
     TODO: make this not janky -->
-			<span class="hidden" data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
-			<div class="flex max-w-[800px] flex-col justify-between grow">
-				<div>
-					<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">
-						<div class="text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2">
-							<span class="text-4xl tracking-widest">{ room.Name }</span>
+		<span class="hidden" data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
+		<div class="flex max-w-[800px] flex-col justify-between grow">
+			<div>
+				<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">
+					<div class="text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2">
+						<span class="text-4xl tracking-widest">{ room.Name }</span>
+					</div>
+					<div class="grid grid-cols-2 gap-4">
+						<div class="bg-white text-black p-3 border-2 border-black">
+							<div class="text-xs  uppercase tracking-wide">MOVIES</div>
+							<div class="text-3xl ">{ room.Game.MovieNumber }</div>
 						</div>
-						<div class="grid grid-cols-2 gap-4">
-							<div class="bg-white text-black p-3 border-2 border-black">
-								<div class="text-xs  uppercase tracking-wide">MOVIES</div>
-								<div class="text-3xl ">{ room.Game.MovieNumber }</div>
-							</div>
-							<div class="bg-white text-black p-3 border-2 border-black">
-								<div class="text-xs  uppercase tracking-wide">MAX PLAYERS</div>
-								<div class="text-3xl ">{ room.Game.MaxPlayers }</div>
-							</div>
+						<div class="bg-white text-black p-3 border-2 border-black">
+							<div class="text-xs  uppercase tracking-wide">MAX PLAYERS</div>
+							<div class="text-3xl ">{ room.Game.MaxPlayers }</div>
 						</div>
 					</div>
-					@UserBox(room, username)
 				</div>
-				<!-- Chatbox -->
-				<div>
-					<div class="flex gap-2">
-						<input
-							class="input mb-2"
-							placeholder="chat message..."
-							data-bind-message
-							data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
-						/>
-						<button
-							data-on-click={ "@post('/message');$message='';" }
-							class="btn !w-16"
-						>
-							Send
-						</button>
-					</div>
-					<div
-						id="container"
-						class="shadow-brutalist border-primary border-4"
-						data-on-load={ fmt.Sprintf("@get('/sse/%s')", room.Name) }
+				@UserBox(room, username)
+			</div>
+			<!-- Chatbox -->
+			<div>
+				<div class="flex gap-2">
+					<input
+						class="input mb-2"
+						placeholder="chat message..."
+						data-bind-message
+						data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
+					/>
+					<button
+						data-on-click={ "@post('/message');$message='';" }
+						class="btn !w-16"
 					>
-						<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5"></div>
-					</div>
+						Send
+					</button>
+				</div>
+				<div
+					id="container"
+					class="shadow-brutalist border-primary border-4"
+					data-on-load={ fmt.Sprintf("@get('/sse/%s')", room.Name) }
+				>
+					<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5"></div>
 				</div>
 			</div>
-		</section>
-	}
+		</div>
+	</section>
 }
 
 templ ChatBox(messages []types.Message) {

@@ -4,30 +4,27 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/services"
 	"watchma/pkg/types"
-	"watchma/view/common"
 )
 
-templ JoinPage(pc common.PageContext, rooms map[string]*services.Room) {
-	@common.Layout(pc) {
-		<section class="text-text mt-8 flex flex-col items-center justify-center px-4">
-			<div class="text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
-				Available Rooms
-			</div>
-			<div class="w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist">
-				<table class="w-full border-collapse">
-					<thead class="bg-primary text-background">
-						<tr>
-							<th class="th-join">Room Name</th>
-							<th class="th-join">Movies</th>
-							<th class="th-join">Players</th>
-							<th class="p-2 tracking-wider">Action</th>
-						</tr>
-					</thead>
-					@RoomListBody(rooms)
-				</table>
-			</div>
-		</section>
-	}
+templ JoinPage(rooms map[string]*services.Room) {
+	<section class="text-text mt-8 flex flex-col items-center justify-center px-4">
+		<div class="text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
+			Available Rooms
+		</div>
+		<div class="w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist">
+			<table class="w-full border-collapse">
+				<thead class="bg-primary text-background">
+					<tr>
+						<th class="th-join">Room Name</th>
+						<th class="th-join">Movies</th>
+						<th class="th-join">Players</th>
+						<th class="p-2 tracking-wider">Action</th>
+					</tr>
+				</thead>
+				@RoomListBody(rooms)
+			</table>
+		</div>
+	</section>
 }
 
 templ RoomListBody(rooms map[string]*services.Room) {

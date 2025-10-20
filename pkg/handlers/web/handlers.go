@@ -6,11 +6,8 @@ import (
 
 	"watchma/pkg/config"
 	"watchma/pkg/services"
-	"watchma/pkg/utils"
 	"watchma/view"
-	"watchma/view/common"
 
-	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/nats-io/nats.go"
 )
@@ -71,7 +68,6 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 }
 
 func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
-	user := utils.GetUserFromContext(r)
 	movieOfTheDay, err := h.movieOfTheDayService.GetMovieOfTheDay()
 
 	if err != nil {
@@ -79,11 +75,8 @@ func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	component := view.IndexPage(common.PageContext{
-		Title: "Movie Showdown",
-		User:  user,
-	}, movieOfTheDay, h.settings.JellyfinBaseURL)
-	templ.Handler(component).ServeHTTP(w, r)
+	response := NewPageResponse(view.IndexPage(movieOfTheDay, h.settings.JellyfinBaseURL), "Movie Showdown")
+	h.RenderPage(response, w, r)
 }
 
 func (h *WebHandler) NatsPublish(subj string, data []byte) error {

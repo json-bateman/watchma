@@ -3,11 +3,8 @@ package web
 import (
 	"net/http"
 	"watchma/pkg/types"
-	"watchma/pkg/utils"
-	"watchma/view/common"
 	"watchma/view/draft"
 
-	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -40,18 +37,9 @@ var testDraftState = types.DraftState{
 }
 
 func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
-	user := utils.GetUserFromContext(r)
 	movies, _ := h.movieService.GetMovies()
-
-	templ.WithChildren(r.Context(), draft.Container(testDraftState, movies, h.settings.JellyfinBaseURL))
-
-	templ.Handler(draft.Draft(
-		common.PageContext{
-			Title: "Draft",
-			User:  user,
-		},
-		testDraftState,
-		movies, h.settings.JellyfinBaseURL)).ServeHTTP(w, r)
+	response := NewPageResponse(draft.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
+	h.RenderPage(response, w, r)
 }
 
 func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +59,7 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 	}
 
 	// now render with the updated testDraftState
-	draftContainerTempl := draft.Container(
+	draftContainerTempl := draft.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,
@@ -109,7 +97,7 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Send new patch to frontend
-	draftContainerTempl := draft.Container(
+	draftContainerTempl := draft.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,

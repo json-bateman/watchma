@@ -11,7 +11,7 @@ type PageContext struct {
 	User  *repository.User
 }
 
-templ Layout(pc PageContext) {
+templ Layout(pc PageContext, content templ.Component) {
 	<html data-theme="burgundy-light" lang="en">
 		<head>
 			<meta charset="UTF-8"/>
@@ -43,7 +43,7 @@ templ Layout(pc PageContext) {
 				</header>
 				<!-- Here's where the pages are injected -->
 				<div class="grow flex flex-col text-text ">
-					{ children... }
+					@content
 				</div>
 				<footer class="border-t-3  text-shadow-hard pt-2 mt-8 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
 					<span>JsonB { time.Now().Year() } </span>

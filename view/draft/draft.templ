@@ -6,13 +6,7 @@ import (
 	"watchma/view/common"
 )
 
-templ Draft(pc common.PageContext, state types.DraftState, movies []types.Movie, baseUrl string) {
-	@common.Layout(pc) {
-		@Container(state, movies, baseUrl)
-	}
-}
-
-templ Container(state types.DraftState, movies []types.Movie, baseUrl string) {
+templ Draft(state types.DraftState, movies []types.Movie, baseUrl string) {
 	{{
 		showSelectedMovies := len(state.SelectedMovies) > 0
 	}}
