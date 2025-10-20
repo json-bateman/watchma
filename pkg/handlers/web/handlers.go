@@ -62,7 +62,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Post("/room/{roomName}/movies", h.SubmitMovies)
 		r.Post("/room/{roomName}/ready", h.Ready)
 		r.Post("/room/{roomName}/start", h.StartGame)
-		r.Post("/draft/filter", h.SortAndFilterMovies)
+		r.Post("/draft/query", h.QueryMovies)
 
 		r.Patch("/draft/{id}", h.ToggleSelectedMovie)
 		r.Delete("/draft/{id}", h.DeleteFromSelectedMovies)

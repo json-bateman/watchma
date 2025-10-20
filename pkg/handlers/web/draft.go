@@ -2,8 +2,8 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"watchma/pkg/services"
 	"watchma/pkg/types"
 	"watchma/view/draft"
 
@@ -107,18 +107,64 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 	_ = sse.PatchElementTempl(draftContainerTempl)
 }
 
-type SortFilter struct {
-	Search string `json:"search"`
-	Genre  string `json:"genre"`
-	Sort   string `json:"sort"`
-}
+func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
+	type MovieQueryRequest struct {
+		Search string `json:"search"`
+		Genre  string `json:"genre"`
+		Sort   string `json:"sort"`
+	}
 
-func (h *WebHandler) SortAndFilterMovies(w http.ResponseWriter, r *http.Request) {
-
-	var sortFilter SortFilter
-	if err := json.NewDecoder(r.Body).Decode(&sortFilter); err != nil {
-		h.logger.Error("Error decoding SortFilter", "SortFilter", sortFilter)
+	var queryRequest MovieQueryRequest
+	if err := json.NewDecoder(r.Body).Decode(&queryRequest); err != nil {
+		h.logger.Error("Error decoding SortFilter", "error", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("%+v", sortFilter)
+
+	var sortField services.MovieSortField
+	descending := false
+	switch queryRequest.Sort {
+	case "name-asc":
+		sortField = services.SortByName
+	case "name-desc":
+		sortField = services.SortByName
+		descending = true
+	case "year-asc":
+		sortField = services.SortByYear
+	case "year-desc":
+		sortField = services.SortByYear
+		descending = true
+	case "critic-asc":
+		sortField = services.SortByCriticRating
+	case "critic-desc":
+		sortField = services.SortByCriticRating
+		descending = true
+	case "community-asc":
+		sortField = services.SortByCommunityRating
+	case "community-desc":
+		sortField = services.SortByCommunityRating
+		descending = true
+	default:
+		// default to name instead of blowing up for now
+		sortField = services.SortByName
+	}
+
+	movies, err := h.services.MovieService.GetMoviesWithQuery(
+		services.MovieQuery{
+			Search:     queryRequest.Search,
+			Genre:      queryRequest.Genre,
+			SortBy:     sortField,
+			Descending: descending,
+		},
+	)
+	if err != nil {
+		http.Error(w, "Failed to get movies", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(movies); err != nil {
+		h.logger.Error("Error encoding movie list", "error", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }

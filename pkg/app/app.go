@@ -78,7 +78,7 @@ func (a *App) Initialize() error {
 
 	eventPublisher := services.NewEventPublisher(a.NATS, a.Logger)
 	authService := services.NewAuthService(userRepo, sessionRepo, a.Logger)
-	movieService := services.NewMovieService(movieProvider)
+	movieService := services.NewMovieService(movieProvider, a.Logger)
 	roomService := services.NewRoomService(eventPublisher, a.Logger)
 	movieOfTheDayService := services.NewMovieOfTheDayService(movieService)
 
