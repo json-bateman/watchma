@@ -162,6 +162,12 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := NewPageResponse(draft.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
-	h.RenderPage(response, w, r)
+	// Send new patch to frontend
+	draftContainerTempl := draft.Draft(
+		testDraftState,
+		movies,
+		h.settings.JellyfinBaseURL,
+	)
+	sse := datastar.NewSSE(w, r)
+	_ = sse.PatchElementTempl(draftContainerTempl)
 }

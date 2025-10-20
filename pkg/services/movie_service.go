@@ -3,6 +3,7 @@ package services
 import (
 	"log/slog"
 	"math/rand"
+	"slices"
 	"watchma/pkg/providers"
 	"watchma/pkg/types"
 
@@ -74,11 +75,8 @@ func filterByGenre(movies []types.Movie, genre string) []types.Movie {
 	}
 	filtered := make([]types.Movie, 0)
 	for _, m := range movies {
-		for _, g := range m.Genres {
-			if g == genre {
-				filtered = append(filtered, m)
-				break
-			}
+		if slices.Contains(m.Genres, genre) {
+			filtered = append(filtered, m)
 		}
 	}
 	return filtered
