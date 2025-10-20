@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log/slog"
 	"math/rand"
 	"watchma/pkg/providers"
@@ -61,14 +62,22 @@ func (ms *MovieService) GetMoviesWithQuery(q MovieQuery) ([]types.Movie, error) 
 		return nil, err
 	}
 
+	ms.logger.Info("Started query", "sort", q.SortBy, "filter", q.Genre, "search", q.Search)
+
 	movies = filterByGenre(movies, q.Genre)
+	ms.logger.Info(fmt.Sprintf("%+v", movies))
 	movies = searchByName(movies, q.Search)
+	ms.logger.Info(fmt.Sprintf("%+v", movies))
 	sortMovies(movies, q.SortBy, q.Descending)
+	ms.logger.Info(fmt.Sprintf("%+v", movies))
 
 	return movies, nil
 }
 
 func filterByGenre(movies []types.Movie, genre string) []types.Movie {
+	if genre == "" {
+		return movies
+	}
 	filtered := make([]types.Movie, 0)
 	for _, m := range movies {
 		for _, g := range m.Genres {
