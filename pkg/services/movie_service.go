@@ -97,6 +97,9 @@ func searchByName(movies []types.Movie, query string) []types.Movie {
 }
 
 func sortMovies(movies []types.Movie, sortBy MovieSortField, descending bool) {
+	if sortBy == "" {
+		return
+	}
 	sort.Slice(movies, func(i, j int) bool {
 		var less bool
 		switch sortBy {

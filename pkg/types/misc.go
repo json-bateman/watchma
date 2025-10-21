@@ -55,7 +55,7 @@ type MovieVote struct {
 }
 
 type DraftState struct {
-	SelectedMovies []Movie
+	SelectedMovies []string
 	IsReady        bool
 	MaxVotes       int
 }

@@ -24,11 +24,11 @@ templ Draft(state types.DraftState, movies []types.Movie, baseUrl string) {
 		</div>
 		if showSelectedMovies {
 			<section class="mt-4">
-				@selectedMovies(state.SelectedMovies)
+				@selectedMovies(movies, state.SelectedMovies)
 			</section>
 		}
 		<section class="mt-4">
-			@moviesList(movies, state.SelectedMovies, baseUrl)
+			@Movies(movies, state.SelectedMovies, baseUrl)
 		</section>
 	</div>
 }
@@ -110,9 +110,20 @@ templ submit(state types.DraftState) {
 	</div>
 }
 
-templ selectedMovies(movies []types.Movie) {
+templ selectedMovies(movies []types.Movie, selectedMovieIds []string) {
+	{{
+		selectedMovies := []types.Movie{}
+		for _, movieId := range selectedMovieIds {
+			for _, movie := range movies {
+				if movie.Id == movieId {
+					selectedMovies = append(selectedMovies, movie)
+					break
+				}
+			}
+		}
+	}}
 	<div class="flex flex-wrap gap-2">
-		for _, movie := range movies {
+		for _, movie := range selectedMovies {
 			<div class="inline-flex items-center pl-3 py-1 bg-primary tracking-wide text-sm text-text">
 				{ movie.Name }
 				<button
@@ -130,37 +141,13 @@ templ selectedMovies(movies []types.Movie) {
 	</div>
 }
 
-func containsMovie(movies []types.Movie, id string) bool {
-	for _, m := range movies {
-		if m.Id == id {
-			return true
-		}
+templ Movies(movies []types.Movie, selectedMovies []string, baseUrl string) {
+	{{
+	gridOptions := common.DefaultGridOptions()
+	gridOptions.Selectable = true
+	gridOptions.MakeOnClickMovie = func(movieId string) string {
+		return datastar.PatchSSE("/draft/%s", movieId)
 	}
-	return false
-}
-
-templ moviesList(movies []types.Movie, selectedMovies []types.Movie, baseUrl string) {
-	<div id="movie-list" class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 ">
-		for _, movie := range movies {
-			<label
-				id={ movie.Id }
-				if containsMovie(selectedMovies, movie.Id) {
-					class="border-2 border-orange-500 cursor-pointer ring-4 ring-orange-500 shadow-brutalist"
-				} else {
-					class="cursor-pointer"
-				}
-			>
-				<input
-					class="hidden"
-					type="checkbox"
-					value={ movie.Id }
-					data-on-click={ datastar.PatchSSE("/draft/%s", movie.Id) }
-					aria-label={ movie.Name }
-				/>
-				@common.MovieTitleImage(movie, baseUrl, common.MovieTitleImageOptions{
-					Class: "aspect-[2/3] w-full object-cover",
-				})
-			</label>
-		}
-	</div>
+	}}
+	@common.MovieGrid(movies, selectedMovies, baseUrl, gridOptions)
 }

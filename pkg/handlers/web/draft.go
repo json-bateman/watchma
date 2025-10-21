@@ -13,27 +13,9 @@ import (
 
 var testDraftState = types.DraftState{
 	MaxVotes: 8,
-	SelectedMovies: []types.Movie{
-		{
-			CommunityRating: 7.545,
-			CriticRating:    88,
-			Genres:          []string{"Family", "Comedy", "Crime", "Adventure", "Animation"},
-			Id:              "eeabfd0d5436e34e85fe977afc1c54d5",
-			Name:            "The Bad Guys",
-			PremiereDate:    "2022-03-17T00:00:00.0000000Z",
-			PrimaryImageTag: "d377231308c50295fa54c052a00836d1",
-			ProductionYear:  2022,
-		},
-		{
-			CommunityRating: 7.918,
-			CriticRating:    84,
-			Genres:          []string{"Action", "Thriller"},
-			Id:              "202b05b82b0a1b8eb0e42d785c981bd7",
-			Name:            "Nobody",
-			PremiereDate:    "2021-03-18T00:00:00.0000000Z",
-			PrimaryImageTag: "fce50f2a76aa55feec713720063e87b5",
-			ProductionYear:  2021,
-		},
+	SelectedMovies: []string{
+		"eeabfd0d5436e34e85fe977afc1c54d5",
+		"202b05b82b0a1b8eb0e42d785c981bd7",
 	},
 	IsReady: false,
 }
@@ -47,11 +29,10 @@ func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
 func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
 	movies, _ := h.services.MovieService.GetMovies()
-	sse := datastar.NewSSE(w, r)
 
 	// This business logic needs to be put into roomService later
-	for i, m := range testDraftState.SelectedMovies {
-		if m.Id == movieId {
+	for i, id := range testDraftState.SelectedMovies {
+		if id == movieId {
 			testDraftState.SelectedMovies = append(
 				testDraftState.SelectedMovies[:i],
 				testDraftState.SelectedMovies[i+1:]...,
@@ -67,18 +48,18 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 		h.settings.JellyfinBaseURL,
 	)
 
-	_ = sse.PatchElementTempl(draftContainerTempl)
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElementTempl(draftContainerTempl)
 }
 
 func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
 	movies, _ := h.services.MovieService.GetMovies()
-	sse := datastar.NewSSE(w, r)
 
 	// This business logic needs to be put into roomService later
 	found := false
-	for i, m := range testDraftState.SelectedMovies {
-		if m.Id == movieId {
+	for i, id := range testDraftState.SelectedMovies {
+		if id == movieId {
 			testDraftState.SelectedMovies = append(
 				testDraftState.SelectedMovies[:i],
 				testDraftState.SelectedMovies[i+1:]...,
@@ -92,19 +73,18 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 	if !found {
 		for _, m := range movies {
 			if m.Id == movieId {
-				testDraftState.SelectedMovies = append(testDraftState.SelectedMovies, m)
+				testDraftState.SelectedMovies = append(testDraftState.SelectedMovies, m.Id)
 				break
 			}
 		}
 	}
 
-	// Send new patch to frontend
-	draftContainerTempl := draft.Draft(
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElementTempl(draft.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,
-	)
-	_ = sse.PatchElementTempl(draftContainerTempl)
+	))
 }
 
 func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
@@ -162,12 +142,10 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send new patch to frontend
-	draftContainerTempl := draft.Draft(
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElementTempl(draft.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,
-	)
-	sse := datastar.NewSSE(w, r)
-	_ = sse.PatchElementTempl(draftContainerTempl)
+	))
 }
