@@ -10,6 +10,7 @@ type MovieGridOptions struct {
 	EmptyMessage     string
 	Gap              string
 	MinCardWidth     string
+	MaxCardWidth     string
 	MakeOnClickMovie func(movieId string) string
 	Selectable       bool
 	ShowOverlay      bool
@@ -18,7 +19,8 @@ type MovieGridOptions struct {
 func DefaultGridOptions() MovieGridOptions {
 	return MovieGridOptions{
 		MinCardWidth: "160px",
-		Gap:          "gap-4",
+		MaxCardWidth: "180",
+		Gap:          "1rem",
 		Selectable:   false,
 		ShowOverlay:  true,
 		EmptyMessage: "No movies found",
@@ -27,8 +29,9 @@ func DefaultGridOptions() MovieGridOptions {
 
 templ MovieGrid(movies []types.Movie, selectedMovies []string, baseUrl string, opts MovieGridOptions) {
 	<div
-		id="movie-grid"
-		class={ fmt.Sprintf("grid grid-cols-[repeat(auto-fill,minmax(%s,1fr))] %s", opts.MinCardWidth, opts.Gap) }
+		id="moviegrid"
+		class="grid grid-cols-[repeat(auto-fill,minmax(var(--card-min),1fr))] gap-[var(--gap)]"
+		style={ fmt.Sprintf("--card-min:%s; --gap:%s;", opts.MinCardWidth, opts.Gap) }
 	>
 		if len(movies) == 0 {
 			@EmptyState(opts.EmptyMessage)
@@ -51,21 +54,24 @@ templ MovieCard(movie types.Movie, selectedMovies []string, baseUrl string, opts
 templ SelectableMovieCard(movie types.Movie, selectedMovies []string, baseUrl string, opts MovieGridOptions) {
 	{{
 		selected := slices.Contains(selectedMovies, movie.Id)
-		labelClass := "aspect-[2/3] cursor-pointer relative group box-border"
+
+		labelClass := "aspect-[2/3] cursor-pointer relative group box-border max-w-[var(--card-max)]"
+
 		if selected {
-			labelClass += "border-2 border-orange-500 ring-4 ring-orange-500 shadow-brutalist"
+			labelClass += " border-2 border-orange-500 ring-4 ring-orange-500 shadow-brutalist"
 		}
 	}}
 	<label
 		id={ movie.Id }
 		class={ labelClass }
+		style={ fmt.Sprintf("--card-max:%s;", opts.MaxCardWidth) }
 	>
 		<input
 			id={ movie.Id }
 			class="hidden"
 			type="checkbox"
 			value={ movie.Id }
-			data-on-click={ opts.MakeOnClickMovie(movie.Id) }
+			data-on:click={ opts.MakeOnClickMovie(movie.Id) }
 			aria-label={ movie.Name }
 		/>
 		@MovieTitleImage(movie, baseUrl, MovieTitleImageOptions{

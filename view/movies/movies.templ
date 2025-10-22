@@ -33,12 +33,12 @@ templ Movies(movies []types.Movie, baseURL string, room *services.Room) {
 				<button
 					id="moviesSubmit"
 					class="btn"
-					data-on-click={ fmt.Sprintf("@post('/room/%s/movies')", room.Name) }
+					data-on:click={ fmt.Sprintf("@post('/room/%s/movies')", room.Name) }
 				>
 					Submit Choices
 				</button>
 				@common.Error()
-				<div data-signals-movies="[]">
+				<div data-signals:movies="[]">
 					<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
 						for _, m := range movies {
 							<label id="movieSwap" class="block w-40 h-60 md:w-64 md:h-96 border-2 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-2">
@@ -46,7 +46,7 @@ templ Movies(movies []types.Movie, baseURL string, room *services.Room) {
 									class="hidden"
 									type="checkbox"
 									value={ m.Id }
-									data-bind-movies
+									data-bind:movies
 								/>
 								@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{})
 							</label>
@@ -79,7 +79,7 @@ templ SubmitButton(movies []types.Movie, baseURL string, selectedMovies []string
 
 templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
 	{{ winnerMovies := getWinnerMovies(moviesSortedByVote) }}
-	<section id="moviesRoom" class="h-full" data-signals-movies>
+	<section id="moviesRoom" class="h-full" data-signals:movies>
 		<div class="flex flex-col justify-center h-full items-center">
 			if len(winnerMovies) > 1 {
 				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>

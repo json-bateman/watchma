@@ -43,11 +43,11 @@ templ SingleRoom(room *services.Room, username string) {
 					<input
 						class="input mb-2"
 						placeholder="chat message..."
-						data-bind-message
-						data-on-keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
+						data-bind:message
+						data-on:keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
 					/>
 					<button
-						data-on-click={ "@post('/message');$message='';" }
+						data-on:click={ "@post('/message');$message='';" }
 						class="btn !w-16"
 					>
 						Send
@@ -56,7 +56,7 @@ templ SingleRoom(room *services.Room, username string) {
 				<div
 					id="container"
 					class="shadow-brutalist border-primary border-4"
-					data-on-load={ fmt.Sprintf("@get('/sse/%s')", room.Name) }
+					data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }
 				>
 					<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5"></div>
 				</div>
@@ -101,7 +101,7 @@ templ UserBox(room *services.Room, username string) {
 			<div>
 				<button
 					class="btn uppercase gap-2 tracking-wide"
-					data-on-click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
+					data-on:click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
 				>
 					Ready Up!
 				</button>
@@ -109,7 +109,7 @@ templ UserBox(room *services.Room, username string) {
 					if len(players) == totalReady && totalReady > 1 {
 						<button
 							class="btn-success  uppercase tracking-wide"
-							data-on-click={ fmt.Sprintf("@post('/room/%s/start')", room.Name) }
+							data-on:click={ fmt.Sprintf("@post('/room/%s/start')", room.Name) }
 						>
 							Start Game!
 						</button>
@@ -154,7 +154,7 @@ templ Button(room *services.Room) {
 			</div>
 			<button
 				class="btn"
-				data-on-click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
+				data-on:click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
 			>
 				Ready Up!
 			</button>

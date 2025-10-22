@@ -28,7 +28,7 @@ templ JoinPage(rooms map[string]*services.Room) {
 }
 
 templ RoomListBody(rooms map[string]*services.Room) {
-	<tbody id="joinTable" data-on-load={ datastar.GetSSE("/sse/join") }>
+	<tbody id="joinTable" data-init={ datastar.GetSSE("/sse/join") }>
 		if len(rooms) > 0 {
 			for _, room := range rooms {
 				<tr class={ "text-center text-text hover:bg-primary/10 px-4 border-b-2 border-primary/20 transition-colors" }>

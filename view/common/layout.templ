@@ -12,7 +12,7 @@ type PageContext struct {
 }
 
 templ Layout(pc PageContext, content templ.Component) {
-	<html data-theme="burgundy-light" lang="en">
+	<html data-signals="{theme: 'burgundy-light'}" data-attr:data-theme="$theme" data-theme="burgundy-light" lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -29,18 +29,20 @@ templ Layout(pc PageContext, content templ.Component) {
 			<title>{ pc.Title }</title>
 		</head>
 		<body class="bg-background min-h-svh font-serif">
-			<main class="min-h-full flex flex-col p-4">
+			<main class="text-text min-h-full flex flex-col p-4">
 				<header class="mb-4 flex justify-between">
 					<div class="flex items-center gap-4">
 						@homeIcon()
 						if pc.User != nil {
-							<span class="px-2 py-1 border-3 text-text text-xs tracking-wide border-primary bg-primary/10 shadow-hard">
+							<span class="px-2 py-1 border-3 text-xs tracking-wide border-primary bg-primary/10 shadow-hard">
 								{ utils.CapitalizeFirst(pc.User.Username) }
 							</span>
 						}
 					</div>
 					@themeToggle()
 				</header>
+				<!-- Display all signals -->
+				<pre data-json-signals></pre>
 				<!-- Here's where the pages are injected -->
 				<div class="grow flex flex-col text-text ">
 					@content
@@ -54,23 +56,11 @@ templ Layout(pc PageContext, content templ.Component) {
 				<!-- Helpful inspector element for data-star -->
 				<dataspa-inspector></dataspa-inspector>
 			</main>
-			<script>
-                function getSystemTheme() {
-                  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    return 'dark'
-                  }
-                  return 'burgundy-light'
-                }
-
-                const currentTheme = localStorage.getItem('theme')
-                if (!currentTheme) {
-                  const systemTheme = getSystemTheme()
-                  localStorage.setItem("theme", systemTheme)
-                }
-                document.querySelector('html').setAttribute('data-theme', localStorage.getItem("theme"))
-            </script>
 			<!-- Datastar -->
+			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.6/bundles/datastar.js"></script>
+			<!-- main is version 1.0.0-RC.5, not latest keeping for now in case of breaking changes
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
+            -->
 			<!-- Inspector -->
 			<script defer type="module" src="https://cdn.jsdelivr.net/gh/dataSPA/dataSPA-inspector@main/dataspa-inspector.bundled.js"></script>
 			<!-- Auto animate -->
@@ -89,17 +79,12 @@ templ Layout(pc PageContext, content templ.Component) {
 templ themeToggle() {
 	<select
 		id="theme-toggler"
-		class="select-sm shadow-xl shadow-hard"
-		data-bind-theme
-		data-on-change="
-            localStorage.setItem('theme', event.target.value);
-            document.querySelector('html').setAttribute('data-theme', $theme)
-        "
+		data-bind:theme
 	>
-		<option value="light" data-attr="{selected: localStorage.getItem('theme') === 'light'}">Light</option>
-		<option value="dark" data-attr="{selected: localStorage.getItem('theme') === 'dark'}">Dark</option>
-		<option value="burgundy-light" data-attr="{selected: localStorage.getItem('theme') === 'burgundy-light'}">Burgundy</option>
-		<option value="burgundy-dark" data-attr="{selected: localStorage.getItem('theme') === 'burgundy-dark'}">Burgundy Dark</option>
+		<option value="light">Light</option>
+		<option value="dark">Dark</option>
+		<option value="burgundy-light">Burgundy</option>
+		<option value="burgundy-dark">Burgundy Dark</option>
 	</select>
 }
 
