@@ -46,7 +46,7 @@ templ Layout(pc PageContext, content templ.Component) {
 					</div>
 					@themeToggle()
 				</header>
-				<!-- Display all signals -->
+				<!-- Display all signals delete in prod -->
 				<pre data-json-signals></pre>
 				<!-- Here's where the pages are injected -->
 				<div class="grow flex flex-col text-text ">
@@ -88,10 +88,10 @@ templ themeToggle() {
 		id="theme-toggler !border-none"
 		data-bind:theme
 	>
-		<option value="light">Light</option>
-		<option value="dark">Dark</option>
-		<option value="burgundy-light">Burgundy</option>
-		<option value="burgundy-dark">Burgundy Dark</option>
+		<option value="light" data-attr="{selected: localStorage.getItem('theme') === 'light'}">Light</option>
+		<option value="dark" data-attr="{selected: localStorage.getItem('theme') === 'dark'}">Dark</option>
+		<option value="burgundy-light" data-attr="{selected: localStorage.getItem('theme') === 'burgundy-light'}">Burgundy</option>
+		<option value="burgundy-dark" data-attr="{selected: localStorage.getItem('theme') === 'burgundy-dark'}">Burgundy Dark</option>
 	</select>
 }
 
