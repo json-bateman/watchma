@@ -37,7 +37,7 @@ templ Movies(movies []types.Movie, baseURL string, room *services.Room) {
 				>
 					Submit Choices
 				</button>
-				@common.Error()
+				@common.Error("")
 				<div data-signals:movies="[]">
 					<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
 						for _, m := range movies {
