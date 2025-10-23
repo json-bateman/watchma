@@ -49,6 +49,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Use(h.RequireLogin)
 
 		r.Get("/", h.Index)
+		r.Get("/debug", h.Debug) // Debug endpoint: /debug or /debug?format=json
 		r.Get("/shuffle/{number}", h.Shuffle)
 		r.Get("/host", h.Host)
 		r.Get("/join", h.Join)

@@ -177,9 +177,10 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 	))
 }
 
-func (h *WebHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) SubmitDraftVotes(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.services.RoomService.GetRoom(roomName)
+
 	if !ok {
 		h.logger.Error("Could not obtain room", "room", roomName)
 		return
@@ -202,20 +203,19 @@ func (h *WebHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isVotingFinished := h.services.RoomService.SubmitVotes(roomName, currentUser.Username, moviesReq.Movies)
+	isVotingFinished := h.services.RoomService.SubmitDraftVotes(roomName, currentUser.Username)
 
 	// This will advance to Voting, then Results
 	if isVotingFinished {
 		room.Game.Step += 1
 		for _, p := range room.Players {
-			p.DraftMovies = []string{}
 			p.HasSelectedMovies = false
 		}
 	} else {
 		room, _ := h.services.RoomService.GetRoom(roomName)
 		player, _ := room.GetPlayer(currentUser.Username)
 
-		buttonAndMovies := steps.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.DraftMovies)
+		buttonAndMovies := steps.SubmitButton(room.Game.AllMovies, h.settings.JellyfinBaseURL, player.DraftMovies)
 
 		sse := datastar.NewSSE(w, r)
 		sse.PatchElementTempl(buttonAndMovies)

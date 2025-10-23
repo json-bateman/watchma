@@ -25,9 +25,9 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", room.Name))
 		}
 
-		room.Game.Movies = movies
+		room.Game.AllMovies = movies
 
-		h.services.RoomService.StartGame(roomName, room.Game.Movies)
+		h.services.RoomService.StartGame(roomName, room.Game.AllMovies)
 	}
 }
 

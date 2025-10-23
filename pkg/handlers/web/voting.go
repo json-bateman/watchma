@@ -37,7 +37,7 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isVotingFinished := h.services.RoomService.SubmitVotes(roomName, currentUser.Username, moviesReq.Movies)
+	isVotingFinished := h.services.RoomService.SubmitFinalVotes(roomName, currentUser.Username, moviesReq.Movies)
 
 	// This will advance to Voting, then Results
 	if isVotingFinished {
@@ -50,7 +50,7 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		room, _ := h.services.RoomService.GetRoom(roomName)
 		player, _ := room.GetPlayer(currentUser.Username)
 
-		buttonAndMovies := steps.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.DraftMovies)
+		buttonAndMovies := steps.SubmitButton(room.Game.AllMovies, h.settings.JellyfinBaseURL, player.DraftMovies)
 
 		sse := datastar.NewSSE(w, r)
 		sse.PatchElementTempl(buttonAndMovies)

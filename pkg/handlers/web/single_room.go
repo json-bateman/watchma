@@ -127,7 +127,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case utils.ROOM_VOTING_EVENT:
-			movies := steps.VotingGrid(myRoom.Game.Movies, h.settings.JellyfinBaseURL, myRoom)
+			movies := steps.VotingGrid(myRoom.Game.AllMovies, h.settings.JellyfinBaseURL, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
