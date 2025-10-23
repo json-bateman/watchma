@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"sort"
 	"strings"
@@ -67,6 +66,12 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		return
+	}
+
 	// Send existing message history to new client
 	if ok {
 		if len(myRoom.RoomMessages) > 0 {
@@ -84,6 +89,12 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	h.logger.Debug(utils.NATS_SUB, "subject", roomSubject)
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
+		return
+	}
+
+	movies, err := h.services.MovieService.GetMovies()
+	if err != nil {
+		h.logger.Error("Call to MovieService.GetMovies failed", "Error", err)
 		return
 	}
 
@@ -113,6 +124,12 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case utils.ROOM_START_EVENT:
+			draft := steps.Draft(player, movies, h.settings.JellyfinBaseURL, myRoom)
+			if err := sse.PatchElementTempl(draft); err != nil {
+				h.logger.Error("Error patching movies", "error", err)
+				return
+			}
+		case utils.ROOM_VOTING_EVENT:
 			movies := steps.VotingGrid(myRoom.Game.Movies, h.settings.JellyfinBaseURL, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
@@ -132,7 +149,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			sort.Slice(movieVotes, func(i, j int) bool {
 				return movieVotes[i].Votes > movieVotes[j].Votes
 			})
-			finalScreen := steps.GameFinished(movieVotes, h.settings.JellyfinBaseURL)
+			finalScreen := steps.ResultsScreen(movieVotes, h.settings.JellyfinBaseURL)
 			if err := sse.PatchElementTempl(finalScreen); err != nil {
 				h.logger.Error("Error patching final screen", "error", err)
 				return
@@ -179,26 +196,18 @@ func (h *WebHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.services.RoomService.GetRoom(roomName)
 	if ok {
-		room.Game.Step = types.Voting
+		room.Game.Step = types.Draft
 		movies, err := h.services.MovieService.GetMovies()
 		if err != nil {
+			h.logger.Error("Call to MovieService.GetMovies failed", "Error", err)
+			return
 		}
 
 		if len(movies) == 0 {
 			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", room.Name))
 		}
 
-		rand.Shuffle(len(movies), func(i, j int) {
-			movies[i], movies[j] = movies[j], movies[i]
-		})
-
-		randMovies := []types.Movie{}
-		if len(movies) >= room.Game.MovieNumber {
-			randMovies = movies[:room.Game.MovieNumber]
-		} else {
-			randMovies = movies
-		}
-		room.Game.Movies = randMovies
+		room.Game.Movies = movies
 
 		h.services.RoomService.StartGame(roomName, room.Game.Movies)
 	}

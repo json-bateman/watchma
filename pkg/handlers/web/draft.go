@@ -4,48 +4,51 @@ import (
 	"encoding/json"
 	"net/http"
 	"watchma/pkg/services"
-	"watchma/pkg/types"
+	"watchma/pkg/utils"
 	"watchma/view/steps"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-var testDraftState = types.DraftState{
-	MaxVotes: 8,
-	SelectedMovies: []string{
-		"eeabfd0d5436e34e85fe977afc1c54d5",
-		"202b05b82b0a1b8eb0e42d785c981bd7",
-	},
-	IsReady: false,
-}
-
-func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
-	movies, _ := h.services.MovieService.GetMovies()
-	response := NewPageResponse(steps.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
-	h.RenderPage(response, w, r)
-}
+// func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
+// 	movies, _ := h.services.MovieService.GetMovies()
+// 	response := NewPageResponse(steps.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
+// 	h.RenderPage(response, w, r)
+// }
 
 func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
+	user := utils.GetUserFromContext(r)
 	movies, _ := h.services.MovieService.GetMovies()
 
+	myRoom, ok := h.services.RoomService.GetRoom(roomName)
+	if ok {
+		h.logger.Error("Error finding room", "Room", roomName)
+	}
+
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		return
+	}
 	// This business logic needs to be put into roomService later
-	for i, id := range testDraftState.SelectedMovies {
+	for i, id := range player.SelectedMovies {
 		if id == movieId {
-			testDraftState.SelectedMovies = append(
-				testDraftState.SelectedMovies[:i],
-				testDraftState.SelectedMovies[i+1:]...,
+			player.SelectedMovies = append(
+				player.SelectedMovies[:i],
+				player.SelectedMovies[i+1:]...,
 			)
 			break
 		}
 	}
 
-	// now render with the updated testDraftState
 	draftContainerTempl := steps.Draft(
-		testDraftState,
+		player,
 		movies,
 		h.settings.JellyfinBaseURL,
+		myRoom,
 	)
 
 	sse := datastar.NewSSE(w, r)
@@ -53,41 +56,71 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 }
 
 func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
 	movies, _ := h.services.MovieService.GetMovies()
+	user := utils.GetUserFromContext(r)
+
+	myRoom, ok := h.services.RoomService.GetRoom(roomName)
+	if ok {
+		h.logger.Error("Error finding room", "Room", roomName)
+	}
+
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		return
+	}
 
 	// This business logic needs to be put into roomService later
 	found := false
-	for i, id := range testDraftState.SelectedMovies {
+	for i, id := range player.SelectedMovies {
 		if id == movieId {
-			testDraftState.SelectedMovies = append(
-				testDraftState.SelectedMovies[:i],
-				testDraftState.SelectedMovies[i+1:]...,
+			player.SelectedMovies = append(
+				player.SelectedMovies[:i],
+				player.SelectedMovies[i+1:]...,
 			)
 			found = true
 			break
 		}
 	}
 
-	// if not found, add it
-	if !found {
+	if !found && len(player.SelectedMovies) < myRoom.Game.MaxDraftCount {
 		for _, m := range movies {
 			if m.Id == movieId {
-				testDraftState.SelectedMovies = append(testDraftState.SelectedMovies, m.Id)
+				player.SelectedMovies = append(player.SelectedMovies, m.Id)
 				break
 			}
 		}
 	}
 
-	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(steps.Draft(
-		testDraftState,
+	draftContainerTempl := steps.Draft(
+		player,
 		movies,
 		h.settings.JellyfinBaseURL,
-	))
+		myRoom,
+	)
+
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElementTempl(draftContainerTempl)
 }
 
 func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	user := utils.GetUserFromContext(r)
+	movies, _ := h.services.MovieService.GetMovies()
+
+	myRoom, ok := h.services.RoomService.GetRoom(roomName)
+	if ok {
+		h.logger.Error("Error finding room", "Room", roomName)
+	}
+
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		return
+	}
+
 	type MovieQueryRequest struct {
 		Search string `json:"search"`
 		Genre  string `json:"genre"`
@@ -144,8 +177,9 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 
 	sse := datastar.NewSSE(w, r)
 	sse.PatchElementTempl(steps.Draft(
-		testDraftState,
+		player,
 		movies,
 		h.settings.JellyfinBaseURL,
+		myRoom,
 	))
 }

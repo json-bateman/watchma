@@ -2,54 +2,55 @@ package steps
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
+	"watchma/pkg/services"
 	"watchma/pkg/types"
 	"watchma/view/common"
 )
 
-templ Draft(state types.DraftState, movies []types.Movie, baseUrl string) {
+templ Draft(player *types.Player, movies []types.Movie, baseUrl string, room *services.Room) {
 	{{
-		showSelectedMovies := len(state.SelectedMovies) > 0
+		showSelectedMovies := len(player.SelectedMovies) > 0
 	}}
-	<div id="draftContainer" data-signals={ "{search:'', sort:'', genre:''}" }>
+	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
 			<section class="flex gap-4 flex-wrap">
-				@search()
+				@search(room)
 				<div class="flex gap-4">
-					@filters()
+					@filters(room)
 				</div>
 			</section>
 			<section>
-				@submit(state)
+				@submit(player, room.Game)
 			</section>
 		</div>
 		if showSelectedMovies {
 			<section class="mt-4">
-				@selectedMovies(movies, state.SelectedMovies)
+				@selectedMovies(movies, player.SelectedMovies, room)
 			</section>
 		}
 		<section class="mt-4">
-			@DraftGrid(movies, state.SelectedMovies, baseUrl)
+			@DraftGrid(movies, player.SelectedMovies, baseUrl, room)
 		</section>
 	</div>
 }
 
-templ search() {
+templ search(room *services.Room) {
 	<input
 		class="input"
 		aria-label="Search movies"
 		placeholder="Search..."
 		aria-placeholder="Search..."
 		data-bind:search
-		data-on:input__debounce.500ms={ datastar.PostSSE("/draft/query") }
+		data-on:input__debounce.500ms={ datastar.PostSSE("/draft/%s/query", room.Name) }
 	/>
 }
 
-templ filters() {
+templ filters(room *services.Room) {
 	<select
 		data-bind:genre
 		class="select"
 		aria-label="Filter movies by genre"
-		data-on:change={ datastar.PostSSE("/draft/query") }
+		data-on:change={ datastar.PostSSE("/draft/%s/query", room.Name) }
 	>
 		<option value="" selected>All genres&emsp;</option>
 		<option value="Action">Action</option>
@@ -76,7 +77,7 @@ templ filters() {
 		class="select"
 		aria-label="Sort movies"
 		data-bind:sort
-		data-on:change={ datastar.PostSSE("/draft/query") }
+		data-on:change={ datastar.PostSSE("/draft/%s/query", room.Name) }
 	>
 		<option value="" selected>No sort</option>
 		<option value="name-asc">Name Ascending</option>
@@ -90,13 +91,13 @@ templ filters() {
 	</select>
 }
 
-templ submit(state types.DraftState) {
+templ submit(player *types.Player, game *types.GameSession) {
 	{{
-		selectedCount := len(state.SelectedMovies)
+		selectedCount := len(player.SelectedMovies)
 		disabled := selectedCount == 0
 	}}
 	<div class="flex flex-wrap items-center gap-2">
-		<span>Selected { selectedCount } of { state.MaxVotes } movies</span>
+		<span>Selected { selectedCount } of { game.MaxDraftCount } movies</span>
 		<button
 			id="submit"
 			if disabled {
@@ -110,7 +111,7 @@ templ submit(state types.DraftState) {
 	</div>
 }
 
-templ selectedMovies(movies []types.Movie, selectedMovieIds []string) {
+templ selectedMovies(movies []types.Movie, selectedMovieIds []string, room *services.Room) {
 	{{
 		selectedMovies := []types.Movie{}
 		for _, movieId := range selectedMovieIds {
@@ -129,7 +130,7 @@ templ selectedMovies(movies []types.Movie, selectedMovieIds []string) {
 				<button
 					type="button"
 					class="pl-2 pr-3 cursor-pointer"
-					data-on:click={ datastar.DeleteSSE("/draft/%s", movie.Id) }
+					data-on:click={ datastar.DeleteSSE("/draft/%s/%s", room.Name, movie.Id) }
 				>
 					<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -141,12 +142,12 @@ templ selectedMovies(movies []types.Movie, selectedMovieIds []string) {
 	</div>
 }
 
-templ DraftGrid(movies []types.Movie, selectedMovies []string, baseUrl string) {
+templ DraftGrid(movies []types.Movie, selectedMovies []string, baseUrl string, room *services.Room) {
 	{{
 	gridOptions := common.DefaultGridOptions()
 	gridOptions.Selectable = true
 	gridOptions.MakeOnClickMovie = func(movieId string) string {
-		return datastar.PatchSSE("/draft/%s", movieId)
+		return datastar.PatchSSE("/draft/%s/%s", room.Name, movieId)
 	}
 	}}
 	@common.MovieGrid(movies, selectedMovies, baseUrl, gridOptions)

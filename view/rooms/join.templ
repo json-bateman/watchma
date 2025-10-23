@@ -33,7 +33,7 @@ templ RoomListBody(rooms map[string]*services.Room) {
 			for _, room := range rooms {
 				<tr class={ "text-center text-text hover:bg-primary/10 px-4 border-b-2 border-primary/20 transition-colors" }>
 					<td class="py-2 font-bold text-xl">{ room.Name }</td>
-					<td class="py-2 font-semibold text-lg">{ room.Game.MovieNumber }</td>
+					<td class="py-2 font-bold text-xl">{ room.Game.MaxDraftCount }</td>
 					<td class="py-2">
 						<div class="flex justify-center items-center">
 							<div class="bg-accent px-2 py-1 rounded font-bold">
@@ -46,7 +46,7 @@ templ RoomListBody(rooms map[string]*services.Room) {
 							<span class="hover:text-red-400">
 								Full!
 							</span>
-						} else if room.Game.Step == types.Voting {
+						} else if room.Game.Step == types.Voting || room.Game.Step == types.Draft {
 							<span class="hover:text-orange-500">
 								In Progress
 							</span>

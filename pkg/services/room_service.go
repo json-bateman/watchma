@@ -136,24 +136,6 @@ func (rs *RoomService) TogglePlayerReady(roomName, username string) bool {
 	return true
 }
 
-func (rs *RoomService) TogglePlayerFinishedDraft(roomName, username string) bool {
-	room, ok := rs.GetRoom(roomName)
-	if !ok {
-		return false
-	}
-
-	room.mu.Lock()
-	defer room.mu.Unlock()
-	player, found := room.Players[username]
-	if !found {
-		return false
-	}
-	player.HasFinishedDraft = !player.HasFinishedDraft
-
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
-	return true
-}
-
 func (rs *RoomService) AddMessage(roomName string, msg types.Message) bool {
 	room, ok := rs.GetRoom(roomName)
 	if !ok {
@@ -176,7 +158,7 @@ func (rs *RoomService) StartGame(roomName string, movies []types.Movie) bool {
 
 	room.mu.Lock()
 	defer room.mu.Unlock()
-	room.Game.Step = types.Voting
+	room.Game.Step = types.Draft
 	room.Game.Movies = movies
 
 	rs.logger.Info("Game started", "roomName", roomName)
@@ -185,12 +167,30 @@ func (rs *RoomService) StartGame(roomName string, movies []types.Movie) bool {
 	return true
 }
 
-func (rs *RoomService) FinishGame(roomName string) bool {
-	_, ok := rs.GetRoom(roomName)
+func (rs *RoomService) MoveToVoting(roomName string, movies []types.Movie) bool {
+	room, ok := rs.GetRoom(roomName)
 	if !ok {
 		return false
 	}
 
+	room.mu.Lock()
+	defer room.mu.Unlock()
+	room.Game.Step = types.Voting
+	room.Game.Movies = movies
+
+	rs.logger.Info("Game started", "roomName", roomName)
+
+	rs.pub.PublishRoomEvent(roomName, utils.ROOM_VOTING_EVENT)
+	return true
+}
+
+func (rs *RoomService) FinishGame(roomName string) bool {
+	room, ok := rs.GetRoom(roomName)
+	if !ok {
+		return false
+	}
+
+	room.Game.Step = types.Results
 	rs.logger.Info("Game finished", "roomName", roomName)
 
 	rs.pub.PublishRoomEvent(roomName, utils.ROOM_FINISH_EVENT)

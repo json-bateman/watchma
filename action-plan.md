@@ -32,8 +32,9 @@
     (sort of fixed, now just displays ties)
     - [ ] Change game flow, start game --> players add movies, host chooses the max
     number of movies people can add, maybe set timer to 1 minute
+    - [X] cache movies somehow - (Cached GET req for 1 minute)
     - [ ] players add movies --> Aggregate all choices to vote on.
-    - [ ] Stretch goal tournament, for now maybe just display winner(s)?
+    - [ ] Refactor
     - [ ] Post game lobby? Links to various things about the movie?
 
 - Deploy
@@ -47,10 +48,10 @@
     - [ ] make skeleton loader for movies?? 
 
 - Stretch goals
-    - [ ] create DB to store results of finished games
-    - [ ] let individual users log in and generate JWT token
+    - [ ] Stretch goal tournament, for now maybe just display winner(s)?
+    - [ ] create DB to store results of finished games (Have DB need to make table and save it)
+    - [X] let individual users log in
     - [ ] save users selections over time in the DB
-    - [ ] cache movies somehow
 
 - Stretchier goals
     - [ ] Add an input field for the host of each room to choose an actor

@@ -18,7 +18,6 @@ const (
 type GameSession struct {
 	Host          string
 	Movies        []Movie
-	MovieNumber   int
 	MaxPlayers    int
 	MaxDraftCount int
 	Votes         map[*Movie]int // MovieID -> vote count
@@ -34,7 +33,6 @@ type Player struct {
 	Username          string
 	JoinedAt          time.Time
 	Ready             bool
-	DraftedMovies     []string // MovieId
 	SelectedMovies    []string // MovieId
 	HasFinishedDraft  bool
 	HasSelectedMovies bool
@@ -52,10 +50,4 @@ type Message struct {
 type MovieVote struct {
 	Movie *Movie
 	Votes int
-}
-
-type DraftState struct {
-	SelectedMovies []string
-	IsReady        bool
-	MaxVotes       int
 }

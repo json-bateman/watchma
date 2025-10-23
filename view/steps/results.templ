@@ -5,7 +5,7 @@ import (
 	"watchma/view/common"
 )
 
-templ GameFinished(moviesSortedByVote []types.MovieVote, baseURL string) {
+templ ResultsScreen(moviesSortedByVote []types.MovieVote, baseURL string) {
 	{{ winnerMovies := getWinnerMovies(moviesSortedByVote) }}
 	<section id="moviesRoom" class="h-full" data-signals:movies>
 		<div class="flex flex-col justify-center h-full items-center">

@@ -85,10 +85,10 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.services.RoomService.AddRoom(roomName, &types.GameSession{
-		MovieNumber: movies,
-		MaxPlayers:  maxPlayers,
-		Host:        user.Username,
-		Votes:       make(map[*types.Movie]int),
+		MaxDraftCount: movies,
+		MaxPlayers:    maxPlayers,
+		Host:          user.Username,
+		Votes:         make(map[*types.Movie]int),
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
