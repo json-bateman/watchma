@@ -58,7 +58,7 @@ func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
-	user := utils.GetUserFromContext(r)
+	user := h.GetUserFromContext(r)
 	if user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return

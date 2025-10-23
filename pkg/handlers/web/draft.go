@@ -4,23 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 	"watchma/pkg/services"
-	"watchma/pkg/utils"
 	"watchma/view/steps"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-// func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
-// 	movies, _ := h.services.MovieService.GetMovies()
-// 	response := NewPageResponse(steps.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
-// 	h.RenderPage(response, w, r)
-// }
-
 func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
-	user := utils.GetUserFromContext(r)
+	user := h.GetUserFromContext(r)
 	movies, _ := h.services.MovieService.GetMovies()
 
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
@@ -34,11 +27,11 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 		return
 	}
 	// This business logic needs to be put into roomService later
-	for i, id := range player.SelectedMovies {
+	for i, id := range player.DraftMovies {
 		if id == movieId {
-			player.SelectedMovies = append(
-				player.SelectedMovies[:i],
-				player.SelectedMovies[i+1:]...,
+			player.DraftMovies = append(
+				player.DraftMovies[:i],
+				player.DraftMovies[i+1:]...,
 			)
 			break
 		}
@@ -59,7 +52,7 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
 	movies, _ := h.services.MovieService.GetMovies()
-	user := utils.GetUserFromContext(r)
+	user := h.GetUserFromContext(r)
 
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
 	if ok {
@@ -74,21 +67,21 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 
 	// This business logic needs to be put into roomService later
 	found := false
-	for i, id := range player.SelectedMovies {
+	for i, id := range player.DraftMovies {
 		if id == movieId {
-			player.SelectedMovies = append(
-				player.SelectedMovies[:i],
-				player.SelectedMovies[i+1:]...,
+			player.DraftMovies = append(
+				player.DraftMovies[:i],
+				player.DraftMovies[i+1:]...,
 			)
 			found = true
 			break
 		}
 	}
 
-	if !found && len(player.SelectedMovies) < myRoom.Game.MaxDraftCount {
+	if !found && len(player.DraftMovies) < myRoom.Game.MaxDraftCount {
 		for _, m := range movies {
 			if m.Id == movieId {
-				player.SelectedMovies = append(player.SelectedMovies, m.Id)
+				player.DraftMovies = append(player.DraftMovies, m.Id)
 				break
 			}
 		}
@@ -107,7 +100,7 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 
 func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := utils.GetUserFromContext(r)
+	user := h.GetUserFromContext(r)
 	movies, _ := h.services.MovieService.GetMovies()
 
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
@@ -182,4 +175,49 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 		h.settings.JellyfinBaseURL,
 		myRoom,
 	))
+}
+
+func (h *WebHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	room, ok := h.services.RoomService.GetRoom(roomName)
+	if !ok {
+		h.logger.Error("Could not obtain room", "room", roomName)
+		return
+	}
+
+	currentUser := h.GetUserFromContext(r)
+	if currentUser == nil {
+		h.logger.Error("No User found from session cookie")
+		return
+	}
+
+	player, ok := room.GetPlayer(currentUser.Username)
+	if !ok {
+		h.logger.Error("Player not in room")
+		return
+	}
+
+	if len(player.DraftMovies) == 0 {
+		h.SendSSEError(w, r, "Must include at least 1 movie id.")
+		return
+	}
+
+	isVotingFinished := h.services.RoomService.SubmitVotes(roomName, currentUser.Username, moviesReq.Movies)
+
+	// This will advance to Voting, then Results
+	if isVotingFinished {
+		room.Game.Step += 1
+		for _, p := range room.Players {
+			p.DraftMovies = []string{}
+			p.HasSelectedMovies = false
+		}
+	} else {
+		room, _ := h.services.RoomService.GetRoom(roomName)
+		player, _ := room.GetPlayer(currentUser.Username)
+
+		buttonAndMovies := steps.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.DraftMovies)
+
+		sse := datastar.NewSSE(w, r)
+		sse.PatchElementTempl(buttonAndMovies)
+	}
 }

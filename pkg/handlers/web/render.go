@@ -2,7 +2,6 @@ package web
 
 import (
 	"net/http"
-	"watchma/pkg/utils"
 	"watchma/view/common"
 
 	"github.com/a-h/templ"
@@ -23,7 +22,7 @@ func NewPageResponse(component templ.Component, title string) PageResponse {
 
 // RenderPage handles layout wrapping and rendering of common page elements such as page head and menu
 func (h *WebHandler) RenderPage(response PageResponse, w http.ResponseWriter, r *http.Request) {
-	user := utils.GetUserFromContext(r)
+	user := h.GetUserFromContext(r)
 	pc := common.PageContext{
 		Title: response.Title,
 		User:  user,

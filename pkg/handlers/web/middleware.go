@@ -18,7 +18,7 @@ func (h *WebHandler) RequireLogin(next http.Handler) http.Handler {
 			return
 		}
 
-		token := utils.GetSessionToken(r)
+		token := h.GetSessionToken(r)
 		if token == "" {
 			h.logger.Debug(fmt.Sprintf("User redirected to login, no %s cookie", utils.SESSION_COOKIE_NAME))
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -38,7 +38,7 @@ func (h *WebHandler) RequireLogin(next http.Handler) http.Handler {
 		}
 
 		// Store user in request context
-		r = utils.SetUserContext(r, user)
+		r = h.SetUserContext(r, user)
 
 		next.ServeHTTP(w, r)
 	})

@@ -33,7 +33,8 @@ type Player struct {
 	Username          string
 	JoinedAt          time.Time
 	Ready             bool
-	SelectedMovies    []string // MovieId
+	DraftMovies       []string // MovieId
+	VotingMovies      []string // MovieId
 	HasFinishedDraft  bool
 	HasSelectedMovies bool
 }

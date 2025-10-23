@@ -9,7 +9,7 @@ import (
 
 templ Draft(player *types.Player, movies []types.Movie, baseUrl string, room *services.Room) {
 	{{
-		showSelectedMovies := len(player.SelectedMovies) > 0
+		showSelectedMovies := len(player.DraftMovies) > 0
 	}}
 	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
@@ -20,16 +20,17 @@ templ Draft(player *types.Player, movies []types.Movie, baseUrl string, room *se
 				</div>
 			</section>
 			<section>
-				@submit(player, room.Game)
+				@submit(player, room)
+				@common.Error("")
 			</section>
 		</div>
 		if showSelectedMovies {
 			<section class="mt-4">
-				@selectedMovies(movies, player.SelectedMovies, room)
+				@selectedMovies(movies, player.DraftMovies, room)
 			</section>
 		}
 		<section class="mt-4">
-			@DraftGrid(movies, player.SelectedMovies, baseUrl, room)
+			@DraftGrid(movies, player.DraftMovies, baseUrl, room)
 		</section>
 	</div>
 }
@@ -91,24 +92,29 @@ templ filters(room *services.Room) {
 	</select>
 }
 
-templ submit(player *types.Player, game *types.GameSession) {
+templ submit(player *types.Player, room *services.Room) {
 	{{
-		selectedCount := len(player.SelectedMovies)
+		selectedCount := len(player.DraftMovies)
 		disabled := selectedCount == 0
 	}}
 	<div class="flex flex-wrap items-center gap-2">
-		<span>Selected { selectedCount } of { game.MaxDraftCount } movies</span>
+		<span>Selected { selectedCount } of { room.Game.MaxDraftCount } movies</span>
 		<button
-			id="submit"
+			id="draftSubmit"
 			if disabled {
 				class="btn-disabled"
 				disabled
 				aria-disabled
 			} else {
 				class="btn"
+				data-on:click={ datastar.PostSSE("/draft/%s/submit", room.Name) }
 			}
 		>Submit</button>
 	</div>
+}
+
+templ Submit() {
+	<button type="button" id="draftSubmit" class="btn-success cursor-not-allowed">Movies Submitted!</button>
 }
 
 templ selectedMovies(movies []types.Movie, selectedMovieIds []string, room *services.Room) {

@@ -229,7 +229,8 @@ func (rs *RoomService) SubmitVotes(roomName string, username string, movies []st
 					break
 				}
 			}
-			player.SelectedMovies = append(player.SelectedMovies, movieID)
+			// This should be handled on the backend like in draft
+			player.VotingMovies = append(player.VotingMovies, movieID)
 		}
 	}
 
