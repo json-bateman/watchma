@@ -87,6 +87,7 @@ templ themeToggle() {
 	<select
 		id="theme-toggler !border-none"
 		data-bind:theme
+		class="tracking-wide"
 	>
 		<option value="light" data-attr="{selected: localStorage.getItem('theme') === 'light'}">Light</option>
 		<option value="dark" data-attr="{selected: localStorage.getItem('theme') === 'dark'}">Dark</option>

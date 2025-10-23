@@ -3,13 +3,12 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-
 	"net/http"
 	"strconv"
-
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
-	"watchma/view/movies"
+	"watchma/view/shuffle"
+	"watchma/view/steps"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
@@ -35,7 +34,7 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		shuffledMovies = shuffledMovies[:numberOfMovies]
 	}
 
-	response := NewPageResponse(movies.Shuffle(shuffledMovies, h.settings.JellyfinBaseURL), "Movies")
+	response := NewPageResponse(shuffle.Shuffle(shuffledMovies, h.settings.JellyfinBaseURL), "Movies")
 	h.RenderPage(response, w, r)
 }
 
@@ -67,7 +66,7 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		room, _ := h.services.RoomService.GetRoom(roomName)
 		player, _ := room.GetPlayer(currentUser.Username)
 
-		buttonAndMovies := movies.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.SelectedMovies)
+		buttonAndMovies := steps.SubmitButton(room.Game.Movies, h.settings.JellyfinBaseURL, player.SelectedMovies)
 
 		sse := datastar.NewSSE(w, r)
 		sse.PatchElementTempl(buttonAndMovies)

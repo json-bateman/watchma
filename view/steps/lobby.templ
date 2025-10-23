@@ -1,4 +1,4 @@
-package rooms 
+package steps 
 
 import (
 	"encoding/json"
@@ -13,11 +13,11 @@ type ChatMessage struct {
 	Message  string `json:"message"`
 }
 
-templ SingleRoom(room *services.Room, username string) {
+templ Lobby(room *services.Room, username string) {
 	<section id="moviesRoom" class="flex justify-center grow">
 		<!-- janky(?) way to set the subject field for the message payload
     TODO: make this not janky -->
-		<span class="hidden" data-signals={ fmt.Sprintf("{subject: 'chat.%s',room: '%s'}", room.Name, room.Name) }></span>
+		<span class="hidden" data-signals={ fmt.Sprintf("{room: '%s'}", room.Name) }></span>
 		<div class="flex max-w-[800px] flex-col justify-between grow">
 			<div>
 				<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">

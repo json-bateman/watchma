@@ -10,8 +10,8 @@ import (
 
 	"watchma/pkg/types"
 	"watchma/pkg/utils"
-	"watchma/view/movies"
 	"watchma/view/rooms"
+	"watchma/view/steps"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
@@ -42,7 +42,7 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 
 	h.services.RoomService.AddPlayerToRoom(myRoom.Name, user.Username)
 
-	response := NewPageResponse(rooms.SingleRoom(myRoom, user.Username), myRoom.Name)
+	response := NewPageResponse(steps.Lobby(myRoom, user.Username), myRoom.Name)
 	h.RenderPage(response, w, r)
 }
 
@@ -61,7 +61,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	// Send existing user list to new client
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
 	if ok {
-		userBox := rooms.UserBox(myRoom, user.Username)
+		userBox := steps.UserBox(myRoom, user.Username)
 		if err := sse.PatchElementTempl(userBox); err != nil {
 			h.logger.Error("Error patching initial user list")
 		}
@@ -70,7 +70,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	// Send existing message history to new client
 	if ok {
 		if len(myRoom.RoomMessages) > 0 {
-			chat := rooms.ChatBox(myRoom.RoomMessages)
+			chat := steps.ChatBox(myRoom.RoomMessages)
 			if err := sse.PatchElementTempl(chat); err != nil {
 				h.logger.Error("Error patching chatbox on load")
 				return
@@ -101,19 +101,19 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		}
 		switch string(msg.Data) {
 		case utils.ROOM_UPDATE_EVENT:
-			userBox := rooms.UserBox(myRoom, user.Username)
+			userBox := steps.UserBox(myRoom, user.Username)
 			if err := sse.PatchElementTempl(userBox); err != nil {
 				h.logger.Error("Error patching user list", "error", err)
 				return
 			}
 		case utils.MESSAGE_SENT_EVENT:
-			chat := rooms.ChatBox(myRoom.RoomMessages)
+			chat := steps.ChatBox(myRoom.RoomMessages)
 			if err := sse.PatchElementTempl(chat); err != nil {
 				h.logger.Error("Error patching chat message", "error", err)
 				return
 			}
 		case utils.ROOM_START_EVENT:
-			movies := movies.Movies(myRoom.Game.Movies, h.settings.JellyfinBaseURL, myRoom)
+			movies := steps.VotingGrid(myRoom.Game.Movies, h.settings.JellyfinBaseURL, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
@@ -132,7 +132,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			sort.Slice(movieVotes, func(i, j int) bool {
 				return movieVotes[i].Votes > movieVotes[j].Votes
 			})
-			finalScreen := movies.GameFinished(movieVotes, h.settings.JellyfinBaseURL)
+			finalScreen := steps.GameFinished(movieVotes, h.settings.JellyfinBaseURL)
 			if err := sse.PatchElementTempl(finalScreen); err != nil {
 				h.logger.Error("Error patching final screen", "error", err)
 				return

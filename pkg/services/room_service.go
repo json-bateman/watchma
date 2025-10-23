@@ -89,8 +89,12 @@ func (rs *RoomService) RemovePlayerFromRoom(roomName, username string) bool {
 	}
 
 	room.mu.Lock()
-	defer room.mu.Lock()
+	defer room.mu.Unlock()
 	delete(room.Players, username)
+
+	if len(room.Players) == 0 {
+		rs.DeleteRoom(room.Name)
+	}
 
 	rs.logger.Info("Player removed from room", "roomName", roomName, "playerName", username)
 

@@ -1,4 +1,4 @@
-package draft
+package steps 
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
@@ -28,7 +28,7 @@ templ Draft(state types.DraftState, movies []types.Movie, baseUrl string) {
 			</section>
 		}
 		<section class="mt-4">
-			@Movies(movies, state.SelectedMovies, baseUrl)
+			@DraftGrid(movies, state.SelectedMovies, baseUrl)
 		</section>
 	</div>
 }
@@ -141,7 +141,7 @@ templ selectedMovies(movies []types.Movie, selectedMovieIds []string) {
 	</div>
 }
 
-templ Movies(movies []types.Movie, selectedMovies []string, baseUrl string) {
+templ DraftGrid(movies []types.Movie, selectedMovies []string, baseUrl string) {
 	{{
 	gridOptions := common.DefaultGridOptions()
 	gridOptions.Selectable = true

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"watchma/pkg/services"
 	"watchma/pkg/types"
-	"watchma/view/draft"
+	"watchma/view/steps"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/starfederation/datastar-go/datastar"
@@ -22,7 +22,7 @@ var testDraftState = types.DraftState{
 
 func (h *WebHandler) JoinDraft(w http.ResponseWriter, r *http.Request) {
 	movies, _ := h.services.MovieService.GetMovies()
-	response := NewPageResponse(draft.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
+	response := NewPageResponse(steps.Draft(testDraftState, movies, h.settings.JellyfinBaseURL), "Draft")
 	h.RenderPage(response, w, r)
 }
 
@@ -42,7 +42,7 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 	}
 
 	// now render with the updated testDraftState
-	draftContainerTempl := draft.Draft(
+	draftContainerTempl := steps.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,
@@ -80,7 +80,7 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 	}
 
 	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(draft.Draft(
+	sse.PatchElementTempl(steps.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,
@@ -143,7 +143,7 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(draft.Draft(
+	sse.PatchElementTempl(steps.Draft(
 		testDraftState,
 		movies,
 		h.settings.JellyfinBaseURL,
