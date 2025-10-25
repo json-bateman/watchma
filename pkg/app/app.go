@@ -15,15 +15,17 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 )
 
 type App struct {
-	Settings *config.Settings
-	Logger   *slog.Logger
-	Router   *chi.Mux
-	NATS     *nats.Conn
-	DB       *database.DB
+	Settings   *config.Settings
+	Logger     *slog.Logger
+	Router     *chi.Mux
+	NATS       *nats.Conn
+	NATSServer *server.Server // Embedded NATS server instance
+	DB         *database.DB
 }
 
 func New() *App {
@@ -42,23 +44,14 @@ func (a *App) Initialize() error {
 		return fmt.Errorf("initialize database: %w", err)
 	}
 
-	nc, err := nats.Connect(nats.DefaultURL)
+	// Start embedded NATS server
+	ns, nc, err := config.StartEmbeddedNATS(a.Logger)
 	if err != nil {
-		return fmt.Errorf("connect NATS: %w", err)
-	}
-
-	// Verify round-trip (ensures we’re really up)
-	if err := nc.FlushTimeout(2 * time.Second); err != nil {
-		return fmt.Errorf("nats flush failed: %w", err)
+		return fmt.Errorf("start embedded NATS: %w", err)
 	}
 
 	a.NATS = nc
-	a.Logger.Info(
-		"NATS connected",
-		"url", nc.ConnectedUrl(),
-		"server_id", nc.ConnectedServerId(),
-		"max_payload", nc.MaxPayload(),
-	)
+	a.NATSServer = ns
 
 	a.DB = db
 	userRepo := repository.NewUserRepository(db.DB, a.Logger)
@@ -106,11 +99,25 @@ func (a *App) Run() error {
 	a.Logger.Info("Starting server", "port", a.Settings.Port)
 
 	defer func() {
-		if a.DB != nil {
-			a.DB.Close()
-		}
+		a.Logger.Info("Shutting down gracefully...")
+
+		// Close NATS client connection first
 		if a.NATS != nil {
 			a.NATS.Close()
+			a.Logger.Info("NATS client connection closed")
+		}
+
+		// Shutdown embedded NATS server
+		if a.NATSServer != nil {
+			a.NATSServer.Shutdown()
+			a.NATSServer.WaitForShutdown()
+			a.Logger.Info("Embedded NATS server shutdown")
+		}
+
+		// Close database
+		if a.DB != nil {
+			a.DB.Close()
+			a.Logger.Info("Database closed")
 		}
 	}()
 

@@ -1,9 +1,5 @@
 package types
 
-import (
-	"time"
-)
-
 // Dumping unorganized types in this file until there's enough to refactor
 
 type GameStep int
@@ -29,16 +25,6 @@ type GameSession struct {
 // MovieRequest represents a request containing movie IDs
 type MovieRequest struct {
 	Movies []string `json:"movies"`
-}
-
-type Player struct {
-	Username          string
-	JoinedAt          time.Time
-	Ready             bool
-	DraftMovies       []string // MovieId
-	VotingMovies      []string // MovieId
-	HasFinishedDraft  bool
-	HasSelectedMovies bool
 }
 
 // Message represents a chat message

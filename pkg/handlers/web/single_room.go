@@ -54,29 +54,39 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 
 	sse := datastar.NewSSE(w, r)
 
-	// Send existing user list to new client
+	// Check if room exists
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if ok {
-		userBox := steps.UserBox(myRoom, user.Username)
-		if err := sse.PatchElementTempl(userBox); err != nil {
-			h.logger.Error("Error patching initial user list")
+	if !ok {
+		h.logger.Error("Room not found on SSE reconnect", "Room", roomName, "Username", user.Username)
+		// Send error and redirect to home
+		if err := sse.ExecuteScript("window.location.href = '/'"); err != nil {
+			h.logger.Error("Error redirecting after room not found", "error", err)
 		}
+		return
+	}
+
+	// Send existing user list to new client
+	userBox := steps.UserBox(myRoom, user.Username)
+	if err := sse.PatchElementTempl(userBox); err != nil {
+		h.logger.Error("Error patching initial user list")
 	}
 
 	player, ok := myRoom.GetPlayer(user.Username)
 	if !ok {
 		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		// Send error and redirect to home
+		if err := sse.ExecuteScript("window.location.href = '/'"); err != nil {
+			h.logger.Error("Error redirecting after player not found", "error", err)
+		}
 		return
 	}
 
-	// Send existing message history to new client
-	if ok {
-		if len(myRoom.RoomMessages) > 0 {
-			chat := steps.ChatBox(myRoom.RoomMessages)
-			if err := sse.PatchElementTempl(chat); err != nil {
-				h.logger.Error("Error patching chatbox on load")
-				return
-			}
+	// Send existing messages to new client
+	if len(myRoom.RoomMessages) > 0 {
+		chat := steps.ChatBox(myRoom.RoomMessages)
+		if err := sse.PatchElementTempl(chat); err != nil {
+			h.logger.Error("Error patching chatbox on load")
+			return
 		}
 	}
 

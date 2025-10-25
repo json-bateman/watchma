@@ -38,7 +38,7 @@ func NewWebHandler(settings *config.Settings, logger *slog.Logger, nc *nats.Conn
 }
 
 // Sets up all Web Routes through Chi Router.
-// Web Routes should return web elements (I.E. SSE, HTML)
+// Web Routes should write web elements to http.ResponseWriter (I.E. SSE, HTML, JSON)
 func (h *WebHandler) SetupRoutes(r chi.Router) {
 	// Public web routes
 	r.Get("/login", h.Login)
@@ -48,25 +48,33 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(h.RequireLogin)
 
+		// Debug endpoint to observe rooms
+		r.Get("/debug", h.Debug)
+
 		r.Get("/", h.Index)
-		r.Get("/debug", h.Debug) // Debug endpoint: /debug or /debug?format=json
 		r.Get("/shuffle/{number}", h.Shuffle)
+
+		// Room Setup
+		r.Post("/host", h.HostForm)
 		r.Get("/host", h.Host)
 		r.Get("/join", h.Join)
 		r.Get("/sse/join", h.JoinSSE)
+
+		// Lobby
 		r.Get("/room/{roomName}", h.SingleRoom)
 		r.Get("/sse/{roomName}", h.SingleRoomSSE)
-		// r.Get("/draft", h.JoinDraft)
-
-		r.Post("/host", h.HostForm)
 		r.Post("/message", h.PublishChatMessage)
-		r.Post("/room/{roomName}/movies", h.SubmitMovies)
 		r.Post("/room/{roomName}/ready", h.Ready)
 		r.Post("/room/{roomName}/start", h.StartGame)
-		r.Post("/draft/{roomName}/query", h.QueryMovies)
 
+		// Draft
+		r.Post("/draft/{roomName}/submit", h.ToggleDraftSubmit)
+		r.Post("/draft/{roomName}/query", h.QueryMovies)
 		r.Patch("/draft/{roomName}/{id}", h.ToggleSelectedMovie)
 		r.Delete("/draft/{roomName}/{id}", h.DeleteFromSelectedMovies)
+
+		// Voting
+		r.Post("/voting/{roomName}/submit", h.VotingSubmit)
 	})
 }
 
@@ -80,9 +88,4 @@ func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	response := NewPageResponse(view.IndexPage(movieOfTheDay, h.settings.JellyfinBaseURL), "Movie Showdown")
 	h.RenderPage(response, w, r)
-}
-
-func (h *WebHandler) NatsPublish(subj string, data []byte) error {
-	h.logger.Info("NATS publish", "subject", subj, "bytes", len(data))
-	return h.NATS.Publish(subj, data)
 }

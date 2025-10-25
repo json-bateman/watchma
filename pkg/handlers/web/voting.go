@@ -11,7 +11,7 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
-func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) VotingSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.services.RoomService.GetRoom(roomName)
 	if !ok {
@@ -22,6 +22,11 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 	currentUser := h.GetUserFromContext(r)
 	if currentUser == nil {
 		h.logger.Error("No User found from session cookie")
+		return
+	}
+	player, ok := room.GetPlayer(currentUser.Username)
+	if !ok {
+		h.logger.Error("Could not find player with this username")
 		return
 	}
 
@@ -37,15 +42,12 @@ func (h *WebHandler) SubmitMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isVotingFinished := h.services.RoomService.SubmitFinalVotes(roomName, currentUser.Username, moviesReq.Movies)
+	isVotingFinished := room.IsVotingFinished()
 
-	// This will advance to Voting, then Results
 	if isVotingFinished {
-		room.Game.Step += 1
-		for _, p := range room.Players {
-			p.DraftMovies = []string{}
-			p.HasSelectedMovies = false
-		}
+		// submit votes, advance to results
+		h.services.RoomService.SubmitFinalVotes(room, player, moviesReq.Movies)
+		room.Game.Step = types.Results
 	} else {
 		room, _ := h.services.RoomService.GetRoom(roomName)
 		player, _ := room.GetPlayer(currentUser.Username)

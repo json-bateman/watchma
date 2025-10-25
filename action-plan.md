@@ -30,12 +30,14 @@
     - [X] View results!
     - [X] Fix map sorting, when there's ties, users can get different results on final screen
     (sort of fixed, now just displays ties)
-    - [ ] Change game flow, start game --> players add movies, host chooses the max
+    - [X] Change game flow, start game --> players add movies, host chooses the max
     number of movies people can add, maybe set timer to 1 minute
     - [X] cache movies somehow - (Cached GET req for 1 minute)
-    - [ ] players add movies --> Aggregate all choices to vote on.
-    - [ ] Refactor
+    - [X] players add movies --> Aggregate all choices to vote on.
+    - [ ] Make a function that acts as the state machine, watches for step changes, maybe emits a message that the subscribed SSE channel is listening for.
+
     - [ ] Post game lobby? Links to various things about the movie?
+
 
 - Deploy
     - [ ] Deploy this as a docker container so people can download and use with their Jellyfin servers

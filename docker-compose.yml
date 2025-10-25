@@ -1,15 +1,23 @@
 version: '3.8'
 
+# NATS is now embedded in the Go application!
+# The services below are commented out but kept for reference.
+#
+# To switch back to external NATS:
+# 1. Uncomment the nats service below
+# 2. Update pkg/app/app.go to use nats.Connect(nats.DefaultURL)
+# 3. Remove the embedded NATS server code
+
 services:
-  nats:
-    build:
-      context: .
-      dockerfile: Dockerfile.nats
-    container_name: nats-server
-    ports:
-      - "4222:4222"  # Client connections
-      - "8222:8222"  # HTTP monitoring
-      - "6222:6222"  # Cluster routing (optional)
-    restart: unless-stopped
-    volumes:
-      - ./nats-server.conf:/nats-server.conf:ro
+  # nats:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.nats
+  #   container_name: nats-server
+  #   ports:
+  #     - "4222:4222"  # Client connections
+  #     - "8222:8222"  # HTTP monitoring
+  #     - "6222:6222"  # Cluster routing (optional)
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./nats-server.conf:/nats-server.conf:ro

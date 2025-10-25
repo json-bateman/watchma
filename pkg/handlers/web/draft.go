@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"watchma/pkg/services"
+	"watchma/pkg/types"
 	"watchma/view/steps"
 
 	"github.com/go-chi/chi/v5"
@@ -17,8 +18,9 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 	movies, _ := h.services.MovieService.GetMovies()
 
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if ok {
+	if !ok {
 		h.logger.Error("Error finding room", "Room", roomName)
+		return
 	}
 
 	player, ok := myRoom.GetPlayer(user.Username)
@@ -26,15 +28,10 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
 		return
 	}
-	// This business logic needs to be put into roomService later
-	for i, id := range player.DraftMovies {
-		if id == movieId {
-			player.DraftMovies = append(
-				player.DraftMovies[:i],
-				player.DraftMovies[i+1:]...,
-			)
-			break
-		}
+
+	// Use RoomService to handle business logic
+	if !h.services.RoomService.RemoveDraftMovie(roomName, user.Username, movieId) {
+		h.logger.Error("Failed to remove draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
 	draftContainerTempl := steps.Draft(
@@ -55,8 +52,9 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 	user := h.GetUserFromContext(r)
 
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if ok {
+	if !ok {
 		h.logger.Error("Error finding room", "Room", roomName)
+		return
 	}
 
 	player, ok := myRoom.GetPlayer(user.Username)
@@ -65,26 +63,9 @@ func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// This business logic needs to be put into roomService later
-	found := false
-	for i, id := range player.DraftMovies {
-		if id == movieId {
-			player.DraftMovies = append(
-				player.DraftMovies[:i],
-				player.DraftMovies[i+1:]...,
-			)
-			found = true
-			break
-		}
-	}
-
-	if !found && len(player.DraftMovies) < myRoom.Game.MaxDraftCount {
-		for _, m := range movies {
-			if m.Id == movieId {
-				player.DraftMovies = append(player.DraftMovies, m.Id)
-				break
-			}
-		}
+	// Use RoomService to handle business logic
+	if !h.services.RoomService.ToggleDraftMovie(roomName, user.Username, movieId) {
+		h.logger.Error("Failed to toggle draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
 	draftContainerTempl := steps.Draft(
@@ -104,8 +85,9 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 	movies, _ := h.services.MovieService.GetMovies()
 
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if ok {
+	if !ok {
 		h.logger.Error("Error finding room", "Room", roomName)
+		return
 	}
 
 	player, ok := myRoom.GetPlayer(user.Username)
@@ -177,7 +159,7 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 	))
 }
 
-func (h *WebHandler) SubmitDraftVotes(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) ToggleDraftSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.services.RoomService.GetRoom(roomName)
 
@@ -203,19 +185,14 @@ func (h *WebHandler) SubmitDraftVotes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isVotingFinished := h.services.RoomService.SubmitDraftVotes(roomName, currentUser.Username)
+	isVotingFinished := room.IsVotingFinished()
 
-	// This will advance to Voting, then Results
+	// if voting is finished, add all players choices to the voting array
 	if isVotingFinished {
-		room.Game.Step += 1
-		for _, p := range room.Players {
-			p.HasSelectedMovies = false
-		}
+		h.services.RoomService.SubmitDraftVotes(room, player)
+		room.Game.Step = types.Voting
 	} else {
-		room, _ := h.services.RoomService.GetRoom(roomName)
-		player, _ := room.GetPlayer(currentUser.Username)
-
-		buttonAndMovies := steps.SubmitButton(room.Game.AllMovies, h.settings.JellyfinBaseURL, player.DraftMovies)
+		buttonAndMovies := steps.DraftSubmit()
 
 		sse := datastar.NewSSE(w, r)
 		sse.PatchElementTempl(buttonAndMovies)

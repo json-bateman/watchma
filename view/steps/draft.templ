@@ -7,7 +7,7 @@ import (
 	"watchma/view/common"
 )
 
-templ Draft(player *types.Player, movies []types.Movie, baseUrl string, room *services.Room) {
+templ Draft(player *services.Player, movies []types.Movie, baseUrl string, room *services.Room) {
 	{{
 		showSelectedMovies := len(player.DraftMovies) > 0
 	}}
@@ -92,7 +92,7 @@ templ filters(room *services.Room) {
 	</select>
 }
 
-templ submit(player *types.Player, room *services.Room) {
+templ submit(player *services.Player, room *services.Room) {
 	{{
 		selectedCount := len(player.DraftMovies)
 		disabled := selectedCount == 0
@@ -113,7 +113,7 @@ templ submit(player *types.Player, room *services.Room) {
 	</div>
 }
 
-templ Submit() {
+templ DraftSubmit() {
 	<button type="button" id="draftSubmit" class="btn-success cursor-not-allowed">Movies Submitted!</button>
 }
 

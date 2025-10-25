@@ -23,8 +23,18 @@ type Room struct {
 	Name         string
 	Game         *types.GameSession
 	RoomMessages []types.Message
-	Players      map[string]*types.Player
+	Players      map[string]*Player
 	mu           sync.RWMutex
+}
+
+type Player struct {
+	Username          string
+	JoinedAt          time.Time
+	Ready             bool
+	DraftMovies       []string // MovieId
+	VotingMovies      []string // MovieId
+	HasFinishedDraft  bool
+	HasSelectedMovies bool
 }
 
 func NewRoomService(pub *EventPublisher, l *slog.Logger) *RoomService {
@@ -42,7 +52,7 @@ func (rs *RoomService) AddRoom(roomName string, game *types.GameSession) {
 		Name:         roomName,
 		Game:         game,
 		RoomMessages: make([]types.Message, 0),
-		Players:      make(map[string]*types.Player),
+		Players:      make(map[string]*Player),
 	}
 
 	rs.logger.Info("Room added", "name", roomName)
@@ -60,7 +70,7 @@ func (rs *RoomService) DeleteRoom(roomName string) {
 	rs.pub.PublishLobbyEvent(utils.ROOM_LIST_UPDATE_EVENT)
 }
 
-func (rs *RoomService) AddPlayerToRoom(roomName, username string) (*types.Player, bool) {
+func (rs *RoomService) AddPlayerToRoom(roomName, username string) (*Player, bool) {
 	room, ok := rs.GetRoom(roomName)
 	if !ok {
 		return nil, false
@@ -68,7 +78,7 @@ func (rs *RoomService) AddPlayerToRoom(roomName, username string) (*types.Player
 
 	room.mu.Lock()
 	defer room.mu.Unlock()
-	player := &types.Player{
+	player := &Player{
 		Username: username,
 		JoinedAt: time.Now(),
 	}
@@ -211,100 +221,143 @@ func (rs *RoomService) GetRoom(roomName string) (*Room, bool) {
 	return room, ok
 }
 
-// Submits movie votes for a given user and returns whether the voting period is concluded
-// for the given room. When voting is concluded, we can advance the step
-func (rs *RoomService) SubmitDraftVotes(roomName string, username string) bool {
+// SubmitDraftVotes() submits all votes for the given room.
+// When voting is concluded, we can advance the step
+func (rs *RoomService) SubmitDraftVotes(room *Room, player *Player) {
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()
 
-	room, ok := rs.GetRoom(roomName)
-	player, ok2 := room.GetPlayer(username)
+	for _, p := range room.Players {
+		// Add each player's draft movies to voting movies (if not already present)
+		for _, movieID := range p.DraftMovies {
+			if room.Game.VotingMoviesContains(movieID) {
+				continue
+			}
 
-	if !ok || !ok2 {
+			// Get movie from AllMovies map (O(1) lookup)
+			if movie, exists := room.Game.GetMovie(movieID); exists {
+				room.Game.VotingMovies = append(room.Game.VotingMovies, *movie)
+			}
+		}
+	}
+
+	rs.logger.Info("All Draft Votes Submitted to Voting Array", "Room Name", room.Name, "player", player.Username)
+}
+
+func (rs *RoomService) SubmitFinalVotes(room *Room, player *Player, movies []string) {
+	rs.mu.RLock()
+	defer rs.mu.RUnlock()
+
+	for _, movieID := range movies {
+		// Find the Movie that matches this ID
+		for i := range room.Game.AllMovies {
+			if room.Game.AllMovies[i].Id == movieID {
+				room.Game.Votes[&room.Game.AllMovies[i]]++
+				break
+			}
+		}
+		// This should be handled on the backend like in draft
+		player.VotingMovies = append(player.VotingMovies, movieID)
+	}
+
+	rs.logger.Info("All Draft Votes submitted to Voting Array", "Room Name", room.Name, "player", player.Username, "votes", movies)
+}
+
+// RemoveDraftMovie removes a specific movie from a player's draft selection
+// Returns true if the movie was found and removed
+func (rs *RoomService) RemoveDraftMovie(roomName, username, movieID string) bool {
+	room, ok := rs.GetRoom(roomName)
+	if !ok {
 		return false
 	}
 
-	// Add player's draft movies to voting movies (if not already present)
-	for _, movieID := range player.DraftMovies {
-		// Skip if already in voting movies (O(n) but n is small)
-		if room.Game.VotingMoviesContains(movieID) {
-			continue
-		}
+	room.mu.Lock()
+	defer room.mu.Unlock()
 
-		// Get movie from AllMovies map (O(1) lookup)
-		if movie, exists := room.Game.GetMovie(movieID); exists {
-			room.Game.VotingMovies = append(room.Game.VotingMovies, *movie)
+	player, ok := room.Players[username]
+	if !ok {
+		return false
+	}
+
+	for i, id := range player.DraftMovies {
+		if id == movieID {
+			player.DraftMovies = append(
+				player.DraftMovies[:i],
+				player.DraftMovies[i+1:]...,
+			)
+			rs.logger.Info("Movie removed from draft", "roomName", roomName, "player", username, "movieID", movieID)
+			rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
+			return true
 		}
 	}
 
-	rs.logger.Info("Player submitted draft votes", "roomName", roomName, "player", username)
-
-	player.HasSelectedMovies = true
-
-	return rs.GetIsVotingFinished(roomName)
+	return false
 }
 
-func (rs *RoomService) SubmitFinalVotes(roomName string, username string, movies []string) bool {
-	rs.mu.RLock()
-	defer rs.mu.RUnlock()
-
+// ToggleDraftMovie adds or removes a movie from a player's draft selection
+// If the movie is already in the draft, it will be removed
+// If the movie is not in the draft and the player hasn't reached MaxDraftCount, it will be added
+// Returns true if the operation was successful
+func (rs *RoomService) ToggleDraftMovie(roomName, username, movieID string) bool {
 	room, ok := rs.GetRoom(roomName)
-	player, ok2 := room.GetPlayer(username)
+	if !ok {
+		return false
+	}
 
-	if ok && ok2 {
-		for _, movieID := range movies {
-			// Find the Movie that matches this ID
-			for i := range room.Game.AllMovies {
-				if room.Game.AllMovies[i].Id == movieID {
-					room.Game.Votes[&room.Game.AllMovies[i]]++
-					break
-				}
-			}
-			// This should be handled on the backend like in draft
-			player.VotingMovies = append(player.VotingMovies, movieID)
+	room.mu.Lock()
+	defer room.mu.Unlock()
+
+	player, ok := room.Players[username]
+	if !ok {
+		return false
+	}
+
+	// Try to remove the movie if it exists in the draft
+	for i, id := range player.DraftMovies {
+		if id == movieID {
+			player.DraftMovies = append(
+				player.DraftMovies[:i],
+				player.DraftMovies[i+1:]...,
+			)
+			rs.logger.Info("Movie toggled off in draft", "roomName", roomName, "player", username, "movieID", movieID)
+			rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
+			return true
 		}
 	}
 
-	rs.logger.Info("Player submitted votes", "roomName", roomName, "player", username, "votes", movies)
-
-	player.HasSelectedMovies = true
-
-	return rs.GetIsVotingFinished(roomName)
-}
-
-func (rs *RoomService) GetIsVotingFinished(roomName string) bool {
-	room, _ := rs.GetRoom(roomName)
-
-	for _, player := range room.Players {
-		if !player.HasSelectedMovies {
-			return false
-		}
+	// Movie not found in draft, try to add it if under limit
+	if len(player.DraftMovies) < room.Game.MaxDraftCount {
+		player.DraftMovies = append(player.DraftMovies, movieID)
+		rs.logger.Info("Movie toggled on in draft", "roomName", roomName, "player", username, "movieID", movieID)
+		rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
+		return true
 	}
 
-	return true
+	rs.logger.Warn("Draft limit reached", "roomName", roomName, "player", username, "maxDraftCount", room.Game.MaxDraftCount)
+	return false
 }
 
-func (r *Room) GetPlayer(username string) (*types.Player, bool) {
+func (r *Room) GetPlayer(username string) (*Player, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	player, exists := r.Players[username]
 	return player, exists
 }
 
-func (r *Room) GetAllPlayers() []*types.Player {
+func (r *Room) GetAllPlayers() []*Player {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	players := make([]*types.Player, 0, len(r.Players))
+	players := make([]*Player, 0, len(r.Players))
 	for _, player := range r.Players {
 		players = append(players, player)
 	}
 	return players
 }
 
-func (r *Room) PlayersByJoinTime() []*types.Player {
+func (r *Room) PlayersByJoinTime() []*Player {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	players := make([]*types.Player, 0, len(r.Players))
+	players := make([]*Player, 0, len(r.Players))
 	for _, u := range r.Players {
 		players = append(players, u)
 	}
@@ -313,4 +366,16 @@ func (r *Room) PlayersByJoinTime() []*types.Player {
 		return players[i].JoinedAt.Before(players[j].JoinedAt)
 	})
 	return players
+}
+
+// IsVotingFinished determines if all players have selected movies, if any have not return false
+func (r *Room) IsVotingFinished() bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, p := range r.Players {
+		if !p.HasSelectedMovies {
+			return false
+		}
+	}
+	return true
 }
