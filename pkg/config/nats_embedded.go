@@ -13,14 +13,14 @@ import (
 func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) {
 	// Configure the embedded NATS server
 	opts := &server.Options{
-		ServerName:  "watchma-nats-embedded",
-		Host:        "127.0.0.1",
-		Port:        4222,
-		HTTPPort:    8222, // Monitoring port
-		NoLog:       false,
-		NoSigs:      true, // Disable signal handling (parent app handles it)
-		MaxPayload:  1024 * 1024, // 1MB
-		MaxConn:     100,
+		ServerName:    "watchma-nats-embedded",
+		Host:          "127.0.0.1",
+		Port:          4222,
+		HTTPPort:      8222, // Monitoring port
+		NoLog:         false,
+		NoSigs:        true,        // Disable signal handling (parent app handles it)
+		MaxPayload:    1024 * 1024, // 1MB
+		MaxConn:       500,
 		WriteDeadline: 10 * time.Second,
 	}
 

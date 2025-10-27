@@ -1,0 +1,70 @@
+package view
+
+import "github.com/starfederation/datastar-go/datastar"
+
+templ Validate() {
+	<html>
+		<body class="w-full">
+			<section
+				class="w-full items-center flex flex-col"
+			>
+				<!-- Display all signals... for fun! -->
+				<pre data-json-signals></pre>
+				<div class="w-80 p-6 bg-white rounded-xl shadow-lg space-y-4 font-sans flex flex-col">
+					<input
+						type="password"
+						data-bind:password
+						placeholder="Enter password"
+						class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+						data-on:input__debounce.200ms={ datastar.PostSSE("/validate") }
+					/>
+					<span data-text="($valid8 ? '✓ ' : '') + '8+ characters'" data-class="{ 'text-green-600 font-medium': $valid8, 'text-gray-500': !$valid8 }" class="text-sm"></span>
+					<span data-text="($valid12 ? '✓ ' : '') + '12+ characters'" data-class="{ 'text-green-600 font-medium': $valid12, 'text-gray-500': !$valid12 }" class="text-sm"></span>
+					<span data-text="($hasLower ? '✓ ' : '') + 'Lowercase letter'" data-class="{ 'text-green-600 font-medium': $hasLower, 'text-gray-500': !$hasLower }" class="text-sm"></span>
+					<span data-text="($hasUpper ? '✓ ' : '') + 'Uppercase letter'" data-class="{ 'text-green-600 font-medium': $hasUpper, 'text-gray-500': !$hasUpper }" class="text-sm"></span>
+					<span data-text="($hasNumber ? '✓ ' : '') + 'Number'" data-class="{ 'text-green-600 font-medium': $hasNumber, 'text-gray-500': !$hasNumber }" class="text-sm"></span>
+					<span data-text="($hasSpecial ? '✓ ' : '') + 'Special character'" data-class="{ 'text-green-600 font-medium': $hasSpecial, 'text-gray-500': !$hasSpecial }" class="text-sm"></span>
+				</div>
+			</section>
+		</body>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.6/bundles/datastar.js"></script>
+	</html>
+}
+
+templ Validate2(valid bool) {
+	<html id="fattyMorph">
+		<body class="w-full">
+			<section
+				class="w-full items-center flex flex-col"
+			>
+				<!-- Display all signals... for fun! -->
+				<pre data-json-signals></pre>
+				<div class="w-80 p-6 bg-white rounded-xl shadow-lg space-y-4 font-sans flex flex-col">
+					<input
+						type="password"
+						data-bind:password
+						placeholder="Enter password"
+						class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+						data-on:input__debounce.200ms={ datastar.PostSSE("/validate") }
+					/>
+					<div
+						if !valid {
+							class="text-gray flex flex-col"
+						} else {
+							class="text-green-500 flex flex-col"
+						}
+					>
+						<span>8+ Characters</span>
+						<span>Lowercase character</span>
+						<span>Uppercase character</span>
+						<span>Special character</span>
+						<span>Number</span>
+					</div>
+				</div>
+			</section>
+		</body>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.6/bundles/datastar.js"></script>
+	</html>
+}

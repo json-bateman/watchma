@@ -1,15 +1,20 @@
 package web
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
+	"regexp"
+	"unicode"
 
 	"watchma/pkg/config"
 	"watchma/pkg/services"
 	"watchma/view"
 
+	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/nats-io/nats.go"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 type WebHandlerServices struct {
@@ -75,6 +80,10 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 
 		// Voting
 		r.Post("/voting/{roomName}/submit", h.VotingSubmit)
+
+		// Random Password Validation
+		r.Get("/validate", h.Validate)
+		r.Post("/validate", h.ValidatePost2)
 	})
 }
 
@@ -88,4 +97,76 @@ func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 
 	response := NewPageResponse(view.IndexPage(movieOfTheDay, h.settings.JellyfinBaseURL), "Movie Showdown")
 	h.RenderPage(response, w, r)
+}
+
+type Signals struct {
+	Password string `json:"password"`
+}
+
+type PwRules struct {
+	Valid8     bool `json:"valid8"`
+	Valid12    bool `json:"valid12"`
+	HasNumber  bool `json:"hasNumber"`
+	HasSpecial bool `json:"hasSpecial"`
+	HasUpper   bool `json:"hasUpper"`
+	HasLower   bool `json:"hasLower"`
+}
+
+func (h *WebHandler) Validate(w http.ResponseWriter, r *http.Request) {
+	templ.Handler(view.Validate2(false)).ServeHTTP(w, r)
+}
+
+func isValidPassword(pw string) bool {
+	if len(pw) < 8 {
+		return false
+	}
+
+	hasLower := regexp.MustCompile(`[a-z]`).MatchString(pw)
+	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(pw)
+	hasNumber := regexp.MustCompile(`[0-9]`).MatchString(pw)
+
+	return hasLower && hasUpper && hasNumber
+}
+
+func (h *WebHandler) ValidatePost2(w http.ResponseWriter, r *http.Request) {
+	var signals Signals
+	if err := json.NewDecoder(r.Body).Decode(&signals); err != nil {
+		h.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
+		return
+	}
+	sse := datastar.NewSSE(w, r)
+	valid := isValidPassword(signals.Password)
+	sse.PatchElementTempl(view.Validate2(valid))
+}
+
+func (h *WebHandler) ValidatePost(w http.ResponseWriter, r *http.Request) {
+	var signals Signals
+	if err := json.NewDecoder(r.Body).Decode(&signals); err != nil {
+		h.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
+		return
+	}
+
+	var rules PwRules
+
+	runes := []rune(signals.Password)
+	n := len(runes)
+
+	rules.Valid8 = n >= 8
+	rules.Valid12 = n >= 12
+
+	for _, r := range runes {
+		switch {
+		case unicode.IsLower(r):
+			rules.HasLower = true
+		case unicode.IsUpper(r):
+			rules.HasUpper = true
+		case unicode.IsDigit(r):
+			rules.HasNumber = true
+		case unicode.IsPunct(r) || unicode.IsSymbol(r):
+			rules.HasSpecial = true
+		}
+	}
+
+	sse := datastar.NewSSE(w, r)
+	sse.MarshalAndPatchSignals(rules)
 }
