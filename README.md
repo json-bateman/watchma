@@ -24,11 +24,6 @@ Must have a Jellyfin server with API key in your `.env` for this to run properly
 `PORT`  (to run the app on)  
 `LOG_LEVEL` (DEBUG | INFO | WARN | ERROR)
 
-### Running dev
-`docker-compose up` to start the [NATS](https://nats.io/) Service.  
-`task dev` to compile the css, templ files and run the server with Air and Tailwind in watch mode.  
-`task` to see all available commands
-
 ### Using Bruno (basically offline postman)
 I have some of the api endpoints saved in the _bruno folder [install bruno](https://www.usebruno.com/) if you want to use these endpoints. Make sure to copy your `.env` file in the root of the `_bruno` directory so the endpoints can use the environment variables in their requests. Jellyfin requires an API key in each of it's requests. [here's](https://docs.usebruno.com/secrets-management/dotenv-file) some info on how to store bruno secrets.
 
