@@ -28,6 +28,5 @@ func (h *WebHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		shuffledMovies = shuffledMovies[:numberOfMovies]
 	}
 
-	response := NewPageResponse(shuffle.Shuffle(shuffledMovies, h.settings.JellyfinBaseURL), "Movies")
-	h.RenderPage(response, w, r)
+	h.RenderPage(shuffle.Shuffle(shuffledMovies, h.settings.JellyfinBaseURL), "Movies", w, r)
 }

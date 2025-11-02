@@ -42,7 +42,7 @@ func (s *AuthService) LoginOrCreate(username, password string) (*repository.User
 		// User exists - verify password
 		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash),
 			[]byte(password)); err != nil {
-			return nil, "", errors.New("invalid password")
+			return nil, "", errors.New("Invalid password for existing user: " + user.Username)
 		}
 		s.logger.Info("User logged in", "username", username)
 	}

@@ -13,8 +13,7 @@ import (
 )
 
 func (h *WebHandler) Join(w http.ResponseWriter, r *http.Request) {
-	response := NewPageResponse(rooms.JoinPage(h.services.RoomService.Rooms), "Join page")
-	h.RenderPage(response, w, r)
+	h.RenderPage(rooms.JoinPage(h.services.RoomService.Rooms), "Join page", w, r)
 }
 
 func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
@@ -53,8 +52,7 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebHandler) Host(w http.ResponseWriter, r *http.Request) {
-	response := NewPageResponse(rooms.HostPage(), "Host Room")
-	h.RenderPage(response, w, r)
+	h.RenderPage(rooms.HostPage(), "Host Room", w, r)
 }
 
 func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {

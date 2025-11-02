@@ -25,21 +25,18 @@ func (h *WebHandler) SingleRoom(w http.ResponseWriter, r *http.Request) {
 	myRoom, ok := h.services.RoomService.GetRoom(roomName)
 
 	if !ok {
-		response := NewPageResponse(rooms.NoRoom(roomName), roomName)
-		h.RenderPage(response, w, r)
+		h.RenderPage(rooms.NoRoom(roomName), roomName, w, r)
 		return
 	}
 
 	if myRoom.Game.MaxPlayers <= len(myRoom.Players) {
-		response := NewPageResponse(rooms.RoomFull(), roomName)
-		h.RenderPage(response, w, r)
+		h.RenderPage(rooms.RoomFull(), roomName, w, r)
 		return
 	}
 
 	h.services.RoomService.AddPlayerToRoom(myRoom.Name, user.Username)
 
-	response := NewPageResponse(steps.Lobby(myRoom, user.Username), myRoom.Name)
-	h.RenderPage(response, w, r)
+	h.RenderPageNoLayout(steps.Lobby(myRoom, user.Username), myRoom.Name, w, r)
 }
 
 // Function that does the heavy lifting by keeping the SSE channel open and sending

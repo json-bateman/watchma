@@ -15,20 +15,6 @@ tasks:
     cmd: air
 
   # Combined development task
-  dev:
-    desc: Run all watchers in parallel
-    cmds:
-      - |
-        sqlc generate
-        tailwindcss -i ./public/input.css -o ./public/style.css --watch &
-        templ generate --watch &
-        if [ "$OS" = "Windows_NT" ]; then
-          air -build.cmd "templ generate; if (\$?) { go build -o tmp/main.exe ./cmd }" -build.bin "tmp/main.exe" &
-        else
-          air &
-        fi
-        wait
-
   # Build tasks
   css:build:
     desc: Build CSS for production
@@ -60,4 +46,18 @@ tasks:
       - rm -rf ./release/*
       - rm -f ./public/style.css
       - find . -name "*_templ.go" -delete
+
+  default:
+    desc: Run all watchers in parallel
+    cmds:
+      - |
+        sqlc generate
+        tailwindcss -i ./public/input.css -o ./public/style.css --watch &
+        templ generate --watch &
+        if [ "$OS" = "Windows_NT" ]; then
+          air -build.cmd "templ generate; if (\$?) { go build -o tmp/main.exe ./cmd }" -build.bin "tmp/main.exe" &
+        else
+          air &
+        fi
+        wait
 

@@ -7,27 +7,23 @@ import (
 	"github.com/a-h/templ"
 )
 
-type PageResponse struct {
-	Component templ.Component
-	Title     string
+func (h *WebHandler) RenderPage(component templ.Component, title string, w http.ResponseWriter, r *http.Request) {
+	h.renderPage(component, title, w, r, true)
 }
 
-// NewPageResponse creates a standard page response
-func NewPageResponse(component templ.Component, title string) PageResponse {
-	return PageResponse{
-		Component: component,
-		Title:     title,
-	}
+func (h *WebHandler) RenderPageNoLayout(component templ.Component, title string, w http.ResponseWriter, r *http.Request) {
+	h.renderPage(component, title, w, r, false)
 }
 
-// RenderPage handles layout wrapping and rendering of common page elements such as page head and menu
-func (h *WebHandler) RenderPage(response PageResponse, w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) renderPage(component templ.Component, title string, w http.ResponseWriter, r *http.Request, headerFooter bool) {
 	user := h.GetUserFromContext(r)
+
 	pc := common.PageContext{
-		Title: response.Title,
-		User:  user,
+		Title:        title,
+		HeaderFooter: headerFooter,
+		User:         user,
+		Content:      component,
 	}
 
-	component := common.Layout(pc, response.Component)
-	templ.Handler(component).ServeHTTP(w, r)
+	templ.Handler(common.Layout(pc)).ServeHTTP(w, r)
 }
