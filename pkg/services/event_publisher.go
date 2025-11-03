@@ -29,7 +29,6 @@ func (ep *EventPublisher) Publish(subject string, data []byte) error {
 	return nil
 }
 
-// Helper methods for common patterns
 func (ep *EventPublisher) PublishRoomEvent(roomName, event string) error {
 	subject := utils.RoomSubject(roomName)
 	ep.logger.Debug(utils.NATS_PUB, "subject", subject, "msg", event)

@@ -1,4 +1,4 @@
-## <p align="center">![Watchma](public/watchma.png)</p>
+## <p align="center">![Watchma](public/watchma-outlined.png)</p>
 
 <a  target="_blank" href="https://data-star.dev/" ><img src="public/datastar-rocket.png" width="32"/></a> + <a target="_blank" href="https://templ.guide/"><img src="public/templ.svg" width="120"/></a> + <a target="_blank" href="https://tailwindcss.com/"><img src="public/tailwind.png" width="36"/></a>
 

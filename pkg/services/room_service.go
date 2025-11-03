@@ -234,7 +234,6 @@ func (rs *RoomService) SubmitDraftVotes(room *Room, player *Player) {
 				continue
 			}
 
-			// Get movie from AllMovies map (O(1) lookup)
 			if movie, exists := room.Game.GetMovie(movieID); exists {
 				room.Game.VotingMovies = append(room.Game.VotingMovies, *movie)
 			}

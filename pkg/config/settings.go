@@ -16,7 +16,7 @@ const (
 	J_BASE_URL = "JELLYFIN_BASE_URL"
 	PORT       = "PORT"
 	LOG_LEVEL  = "LOG_LEVEL"
-	ENV        = "ENVIRONMENT"
+	IS_DEV     = "IS_DEV"
 )
 
 type Settings struct {
@@ -27,7 +27,7 @@ type Settings struct {
 
 	Port     int
 	LogLevel slog.Level
-	Env      string
+	Env      bool
 
 	//TODO: Timeout users who are inactive maybe?
 	SessionTimeout time.Duration
@@ -46,7 +46,7 @@ func LoadSettings() *Settings {
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
 
 		Port:           getEnvAsInt(PORT, 8080),
-		Env:            getEnvAsString(ENV, "development"),
+		Env:            strings.ToLower(os.Getenv(IS_DEV)) == "true",
 		SessionTimeout: getEnvAsDuration("SESSION_TIMEOUT", 30*time.Minute),
 	}
 
