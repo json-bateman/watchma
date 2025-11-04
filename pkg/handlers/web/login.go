@@ -105,8 +105,7 @@ func (h *WebHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	// SSE must consume the writer and request AFTER cookie is set
 	sse := datastar.NewSSE(w, r)
 	h.logger.Info("Login successful", "user_id", user.ID, "username", user.Username)
-	sse.PatchElementTempl(login.LoginSuccess())
+	sse.Redirect("/")
 }

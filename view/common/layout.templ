@@ -15,7 +15,7 @@ type PageContext struct {
 
 templ Layout(pc PageContext) {
 	<html
-		data-signals="{theme: localStorage.getItem('theme')}"
+		data-signals="{theme: localStorage.getItem('theme') || 'burgundy-light'}"
 		data-theme-storage="$theme"
 		data-attr:data-theme="$theme"
 		lang="en"
