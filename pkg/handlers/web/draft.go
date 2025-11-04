@@ -11,95 +11,92 @@ import (
 	"github.com/starfederation/datastar-go/datastar"
 )
 
+type MovieQueryRequest struct {
+	Search string `json:"search"`
+	Genre  string `json:"genre"`
+	Sort   string `json:"sort"`
+}
+
 func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
 	user := h.GetUserFromContext(r)
-	movies, _ := h.services.MovieService.GetMovies()
-
-	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if !ok {
-		h.logger.Error("Error finding room", "Room", roomName)
-		return
-	}
-
-	player, ok := myRoom.GetPlayer(user.Username)
-	if !ok {
-		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
-		return
-	}
 
 	// Use RoomService to handle business logic
 	if !h.services.RoomService.RemoveDraftMovie(roomName, user.Username, movieId) {
 		h.logger.Error("Failed to remove draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
-	draftContainerTempl := steps.Draft(
-		player,
-		movies,
-		h.settings.JellyfinBaseURL,
-		myRoom,
-	)
-
-	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(draftContainerTempl)
+	h.RenderDraftPage(w, r)
 }
 
 func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
-	movies, _ := h.services.MovieService.GetMovies()
 	user := h.GetUserFromContext(r)
-
-	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if !ok {
-		h.logger.Error("Error finding room", "Room", roomName)
-		return
-	}
-
-	player, ok := myRoom.GetPlayer(user.Username)
-	if !ok {
-		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
-		return
-	}
 
 	// Use RoomService to handle business logic
 	if !h.services.RoomService.ToggleDraftMovie(roomName, user.Username, movieId) {
 		h.logger.Error("Failed to toggle draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
-	draftContainerTempl := steps.Draft(
-		player,
-		movies,
-		h.settings.JellyfinBaseURL,
-		myRoom,
-	)
-
-	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(draftContainerTempl)
+	h.RenderDraftPage(w, r)
 }
 
 func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
+	h.RenderDraftPage(w, r)
+}
+
+func (h *WebHandler) ToggleDraftSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := h.GetUserFromContext(r)
-	movies, _ := h.services.MovieService.GetMovies()
+	room, ok := h.services.RoomService.GetRoom(roomName)
 
-	myRoom, ok := h.services.RoomService.GetRoom(roomName)
-	if !ok {
-		h.logger.Error("Error finding room", "Room", roomName)
+	currentUser := h.GetUserFromContext(r)
+	if currentUser == nil {
+		h.logger.Error("No User found from session cookie")
 		return
 	}
 
-	player, ok := myRoom.GetPlayer(user.Username)
+	player, ok := room.GetPlayer(currentUser.Username)
 	if !ok {
-		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		h.logger.Error("Player not in room")
+		return
+	}
+	if len(player.DraftMovies) == 0 {
+		h.SendSSEError(w, r, "Must include at least 1 movie id.")
 		return
 	}
 
-	type MovieQueryRequest struct {
-		Search string `json:"search"`
-		Genre  string `json:"genre"`
-		Sort   string `json:"sort"`
+	isVotingFinished := room.IsVotingFinished()
+
+	// if voting is finished, add all players choices to the voting array
+	if isVotingFinished {
+		h.services.RoomService.SubmitDraftVotes(room, player)
+		room.Game.Step = types.Voting
+	} else {
+		h.RenderDraftPage(w, r)
+	}
+}
+
+func (h *WebHandler) RenderDraftPage(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	room, ok := h.services.RoomService.GetRoom(roomName)
+
+	if !ok {
+		h.logger.Error("Could not obtain room", "room", roomName)
+		return
+	}
+
+	currentUser := h.GetUserFromContext(r)
+	if currentUser == nil {
+		h.logger.Error("No User found from session cookie")
+		return
+	}
+
+	player, ok := room.GetPlayer(currentUser.Username)
+	if !ok {
+		h.logger.Error("Player not in room")
+		return
 	}
 
 	var queryRequest MovieQueryRequest
@@ -145,56 +142,12 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 			Descending: descending,
 		},
 	)
+
 	if err != nil {
-		http.Error(w, "Failed to get movies", http.StatusInternalServerError)
-		return
+		h.logger.Error("Movie Query Error", "Error", err)
 	}
-
-	sse := datastar.NewSSE(w, r)
-	sse.PatchElementTempl(steps.Draft(
-		player,
-		movies,
-		h.settings.JellyfinBaseURL,
-		myRoom,
-	))
-}
-
-func (h *WebHandler) ToggleDraftSubmit(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.services.RoomService.GetRoom(roomName)
-
-	if !ok {
-		h.logger.Error("Could not obtain room", "room", roomName)
-		return
-	}
-
-	currentUser := h.GetUserFromContext(r)
-	if currentUser == nil {
-		h.logger.Error("No User found from session cookie")
-		return
-	}
-
-	player, ok := room.GetPlayer(currentUser.Username)
-	if !ok {
-		h.logger.Error("Player not in room")
-		return
-	}
-
-	if len(player.DraftMovies) == 0 {
-		h.SendSSEError(w, r, "Must include at least 1 movie id.")
-		return
-	}
-
-	isVotingFinished := room.IsVotingFinished()
-
-	// if voting is finished, add all players choices to the voting array
-	if isVotingFinished {
-		h.services.RoomService.SubmitDraftVotes(room, player)
-		room.Game.Step = types.Voting
-	} else {
-		buttonAndMovies := steps.DraftSubmit()
-
-		sse := datastar.NewSSE(w, r)
-		sse.PatchElementTempl(buttonAndMovies)
+	draft := steps.Draft(player, movies, h.settings.JellyfinBaseURL, room)
+	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
+		h.logger.Error("Error Rendering Draft Page")
 	}
 }

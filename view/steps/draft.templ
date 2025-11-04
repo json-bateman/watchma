@@ -8,9 +8,7 @@ import (
 )
 
 templ Draft(player *services.Player, movies []types.Movie, baseUrl string, room *services.Room) {
-	{{
-		showSelectedMovies := len(player.DraftMovies) > 0
-	}}
+	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
 	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
 			<section class="flex gap-4 flex-wrap">
@@ -32,6 +30,27 @@ templ Draft(player *services.Player, movies []types.Movie, baseUrl string, room 
 		<section class="mt-4">
 			@DraftGrid(movies, player.DraftMovies, baseUrl, room)
 		</section>
+		<script>
+          self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+    debugger
+
+    // Cache Jellyfin images
+    if (url.hostname === 'lilnasx.cloud' && url.pathname.includes('/Images/Primary')) {
+      event.respondWith(
+        caches.open('jellyfin-images-v1').then((cache) => {
+          return cache.match(event.request).then((response) => {
+            return response || fetch(event.request).then((networkResponse) => {
+              cache.put(event.request, networkResponse.clone());
+              return networkResponse;
+            });
+          });
+        })
+      );
+    }
+  });
+
+        </script>
 	</div>
 }
 
@@ -150,11 +169,11 @@ templ selectedMovies(movies []types.Movie, selectedMovieIds []string, room *serv
 
 templ DraftGrid(movies []types.Movie, selectedMovies []string, baseUrl string, room *services.Room) {
 	{{
-	gridOptions := common.DefaultGridOptions()
-	gridOptions.Selectable = true
-	gridOptions.MakeOnClickMovie = func(movieId string) string {
-		return datastar.PatchSSE("/draft/%s/%s", room.Name, movieId)
-	}
+		gridOptions := common.DefaultGridOptions()
+		gridOptions.Selectable = true
+		gridOptions.MakeOnClickMovie = func(movieId string) string {
+			return datastar.PatchSSE("/draft/%s/%s", room.Name, movieId)
+		}
 	}}
 	@common.MovieGrid(movies, selectedMovies, baseUrl, gridOptions)
 }
