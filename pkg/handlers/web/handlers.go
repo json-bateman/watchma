@@ -1,6 +1,8 @@
 package web
 
 import (
+	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -45,6 +47,9 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 	r.Post("/login", h.HandleLogin)
 	r.Post("/validate", h.ValidatePassword)
 
+	// Image proxy (public so images load everywhere)
+	r.Get("/images/{itemId}", h.ProxyJellyfinImage)
+
 	// Protected web routes
 	r.Group(func(r chi.Router) {
 		r.Use(h.RequireLogin)
@@ -87,5 +92,39 @@ func (h *WebHandler) Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.RenderPage(view.IndexPage(movieOfTheDay, h.settings.JellyfinBaseURL), "Movie Showdown", w, r)
+	h.RenderPage(view.IndexPage(movieOfTheDay), "Movie Showdown", w, r)
+}
+
+func (h *WebHandler) ProxyJellyfinImage(w http.ResponseWriter, r *http.Request) {
+	itemId := chi.URLParam(r, "itemId")
+	tag := r.URL.Query().Get("tag")
+	width := r.URL.Query().Get("width")
+	height := r.URL.Query().Get("height")
+
+	etag := fmt.Sprintf(`"%s"`, tag)
+	if r.Header.Get("If-None-Match") == etag {
+		h.logger.Debug("Movie From Cache")
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+
+	jellyfinURL := fmt.Sprintf("%s/Items/%s/Images/Primary?tag=%s&width=%s&height=%s",
+		h.settings.JellyfinBaseURL, itemId, tag, width, height)
+
+	resp, err := http.Get(jellyfinURL)
+	if err != nil {
+		http.Error(w, "Failed to fetch image", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
+	w.Header().Set("ETag", etag)
+
+	if lastModified := resp.Header.Get("Last-Modified"); lastModified != "" {
+		w.Header().Set("Last-Modified", lastModified)
+	}
+
+	io.Copy(w, resp.Body)
 }

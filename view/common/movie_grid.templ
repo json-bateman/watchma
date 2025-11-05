@@ -74,7 +74,7 @@ templ SelectableMovieCard(movie types.Movie, selectedMovies []string, baseUrl st
 			data-on:click={ opts.MakeOnClickMovie(movie.Id) }
 			aria-label={ movie.Name }
 		/>
-		@MovieTitleImage(movie, baseUrl, MovieTitleImageOptions{
+		@MovieTitleImage(movie, MovieTitleImageOptions{
 			Class: "h-full w-full object-cover transition-transform group-hover:scale-105",
 		})
 		if opts.ShowOverlay {
@@ -84,7 +84,7 @@ templ SelectableMovieCard(movie types.Movie, selectedMovies []string, baseUrl st
 }
 
 templ StaticMovieCard(movie types.Movie, baseUrl string, opts MovieGridOptions) {
-	@MovieTitleImage(movie, baseUrl, MovieTitleImageOptions{
+	@MovieTitleImage(movie, MovieTitleImageOptions{
 		Class: "aspect-[2/3] w-full object-cover transition-transform group-hover:scale-105",
 	})
 	if opts.ShowOverlay {

@@ -2,11 +2,11 @@ package common
 
 import "watchma/pkg/types"
 
-templ MovieOfTheDay(movie types.Movie, baseURL string) {
+templ MovieOfTheDay(movie types.Movie) {
 	<div class="text-center">
 		<h2 class="text-4xl my-4">Movie of the Day</h2>
 		<div class="flex contain-content shadow-hard">
-			@MovieTitleImage(movie, baseURL, MovieTitleImageOptions{Class: "border-primary border-3"})
+			@MovieTitleImage(movie, MovieTitleImageOptions{Class: "border-primary border-3"})
 		</div>
 	</div>
 }

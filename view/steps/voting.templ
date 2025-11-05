@@ -25,7 +25,7 @@ func getWinnerMovies(moviesSortedByVote []types.MovieVote) []types.MovieVote {
 	return winners
 }
 
-templ VotingGrid(movies []types.Movie, baseURL string, room *services.Room) {
+templ VotingGrid(movies []types.Movie, room *services.Room) {
 	<section id="moviesRoom" data-signals-movies>
 		<div class="flex flex-col justify-center items-center">
 			<span class="text-3xl">Movies</span>
@@ -48,7 +48,7 @@ templ VotingGrid(movies []types.Movie, baseURL string, room *services.Room) {
 									value={ m.Id }
 									data-bind:movies
 								/>
-								@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{})
+								@common.MovieTitleImage(m, common.MovieTitleImageOptions{})
 							</label>
 						}
 					</div>
@@ -58,7 +58,7 @@ templ VotingGrid(movies []types.Movie, baseURL string, room *services.Room) {
 	</section>
 }
 
-templ SubmitButton(movies []types.Movie, baseURL string, selectedMovies []string) {
+templ SubmitButton(movies []types.Movie, selectedMovies []string) {
 	// This updates both the id="moviesSubmit" and the id="movieContainer" simultaneously when sent though SSE with PatchElementTempl!
 	<button type="button" id="moviesSubmit" class="btn-success cursor-not-allowed">Movies Submitted!</button>
 	<div id="movieContainer" class="mt-6">
@@ -67,9 +67,9 @@ templ SubmitButton(movies []types.Movie, baseURL string, selectedMovies []string
 			for _, m := range movies {
 				<div class="relative w-40 h-60 md:w-64 md:h-96">
 					if slices.Contains(selectedMovies, m.Id) {
-						@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"})
+						@common.MovieTitleImage(m, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"})
 					} else {
-						@common.MovieTitleImage(m, baseURL, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2"})
+						@common.MovieTitleImage(m, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2"})
 					}
 				</div>
 			}

@@ -5,7 +5,7 @@ import (
 	"watchma/view/common"
 )
 
-templ IndexPage(movieOfTheDay types.Movie, baseURL string) {
+templ IndexPage(movieOfTheDay types.Movie) {
 	<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
 		<span class="font-bold shadow-dance-text">Watchma</span>
 	</div>
@@ -17,6 +17,6 @@ templ IndexPage(movieOfTheDay types.Movie, baseURL string) {
 		<a href="shuffle/8" class="btn">Shuffle 8</a>
 	</div>
 	<div class="flex justify-center mt-12">
-		@common.MovieOfTheDay(movieOfTheDay, baseURL)
+		@common.MovieOfTheDay(movieOfTheDay)
 	</div>
 }

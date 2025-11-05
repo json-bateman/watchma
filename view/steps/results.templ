@@ -5,7 +5,7 @@ import (
 	"watchma/view/common"
 )
 
-templ ResultsScreen(moviesSortedByVote []types.MovieVote, baseURL string) {
+templ ResultsScreen(moviesSortedByVote []types.MovieVote) {
 	{{ winnerMovies := getWinnerMovies(moviesSortedByVote) }}
 	<section id="moviesRoom" class="h-full" data-signals:movies>
 		<div class="flex flex-col justify-center h-full items-center">
@@ -18,7 +18,7 @@ templ ResultsScreen(moviesSortedByVote []types.MovieVote, baseURL string) {
 				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
 					for _, movieVote := range winnerMovies {
 						<div class="block glow-border w-72 md:w-96">
-							@common.MovieTitleImage(*movieVote.Movie, baseURL, common.MovieTitleImageOptions{})
+							@common.MovieTitleImage(*movieVote.Movie, common.MovieTitleImageOptions{})
 						</div>
 					}
 				</div>

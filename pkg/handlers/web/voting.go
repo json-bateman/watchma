@@ -52,7 +52,7 @@ func (h *WebHandler) VotingSubmit(w http.ResponseWriter, r *http.Request) {
 		room, _ := h.services.RoomService.GetRoom(roomName)
 		player, _ := room.GetPlayer(currentUser.Username)
 
-		buttonAndMovies := steps.SubmitButton(room.Game.AllMovies, h.settings.JellyfinBaseURL, player.DraftMovies)
+		buttonAndMovies := steps.SubmitButton(room.Game.AllMovies, player.DraftMovies)
 
 		sse := datastar.NewSSE(w, r)
 		sse.PatchElementTempl(buttonAndMovies)

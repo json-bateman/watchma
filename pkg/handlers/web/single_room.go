@@ -134,7 +134,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case utils.ROOM_VOTING_EVENT:
-			movies := steps.VotingGrid(myRoom.Game.AllMovies, h.settings.JellyfinBaseURL, myRoom)
+			movies := steps.VotingGrid(myRoom.Game.AllMovies, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
@@ -153,7 +153,7 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			sort.Slice(movieVotes, func(i, j int) bool {
 				return movieVotes[i].Votes > movieVotes[j].Votes
 			})
-			finalScreen := steps.ResultsScreen(movieVotes, h.settings.JellyfinBaseURL)
+			finalScreen := steps.ResultsScreen(movieVotes)
 			if err := sse.PatchElementTempl(finalScreen); err != nil {
 				h.logger.Error("Error patching final screen", "error", err)
 				return
