@@ -50,6 +50,10 @@ templ RoomListBody(rooms map[string]*services.Room) {
 							<span class="hover:text-orange-500">
 								In Progress
 							</span>
+						} else if room.Game.Step == types.Announce {
+							<span class="hover:text-orange-500">
+								Preparing W	
+							</span>
 						} else if room.Game.Step == types.Results {
 							<span class="hover:text-orange-500">
 								Finishing

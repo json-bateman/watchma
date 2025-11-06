@@ -15,8 +15,6 @@ type ChatMessage struct {
 
 templ Lobby(room *services.Room, username string) {
 	<section id="moviesRoom" class="flex justify-center grow">
-		<!-- janky(?) way to set the subject field for the message payload
-    TODO: make this not janky -->
 		<span class="hidden" data-signals={ fmt.Sprintf("{room: '%s'}", room.Name) }></span>
 		<div class="flex max-w-[800px] flex-col justify-between grow">
 			<div>
@@ -24,10 +22,14 @@ templ Lobby(room *services.Room, username string) {
 					<div class="text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2">
 						<span class="text-4xl tracking-widest">{ room.Name }</span>
 					</div>
-					<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-3 gap-4">
 						<div class="bg-white text-black p-3 border-2 border-black">
-							<div class="text-xs  uppercase tracking-wide">DRAFT COUNT</div>
+							<div class="text-xs  uppercase tracking-wide">DRAFT MOVIES COUNT</div>
 							<div class="text-3xl ">{ room.Game.MaxDraftCount }</div>
+						</div>
+						<div class="bg-white text-black p-3 border-2 border-black">
+							<div class="text-xs  uppercase tracking-wide">MAX VOTES</div>
+							<div class="text-3xl ">{ room.Game.MaxVotes }</div>
 						</div>
 						<div class="bg-white text-black p-3 border-2 border-black">
 							<div class="text-xs  uppercase tracking-wide">MAX PLAYERS</div>
@@ -79,8 +81,8 @@ templ ChatBox(messages []types.Message) {
 
 templ UserBox(room *services.Room, username string) {
 	{{
-	totalReady := 0
-	players := room.PlayersByJoinTime()
+		totalReady := 0
+		players := room.PlayersByJoinTime()
 	}}
 	for _, p := range players {
 		if p.Ready {

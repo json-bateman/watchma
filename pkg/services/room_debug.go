@@ -44,7 +44,7 @@ func (rs *RoomService) GetDebugSnapshot() []RoomDebugInfo {
 				DraftMovies:       len(p.DraftMovies),
 				VotingMovies:      len(p.VotingMovies),
 				HasFinishedDraft:  p.HasFinishedDraft,
-				HasSelectedMovies: p.HasSelectedMovies,
+				HasSelectedMovies: p.HasFinishedVoting,
 			})
 		}
 

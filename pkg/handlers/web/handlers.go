@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"watchma/pkg/config"
+	"watchma/pkg/providers"
 	"watchma/pkg/services"
 	"watchma/view"
 
@@ -19,6 +20,7 @@ type WebHandlerServices struct {
 	RoomService          *services.RoomService
 	MovieOfTheDayService *services.MovieOfTheDayService
 	AuthService          *services.AuthService
+	OpenAiProvider       *providers.OpenApiProvider
 }
 
 // WebHandler holds dependencies needed by web handlers
@@ -74,13 +76,17 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Post("/room/{roomName}/start", h.StartGame)
 
 		// Draft
-		r.Post("/draft/{roomName}/submit", h.ToggleDraftSubmit)
+		r.Post("/draft/{roomName}/submit", h.DraftSubmit)
 		r.Post("/draft/{roomName}/query", h.QueryMovies)
-		r.Patch("/draft/{roomName}/{id}", h.ToggleSelectedMovie)
+		r.Patch("/draft/{roomName}/{id}", h.ToggleDraftMovie)
 		r.Delete("/draft/{roomName}/{id}", h.DeleteFromSelectedMovies)
 
 		// Voting
 		r.Post("/voting/{roomName}/submit", h.VotingSubmit)
+		r.Patch("/voting/{roomName}/{id}", h.ToggleVotingMovie)
+
+		// Announce
+		r.Get("/announce/{roomName}", h.Announce)
 	})
 }
 
@@ -101,13 +107,6 @@ func (h *WebHandler) ProxyJellyfinImage(w http.ResponseWriter, r *http.Request) 
 	width := r.URL.Query().Get("width")
 	height := r.URL.Query().Get("height")
 
-	etag := fmt.Sprintf(`"%s"`, tag)
-	if r.Header.Get("If-None-Match") == etag {
-		h.logger.Debug("Movie From Cache")
-		w.WriteHeader(http.StatusNotModified)
-		return
-	}
-
 	jellyfinURL := fmt.Sprintf("%s/Items/%s/Images/Primary?tag=%s&width=%s&height=%s",
 		h.settings.JellyfinBaseURL, itemId, tag, width, height)
 
@@ -120,7 +119,6 @@ func (h *WebHandler) ProxyJellyfinImage(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
-	w.Header().Set("ETag", etag)
 
 	if lastModified := resp.Header.Get("Last-Modified"); lastModified != "" {
 		w.Header().Set("Last-Modified", lastModified)

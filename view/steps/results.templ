@@ -5,8 +5,7 @@ import (
 	"watchma/view/common"
 )
 
-templ ResultsScreen(moviesSortedByVote []types.MovieVote) {
-	{{ winnerMovies := getWinnerMovies(moviesSortedByVote) }}
+templ ResultsScreen(winnerMovies []types.MovieVote) {
 	<section id="moviesRoom" class="h-full" data-signals:movies>
 		<div class="flex flex-col justify-center h-full items-center">
 			if len(winnerMovies) > 1 {
@@ -22,10 +21,10 @@ templ ResultsScreen(moviesSortedByVote []types.MovieVote) {
 						</div>
 					}
 				</div>
-				if moviesSortedByVote[0].Votes > 1 {
-					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { moviesSortedByVote[0].Votes } Votes!</div>
+				if winnerMovies[0].Votes > 1 {
+					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Votes!</div>
 				} else {
-					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { moviesSortedByVote[0].Votes } Vote!</div>
+					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Vote!</div>
 				}
 			</div>
 		</div>

@@ -7,7 +7,7 @@ import (
 	"watchma/view/common"
 )
 
-templ Draft(player *services.Player, movies []types.Movie, baseUrl string, room *services.Room) {
+templ Draft(player *services.Player, movies []types.Movie, room *services.Room) {
 	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
 	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
@@ -28,29 +28,8 @@ templ Draft(player *services.Player, movies []types.Movie, baseUrl string, room 
 			</section>
 		}
 		<section class="mt-4">
-			@DraftGrid(movies, player.DraftMovies, baseUrl, room)
+			@DraftGrid(movies, player.DraftMovies, room)
 		</section>
-		<script>
-          self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-    debugger
-
-    // Cache Jellyfin images
-    if (url.hostname === 'lilnasx.cloud' && url.pathname.includes('/Images/Primary')) {
-      event.respondWith(
-        caches.open('jellyfin-images-v1').then((cache) => {
-          return cache.match(event.request).then((response) => {
-            return response || fetch(event.request).then((networkResponse) => {
-              cache.put(event.request, networkResponse.clone());
-              return networkResponse;
-            });
-          });
-        })
-      );
-    }
-  });
-
-        </script>
 	</div>
 }
 
@@ -118,36 +97,28 @@ templ submit(player *services.Player, room *services.Room) {
 	}}
 	<div class="flex flex-wrap items-center gap-2">
 		<span>Selected { selectedCount } of { room.Game.MaxDraftCount } movies</span>
-		<button
-			id="draftSubmit"
-			if disabled {
-				class="btn-disabled"
-				disabled
-				aria-disabled
-			} else {
-				class="btn"
-				data-on:click={ datastar.PostSSE("/draft/%s/submit", room.Name) }
-			}
-		>Submit</button>
+		if player.HasFinishedDraft {
+			<button disabled class="btn-success">Movies Submitted!</button>
+			<div class="text-primary">Waiting for other players...</div>
+		} else {
+			<button
+				id="draftSubmit"
+				if disabled {
+					class="btn-disabled"
+					disabled
+					aria-disabled
+				} else {
+					class="btn"
+					data-on:click={ datastar.PostSSE("/draft/%s/submit", room.Name) }
+				}
+			>
+				Submit
+			</button>
+		}
 	</div>
 }
 
-templ DraftSubmit() {
-	<button type="button" id="draftSubmit" class="btn-success cursor-not-allowed">Movies Submitted!</button>
-}
-
-templ selectedMovies(movies []types.Movie, selectedMovieIds []string, room *services.Room) {
-	{{
-		selectedMovies := []types.Movie{}
-		for _, movieId := range selectedMovieIds {
-			for _, movie := range movies {
-				if movie.Id == movieId {
-					selectedMovies = append(selectedMovies, movie)
-					break
-				}
-			}
-		}
-	}}
+templ selectedMovies(movies []types.Movie, selectedMovies []types.Movie, room *services.Room) {
 	<div class="flex flex-wrap gap-2">
 		for _, movie := range selectedMovies {
 			<div class="inline-flex items-center pl-3 py-1 bg-primary tracking-wide text-sm text-text">
@@ -167,7 +138,7 @@ templ selectedMovies(movies []types.Movie, selectedMovieIds []string, room *serv
 	</div>
 }
 
-templ DraftGrid(movies []types.Movie, selectedMovies []string, baseUrl string, room *services.Room) {
+templ DraftGrid(movies []types.Movie, selectedMovies []types.Movie, room *services.Room) {
 	{{
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true
@@ -175,5 +146,5 @@ templ DraftGrid(movies []types.Movie, selectedMovies []string, baseUrl string, r
 			return datastar.PatchSSE("/draft/%s/%s", room.Name, movieId)
 		}
 	}}
-	@common.MovieGrid(movies, selectedMovies, baseUrl, gridOptions)
+	@common.MovieGrid(movies, selectedMovies, gridOptions)
 }

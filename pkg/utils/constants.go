@@ -5,6 +5,7 @@ const (
 	ROOM_UPDATE_EVENT      = "Room Update Event"
 	ROOM_START_EVENT       = "Room Start Event"
 	ROOM_VOTING_EVENT      = "Room Voting Event"
+	ROOM_ANNOUNCE_EVENT    = "Room Announce Event"
 	ROOM_FINISH_EVENT      = "Room Finish Event"
 	ROOM_LIST_UPDATE_EVENT = "Room List Update Event"
 	SESSION_COOKIE_NAME    = "watchma_session"

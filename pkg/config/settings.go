@@ -12,18 +12,21 @@ import (
 )
 
 const (
-	J_API_KEY  = "JELLYFIN_API_KEY"
-	J_BASE_URL = "JELLYFIN_BASE_URL"
-	PORT       = "PORT"
-	LOG_LEVEL  = "LOG_LEVEL"
-	IS_DEV     = "IS_DEV"
+	J_API_KEY     = "JELLYFIN_API_KEY"
+	J_BASE_URL    = "JELLYFIN_BASE_URL"
+	OPENAI_API_KEY = "OPENAI_API_KEY"
+	PORT          = "PORT"
+	LOG_LEVEL     = "LOG_LEVEL"
+	IS_DEV        = "IS_DEV"
 )
 
 type Settings struct {
-	// Don't log the api key
+	// Don't log the api keys
 	JellyfinApiKey  string `json:"-"` // Exclude from JSON Marshalling
 	JellyfinBaseURL string
 	UseDummyData    bool // Use dummy data when Jellyfin credentials not available
+
+	OpenAIApiKey string `json:"-"` // Exclude from JSON Marshalling
 
 	Port     int
 	LogLevel slog.Level
@@ -39,11 +42,13 @@ func LoadSettings() *Settings {
 	}
 
 	config := &Settings{
-		// Once again, don't log the api key!
+		// Once again, don't log the api keys!
 		JellyfinApiKey:  os.Getenv(J_API_KEY),
 		JellyfinBaseURL: os.Getenv(J_BASE_URL),
 		UseDummyData:    os.Getenv(J_API_KEY) == "" || os.Getenv(J_BASE_URL) == "",
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
+
+		OpenAIApiKey: os.Getenv(OPENAI_API_KEY),
 
 		Port:           getEnvAsInt(PORT, 8080),
 		Env:            strings.ToLower(os.Getenv(IS_DEV)) == "true",

@@ -120,7 +120,7 @@ Applied Tailwind Styles
 }
 
 .label {
-  @apply text-primary;
+  @apply text-text/80 text-sm tracking-wider;
 }
 
 .input {

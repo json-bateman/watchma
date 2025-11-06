@@ -44,10 +44,20 @@ func (a *App) Initialize() error {
 		return fmt.Errorf("initialize database: %w", err)
 	}
 
-	// Start embedded NATS server
 	ns, nc, err := config.StartEmbeddedNATS(a.Logger)
 	if err != nil {
 		return fmt.Errorf("start embedded NATS: %w", err)
+	}
+
+	var openAiProvider *providers.OpenApiProvider
+	if a.Settings.OpenAIApiKey != "" {
+		openAiProvider = providers.NewOpenApiProvider(
+			a.Settings.OpenAIApiKey,
+			a.Logger,
+		)
+		a.Logger.Info("OpenAI provider initialized")
+	} else {
+		a.Logger.Warn("OpenAI API key not found, AI features disabled")
 	}
 
 	a.NATS = nc
@@ -84,6 +94,7 @@ func (a *App) Initialize() error {
 			RoomService:          roomService,
 			MovieOfTheDayService: movieOfTheDayService,
 			AuthService:          authService,
+			OpenAiProvider:       openAiProvider,
 		},
 	)
 

@@ -30,13 +30,15 @@ func (h *WebHandler) DeleteFromSelectedMovies(w http.ResponseWriter, r *http.Req
 	h.RenderDraftPage(w, r)
 }
 
-func (h *WebHandler) ToggleSelectedMovie(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
+func (h *WebHandler) ToggleDraftMovie(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
 	user := h.GetUserFromContext(r)
+	roomName := chi.URLParam(r, "roomName")
+	room, _ := h.services.RoomService.GetRoom(roomName)
 
-	// Use RoomService to handle business logic
-	if !h.services.RoomService.ToggleDraftMovie(roomName, user.Username, movieId) {
+	movie := room.Game.AllMoviesMap[movieId]
+
+	if !h.services.RoomService.ToggleDraftMovie(roomName, user.Username, *movie) {
 		h.logger.Error("Failed to toggle draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
@@ -47,7 +49,7 @@ func (h *WebHandler) QueryMovies(w http.ResponseWriter, r *http.Request) {
 	h.RenderDraftPage(w, r)
 }
 
-func (h *WebHandler) ToggleDraftSubmit(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) DraftSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.services.RoomService.GetRoom(roomName)
 
@@ -67,12 +69,15 @@ func (h *WebHandler) ToggleDraftSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isVotingFinished := room.IsVotingFinished()
+	player.HasFinishedDraft = true
+
+	isDraftFinished := room.IsDraftFinished()
 
 	// if voting is finished, add all players choices to the voting array
-	if isVotingFinished {
-		h.services.RoomService.SubmitDraftVotes(room, player)
+	if isDraftFinished {
 		room.Game.Step = types.Voting
+		h.services.RoomService.SubmitDraftVotes(room)
+		h.services.RoomService.MoveToVoting(roomName)
 	} else {
 		h.RenderDraftPage(w, r)
 	}
@@ -131,7 +136,7 @@ func (h *WebHandler) RenderDraftPage(w http.ResponseWriter, r *http.Request) {
 		descending = true
 	default:
 		// default to name instead of blowing up for now
-		sortField = services.SortByName
+		// sortField = services.SortByName
 	}
 
 	movies, err := h.services.MovieService.GetMoviesWithQuery(
@@ -146,7 +151,7 @@ func (h *WebHandler) RenderDraftPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error("Movie Query Error", "Error", err)
 	}
-	draft := steps.Draft(player, movies, h.settings.JellyfinBaseURL, room)
+	draft := steps.Draft(player, movies, room)
 	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
 		h.logger.Error("Error Rendering Draft Page")
 	}

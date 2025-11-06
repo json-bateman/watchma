@@ -1,78 +1,66 @@
 package steps 
 
 import (
-	"fmt"
-	"slices"
+	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/services"
 	"watchma/pkg/types"
 	"watchma/view/common"
 )
 
-func getWinnerMovies(moviesSortedByVote []types.MovieVote) []types.MovieVote {
-	if len(moviesSortedByVote) == 0 {
-		return []types.MovieVote{}
-	}
-
-	maxVotes := moviesSortedByVote[0].Votes
-	var winners []types.MovieVote
-
-	for _, movie := range moviesSortedByVote {
-		if movie.Votes == maxVotes {
-			winners = append(winners, movie)
-		}
-	}
-
-	return winners
-}
-
-templ VotingGrid(movies []types.Movie, room *services.Room) {
-	<section id="moviesRoom" data-signals-movies>
-		<div class="flex flex-col justify-center items-center">
+templ Voting(votingMovies []types.Movie, player *services.Player, room *services.Room) {
+	<section class="w-full" id="moviesRoom">
+		<div class="flex flex-col w-full justify-center items-center">
 			<span class="text-3xl">Movies</span>
-			<div class="text-text flex flex-col items-center justify-center">
-				<button
-					id="moviesSubmit"
-					class="btn"
-					data-on:click={ fmt.Sprintf("@post('/voting/%s/submit')", room.Name) }
-				>
-					Submit Choices
-				</button>
+			<div class="text-text w-full flex flex-col items-center justify-center">
+				@submitVoting(player, room)
 				@common.Error("")
-				<div data-signals:movies="[]">
-					<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
-						for _, m := range movies {
-							<label id="movieSwap" class="block w-40 h-60 md:w-64 md:h-96 border-2 cursor-pointer ring-0 has-[input:checked]:border-orange-500 has-[input:checked]:ring-orange-500 has-[input:checked]:ring-2">
-								<input
-									class="hidden"
-									type="checkbox"
-									value={ m.Id }
-									data-bind:movies
-								/>
-								@common.MovieTitleImage(m, common.MovieTitleImageOptions{})
-							</label>
-						}
-					</div>
+				<div class="w-full flex justify-center">
+					<section class="mt-4 w-full">
+						@VotingGrid(votingMovies, player.VotingMovies, room)
+					</section>
 				</div>
 			</div>
 		</div>
 	</section>
 }
 
-templ SubmitButton(movies []types.Movie, selectedMovies []string) {
-	// This updates both the id="moviesSubmit" and the id="movieContainer" simultaneously when sent though SSE with PatchElementTempl!
-	<button type="button" id="moviesSubmit" class="btn-success cursor-not-allowed">Movies Submitted!</button>
-	<div id="movieContainer" class="mt-6">
-		<div class="text-primary text-xl text-center mb-4">Waiting on remaining players...</div>
-		<div class="flex justify-center flex-wrap gap-2 md:gap-4">
-			for _, m := range movies {
-				<div class="relative w-40 h-60 md:w-64 md:h-96">
-					if slices.Contains(selectedMovies, m.Id) {
-						@common.MovieTitleImage(m, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2 border-green-500 ring-green-500 ring-2"})
-					} else {
-						@common.MovieTitleImage(m, common.MovieTitleImageOptions{Class: "cursor-not-allowed border-2"})
-					}
-				</div>
-			}
-		</div>
+templ VotingGrid(movies []types.Movie, selectedMovies []types.Movie, room *services.Room) {
+	{{
+		gridOptions := common.DefaultGridOptions()
+		gridOptions.Selectable = true
+		gridOptions.MaxCardWidth = "225px"
+		gridOptions.MinCardWidth = "200px"
+		gridOptions.MakeOnClickMovie = func(movieId string) string {
+			return datastar.PatchSSE("/voting/%s/%s", room.Name, movieId)
+		}
+	}}
+	@common.MovieGrid(movies, selectedMovies, gridOptions)
+}
+
+templ submitVoting(player *services.Player, room *services.Room) {
+	{{
+		selectedCount := len(player.VotingMovies)
+		disabled := selectedCount == 0
+	}}
+	<div class="flex flex-wrap items-center gap-2">
+		<span>Selected { selectedCount } of { room.Game.MaxVotes } movies</span>
+		if player.HasFinishedVoting {
+			<button disabled class="btn-success">Movies Submitted!</button>
+			<div class="text-primary">Waiting for other players...</div>
+		} else {
+			<button
+				id="votingSubmit"
+				if disabled {
+					class="btn-disabled"
+					disabled
+					aria-disabled
+				} else {
+					class="btn"
+					data-on:click={ datastar.PostSSE("/voting/%s/submit", room.Name) }
+				}
+			>
+				Submit
+			</button>
+		}
 	</div>
 }

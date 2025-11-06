@@ -27,7 +27,7 @@ func DefaultGridOptions() MovieGridOptions {
 	}
 }
 
-templ MovieGrid(movies []types.Movie, selectedMovies []string, baseUrl string, opts MovieGridOptions) {
+templ MovieGrid(movies []types.Movie, selectedMovies []types.Movie, opts MovieGridOptions) {
 	<div
 		id="moviegrid"
 		class="grid grid-cols-[repeat(auto-fill,minmax(var(--card-min),1fr))] gap-[var(--gap)]"
@@ -37,23 +37,25 @@ templ MovieGrid(movies []types.Movie, selectedMovies []string, baseUrl string, o
 			@EmptyState(opts.EmptyMessage)
 		} else {
 			for _, movie := range movies {
-				@MovieCard(movie, selectedMovies, baseUrl, opts)
+				@MovieCard(movie, selectedMovies, opts)
 			}
 		}
 	</div>
 }
 
-templ MovieCard(movie types.Movie, selectedMovies []string, baseUrl string, opts MovieGridOptions) {
+templ MovieCard(movie types.Movie, selectedMovies []types.Movie, opts MovieGridOptions) {
 	if opts.Selectable {
-		@SelectableMovieCard(movie, selectedMovies, baseUrl, opts)
+		@SelectableMovieCard(movie, selectedMovies, opts)
 	} else {
-		@StaticMovieCard(movie, baseUrl, opts)
+		@StaticMovieCard(movie, opts)
 	}
 }
 
-templ SelectableMovieCard(movie types.Movie, selectedMovies []string, baseUrl string, opts MovieGridOptions) {
+templ SelectableMovieCard(movie types.Movie, selectedMovies []types.Movie, opts MovieGridOptions) {
 	{{
-		selected := slices.Contains(selectedMovies, movie.Id)
+		selected := slices.ContainsFunc(selectedMovies, func(m types.Movie) bool {
+			return m.Id == movie.Id
+		})
 
 		labelClass := "aspect-[2/3] cursor-pointer relative group box-border max-w-[var(--card-max)]"
 
@@ -83,7 +85,7 @@ templ SelectableMovieCard(movie types.Movie, selectedMovies []string, baseUrl st
 	</label>
 }
 
-templ StaticMovieCard(movie types.Movie, baseUrl string, opts MovieGridOptions) {
+templ StaticMovieCard(movie types.Movie, opts MovieGridOptions) {
 	@MovieTitleImage(movie, MovieTitleImageOptions{
 		Class: "aspect-[2/3] w-full object-cover transition-transform group-hover:scale-105",
 	})

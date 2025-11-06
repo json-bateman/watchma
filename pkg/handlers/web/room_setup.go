@@ -59,32 +59,40 @@ func (h *WebHandler) HostForm(w http.ResponseWriter, r *http.Request) {
 	user := h.GetUserFromContext(r)
 	if user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		h.logger.Error("User was nil")
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		h.logger.Error("Error parsing form", "error", err)
 		return
 	}
 
 	roomName := r.FormValue("roomName")
-	moviesStr := r.FormValue("movies")
+	moviesStr := r.FormValue("draftNumber")
 	maxPlayersStr := r.FormValue("maxplayers")
+	maxVotesStr := r.FormValue("maxvotes")
+	displayTies := r.FormValue("displayTies")
 
 	movies, err := strconv.Atoi(moviesStr)
 	maxPlayers, err := strconv.Atoi(maxPlayersStr)
+	maxVotes, err := strconv.Atoi(maxVotesStr)
 	if err != nil {
-		http.Error(w, "Movies must be a number", http.StatusBadRequest)
+		http.Error(w, "Error converting form strings", http.StatusInternalServerError)
+		h.logger.Error("Error converting form strings", "error", err)
 		return
 	}
 	if h.services.RoomService.RoomExists(roomName) {
-		http.Error(w, "This room name already exists", http.StatusBadRequest)
+		http.Error(w, "This room name already exists", http.StatusConflict)
 		return
 	}
 	h.services.RoomService.AddRoom(roomName, &types.GameSession{
 		MaxDraftCount: movies,
+		MaxVotes:      maxVotes,
 		MaxPlayers:    maxPlayers,
+		DisplayTies:   displayTies == "yes",
 		Host:          user.Username,
 		Votes:         make(map[*types.Movie]int),
 	})

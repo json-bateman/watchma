@@ -2,9 +2,7 @@ package web
 
 import (
 	"net/http"
-	"sort"
 
-	"watchma/pkg/types"
 	"watchma/pkg/utils"
 	"watchma/view/rooms"
 	"watchma/view/steps"
@@ -128,32 +126,27 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case utils.ROOM_START_EVENT:
-			draft := steps.Draft(player, movies, h.settings.JellyfinBaseURL, myRoom)
+			draft := steps.Draft(player, movies, myRoom)
 			if err := sse.PatchElementTempl(draft); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
 		case utils.ROOM_VOTING_EVENT:
-			movies := steps.VotingGrid(myRoom.Game.AllMovies, myRoom)
+			movies := steps.Voting(myRoom.Game.VotingMovies, player, myRoom)
+			if err := sse.PatchElementTempl(movies); err != nil {
+				h.logger.Error("Error patching movies", "error", err)
+				return
+			}
+		case utils.ROOM_ANNOUNCE_EVENT:
+			movies := steps.AiAnnounce(myRoom, []string{""})
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
 		case utils.ROOM_FINISH_EVENT:
-			// Extract map entries into a slice
-			var movieVotes []types.MovieVote
-			for jfinMovie, votes := range myRoom.Game.Votes {
-				movieVotes = append(movieVotes, types.MovieVote{
-					Movie: jfinMovie,
-					Votes: votes,
-				})
-			}
-
-			// Sort by votes (descending - highest votes first)
-			sort.Slice(movieVotes, func(i, j int) bool {
-				return movieVotes[i].Votes > movieVotes[j].Votes
-			})
-			finalScreen := steps.ResultsScreen(movieVotes)
+			movieVotes := SortMoviesByVotes(myRoom.Game.Votes)
+			winnerMovies := GetWinnerMovies(movieVotes, myRoom)
+			finalScreen := steps.ResultsScreen(winnerMovies)
 			if err := sse.PatchElementTempl(finalScreen); err != nil {
 				h.logger.Error("Error patching final screen", "error", err)
 				return
