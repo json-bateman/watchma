@@ -34,10 +34,13 @@
     number of movies people can add, maybe set timer to 1 minute
     - [X] cache movies somehow - (Cached GET req for 1 minute)
     - [X] players add movies --> Aggregate all choices to vote on.
-    - [ ] Make a function that acts as the state machine, watches for step changes, maybe emits a message that the subscribed SSE channel is listening for.
-
     - [ ] Post game lobby? Links to various things about the movie?
+    - [ ] Or Alternatively, Host presses play, SSE event pushes everyone to a playing session of the movie in a 
+    `<video></video>` player. Now that would be sweet. `https://api.jellyfin.org/` might have the juice, I think 
+    `GET/POST ---  http://localhost/Items/{itemId}/PlaybackInfo` this might be the api call
 
+- Potential Refactor
+    - [ ] Make a function that acts as the state machine, watches for step changes, maybe emits a message that the subscribed SSE channel is listening for.
 
 - Deploy
     - [ ] Deploy this as a docker container so people can download and use with their Jellyfin servers
