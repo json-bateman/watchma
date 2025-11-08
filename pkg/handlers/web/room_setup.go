@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"watchma/pkg/types"
-	"watchma/pkg/utils"
 	"watchma/view/rooms"
 
 	"github.com/starfederation/datastar-go/datastar"
@@ -25,8 +24,8 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("Error patching initial room list")
 	}
 
-	sub, err := h.NATS.SubscribeSync(utils.NATS_LOBBY_ROOMS)
-	h.logger.Debug(utils.NATS_SUB, "subject", utils.NATS_LOBBY_ROOMS)
+	sub, err := h.NATS.SubscribeSync(types.NATS_LOBBY_ROOMS)
+	h.logger.Debug(types.NATS_SUB, "subject", types.NATS_LOBBY_ROOMS)
 	defer sub.Unsubscribe()
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
@@ -40,7 +39,7 @@ func (h *WebHandler) JoinSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch string(msg.Data) {
-		case utils.ROOM_LIST_UPDATE_EVENT:
+		case types.ROOM_LIST_UPDATE_EVENT:
 			roomList := rooms.RoomListBody(h.services.RoomService.Rooms)
 			if err := sse.PatchElementTempl(roomList); err != nil {
 				fmt.Println("Error patching room list")

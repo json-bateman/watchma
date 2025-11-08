@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"watchma/pkg/utils"
+	"watchma/pkg/types"
 )
 
 // RequireLogin middleware checks for session cookie, loads user data, and stores in context
@@ -20,7 +20,7 @@ func (h *WebHandler) RequireLogin(next http.Handler) http.Handler {
 
 		token := h.GetSessionToken(r)
 		if token == "" {
-			h.logger.Debug(fmt.Sprintf("User redirected to login, no %s cookie", utils.SESSION_COOKIE_NAME))
+			h.logger.Debug(fmt.Sprintf("User redirected to login, no %s cookie", types.SESSION_COOKIE_NAME))
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}

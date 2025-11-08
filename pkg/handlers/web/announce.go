@@ -32,12 +32,13 @@ func (h *WebHandler) Announce(w http.ResponseWriter, r *http.Request) {
   **[Different Character]:** *"their response"*
 
   RULES:
-  1. Use 3-5 characters from the movie
-  2. Each character speaks 2-3 times
+  1. Use 2-4 characters from the movie
+  2. Each character speaks 1-2 times
   3. Include character catchphrases naturally
   4. Build suspense without saying the movie title
-  5. NO actor names, NO spoilers, NO narration
+  5. NO actor names, NO spoilers, NO narration, NO movie title
   6. Match the movie's genre/tone
+  7. Keep your responses TERSE
 
   EXAMPLE (for a different movie):
   **Morpheus:** *"What if I told you... we're the ones they chose?"*

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"watchma/pkg/database/repository"
-	"watchma/pkg/utils"
+	"watchma/pkg/types"
 
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -39,7 +39,7 @@ func (h *WebHandler) WriteJSONResponse(w http.ResponseWriter, status int, data a
 }
 
 func (h *WebHandler) GetSessionToken(r *http.Request) string {
-	cookie, err := r.Cookie(utils.SESSION_COOKIE_NAME)
+	cookie, err := r.Cookie(types.SESSION_COOKIE_NAME)
 	if err != nil {
 		return ""
 	}

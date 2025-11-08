@@ -1,4 +1,4 @@
-package utils
+package types
 
 const (
 	MESSAGE_SENT_EVENT     = "Message Sent Event"

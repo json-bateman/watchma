@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"watchma/pkg/utils"
+	"watchma/pkg/types"
 	"watchma/view/rooms"
 	"watchma/view/steps"
 
@@ -86,9 +86,9 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Subscribe to room-specific NATS subject
-	roomSubject := utils.RoomSubject(roomName)
+	roomSubject := types.RoomSubject(roomName)
 	sub, err := h.NATS.SubscribeSync(roomSubject)
-	h.logger.Debug(utils.NATS_SUB, "subject", roomSubject)
+	h.logger.Debug(types.NATS_SUB, "subject", roomSubject)
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
 		return
@@ -113,37 +113,37 @@ func (h *WebHandler) SingleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch string(msg.Data) {
-		case utils.ROOM_UPDATE_EVENT:
+		case types.ROOM_UPDATE_EVENT:
 			userBox := steps.UserBox(myRoom, user.Username)
 			if err := sse.PatchElementTempl(userBox); err != nil {
 				h.logger.Error("Error patching user list", "error", err)
 				return
 			}
-		case utils.MESSAGE_SENT_EVENT:
+		case types.MESSAGE_SENT_EVENT:
 			chat := steps.ChatBox(myRoom.RoomMessages)
 			if err := sse.PatchElementTempl(chat); err != nil {
 				h.logger.Error("Error patching chat message", "error", err)
 				return
 			}
-		case utils.ROOM_START_EVENT:
+		case types.ROOM_START_EVENT:
 			draft := steps.Draft(player, movies, myRoom)
 			if err := sse.PatchElementTempl(draft); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case utils.ROOM_VOTING_EVENT:
+		case types.ROOM_VOTING_EVENT:
 			movies := steps.Voting(myRoom.Game.VotingMovies, player, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case utils.ROOM_ANNOUNCE_EVENT:
+		case types.ROOM_ANNOUNCE_EVENT:
 			movies := steps.AiAnnounce(myRoom, []string{""})
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case utils.ROOM_FINISH_EVENT:
+		case types.ROOM_FINISH_EVENT:
 			movieVotes := SortMoviesByVotes(myRoom.Game.Votes)
 			winnerMovies := GetWinnerMovies(movieVotes, myRoom)
 			finalScreen := steps.ResultsScreen(winnerMovies)

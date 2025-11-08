@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"watchma/pkg/types"
-	"watchma/pkg/utils"
 )
 
 // RoomService represents the orchestrator of all rooms and room operations
@@ -57,7 +56,7 @@ func (rs *RoomService) AddRoom(roomName string, game *types.GameSession) {
 
 	rs.logger.Info("Room added", "name", roomName)
 
-	rs.pub.PublishLobbyEvent(utils.ROOM_LIST_UPDATE_EVENT)
+	rs.pub.PublishLobbyEvent(types.ROOM_LIST_UPDATE_EVENT)
 }
 
 func (rs *RoomService) DeleteRoom(roomName string) {
@@ -67,7 +66,7 @@ func (rs *RoomService) DeleteRoom(roomName string) {
 
 	rs.logger.Info("Room deleted", "name", roomName)
 
-	rs.pub.PublishLobbyEvent(utils.ROOM_LIST_UPDATE_EVENT)
+	rs.pub.PublishLobbyEvent(types.ROOM_LIST_UPDATE_EVENT)
 }
 
 func (rs *RoomService) AddPlayerToRoom(roomName, username string) (*Player, bool) {
@@ -86,8 +85,8 @@ func (rs *RoomService) AddPlayerToRoom(roomName, username string) (*Player, bool
 
 	rs.logger.Info("Player added to room", "roomName", roomName, "playerName", username)
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
-	rs.pub.PublishLobbyEvent(utils.ROOM_LIST_UPDATE_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_UPDATE_EVENT)
+	rs.pub.PublishLobbyEvent(types.ROOM_LIST_UPDATE_EVENT)
 
 	return player, true
 }
@@ -108,8 +107,8 @@ func (rs *RoomService) RemovePlayerFromRoom(roomName, username string) bool {
 
 	rs.logger.Info("Player removed from room", "roomName", roomName, "playerName", username)
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
-	rs.pub.PublishLobbyEvent(utils.ROOM_LIST_UPDATE_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_UPDATE_EVENT)
+	rs.pub.PublishLobbyEvent(types.ROOM_LIST_UPDATE_EVENT)
 
 	return true
 }
@@ -124,7 +123,7 @@ func (rs *RoomService) TransferHost(roomName, newHost string) bool {
 	room.Game.Host = newHost
 	room.mu.Unlock()
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_UPDATE_EVENT)
 	return true
 }
 
@@ -142,7 +141,7 @@ func (rs *RoomService) TogglePlayerReady(roomName, username string) bool {
 	}
 	player.Ready = !player.Ready
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_UPDATE_EVENT)
 	return true
 }
 
@@ -156,7 +155,7 @@ func (rs *RoomService) AddMessage(roomName string, msg types.Message) bool {
 	defer room.mu.Unlock()
 	room.RoomMessages = append(room.RoomMessages, msg)
 
-	rs.pub.PublishRoomEvent(roomName, utils.MESSAGE_SENT_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.MESSAGE_SENT_EVENT)
 	return true
 }
 
@@ -173,7 +172,7 @@ func (rs *RoomService) StartGame(roomName string, movies []types.Movie) bool {
 
 	rs.logger.Info("Game Started", "roomName", roomName)
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_START_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_START_EVENT)
 	return true
 }
 
@@ -189,7 +188,7 @@ func (rs *RoomService) MoveToVoting(roomName string) bool {
 
 	rs.logger.Info("Game Moved to Voting", "roomName", roomName)
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_VOTING_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_VOTING_EVENT)
 	return true
 }
 
@@ -202,7 +201,7 @@ func (rs *RoomService) AnnounceWinner(roomName string) bool {
 	room.Game.Step = types.Announce
 	rs.logger.Info("Announcing Winner...", "roomName", roomName)
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_ANNOUNCE_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_ANNOUNCE_EVENT)
 	return true
 }
 
@@ -215,7 +214,7 @@ func (rs *RoomService) FinishGame(roomName string) bool {
 	room.Game.Step = types.Results
 	rs.logger.Info("Game Finished", "roomName", roomName)
 
-	rs.pub.PublishRoomEvent(roomName, utils.ROOM_FINISH_EVENT)
+	rs.pub.PublishRoomEvent(roomName, types.ROOM_FINISH_EVENT)
 	return true
 }
 
@@ -296,7 +295,7 @@ func (rs *RoomService) RemoveDraftMovie(roomName, username string, movieId strin
 				player.DraftMovies[i+1:]...,
 			)
 			rs.logger.Debug("Movie removed from draft", "roomName", roomName, "player", username, "movie", m.Name)
-			rs.pub.PublishRoomEvent(roomName, utils.ROOM_UPDATE_EVENT)
+			rs.pub.PublishRoomEvent(roomName, types.ROOM_UPDATE_EVENT)
 			return true
 		}
 	}

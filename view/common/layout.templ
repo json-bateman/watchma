@@ -1,9 +1,9 @@
 package common 
 
 import (
+	"strings"
 	"time"
 	"watchma/pkg/database/repository"
-	"watchma/pkg/utils"
 )
 
 type PageContext struct {
@@ -31,6 +31,13 @@ templ Layout(pc PageContext) {
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 			<link href="https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow" rel="stylesheet"/>
+			<!-- Inline script to prevent theme flash - MUST run before CSS loads -->
+			<script>
+                (function() {
+                    const theme = localStorage.getItem('theme') || 'burgundy-light';
+                    document.documentElement.setAttribute('data-theme', theme);
+                })();
+            </script>
 			<!-- stylesheet -->
 			<link href="/public/style.css" rel="stylesheet"/>
 			<title>{ pc.Title }</title>
@@ -43,7 +50,7 @@ templ Layout(pc PageContext) {
 							@homeIcon()
 							if pc.User != nil {
 								<span class="px-2 py-1 border-3 text-xs tracking-wide border-primary bg-primary/10 shadow-hard">
-									{ utils.CapitalizeFirst(pc.User.Username) }
+									{ capitalizeFirst(pc.User.Username) }
 								</span>
 							}
 						</div>
@@ -128,4 +135,14 @@ templ homeIcon() {
 			></path>
 		</svg>
 	</a>
+}
+
+func capitalizeFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	// Convert first rune (character) to upper case
+	runes := []rune(s)
+	runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]
+	return string(runes)
 }

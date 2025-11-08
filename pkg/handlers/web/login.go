@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"unicode"
 
-	"watchma/pkg/utils"
+	"watchma/pkg/types"
 	"watchma/view/common"
 	"watchma/view/login"
 
@@ -97,7 +97,7 @@ func (h *WebHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Set session token as HTTP-only cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     utils.SESSION_COOKIE_NAME,
+		Name:     types.SESSION_COOKIE_NAME,
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
