@@ -8,8 +8,11 @@ import (
 
 	"watchma/db"
 	"watchma/db/repository"
-	"watchma/pkg/providers"
-	"watchma/pkg/services"
+	"watchma/pkg/auth"
+	"watchma/pkg/jellyfin"
+	"watchma/pkg/movie"
+	"watchma/pkg/openai"
+	"watchma/pkg/room"
 	"watchma/web/router"
 
 	"github.com/go-chi/chi/v5"
@@ -48,9 +51,9 @@ func (a *App) Initialize() error {
 		return fmt.Errorf("start embedded NATS: %w", err)
 	}
 
-	var openAiProvider *providers.OpenApiProvider
+	var openAiProvider *openai.Provider
 	if a.Settings.OpenAIApiKey != "" {
-		openAiProvider = providers.NewOpenApiProvider(
+		openAiProvider = openai.NewProvider(
 			a.Settings.OpenAIApiKey,
 			a.Logger,
 		)
@@ -66,22 +69,22 @@ func (a *App) Initialize() error {
 	userRepo := repository.NewUserRepository(db.DB, a.Logger)
 	sessionRepo := repository.NewSessionRepository(db.DB)
 
-	var movieProvider providers.MovieProvider
+	var movieProvider movie.Provider
 	if a.Settings.UseDummyData {
-		movieProvider = providers.NewDummyMovieProvider()
+		movieProvider = movie.NewDummyProvider()
 	} else {
-		movieProvider = providers.NewCachingMovieProvider(
-			providers.NewJellyfinMovieProvider(
+		movieProvider = movie.NewCachingProvider(
+			jellyfin.NewJellyfinMovieProvider(
 				a.Settings.JellyfinApiKey,
 				a.Settings.JellyfinBaseURL,
 				a.Logger),
 			time.Minute)
 	}
 
-	eventPublisher := services.NewEventPublisher(a.NATS, a.Logger)
-	authService := services.NewAuthService(userRepo, sessionRepo, a.Logger)
-	movieService := services.NewMovieService(movieProvider, a.Logger)
-	roomService := services.NewRoomService(eventPublisher, a.Logger)
+	eventPublisher := room.NewEventPublisher(a.NATS, a.Logger)
+	authService := auth.NewAuthService(userRepo, sessionRepo, a.Logger)
+	movieService := movie.NewService(movieProvider, a.Logger)
+	roomService := room.NewService(eventPublisher, a.Logger)
 
 	webHandler := router.NewWebHandler(
 		a.Settings.JellyfinBaseURL,

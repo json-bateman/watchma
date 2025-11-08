@@ -3,7 +3,7 @@ package rooms
 import (
 	"log/slog"
 
-	"watchma/pkg/services"
+	"watchma/pkg/room"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/nats-io/nats.go"
@@ -11,7 +11,7 @@ import (
 
 func SetupRoutes(
 	r chi.Router,
-	roomService *services.RoomService,
+	roomService *room.Service,
 	logger *slog.Logger,
 	nats *nats.Conn,
 ) error {

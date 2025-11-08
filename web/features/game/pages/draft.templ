@@ -2,12 +2,12 @@ package pages
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
+	roomPkg "watchma/pkg/room"
+	moviePkg "watchma/pkg/movie"
 	"watchma/web/views/common"
 )
 
-templ Draft(player *services.Player, movies []types.Movie, room *services.Room) {
+templ Draft(player *roomPkg.Player, movies []moviePkg.Movie, room *roomPkg.Room) {
 	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
 	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
@@ -33,7 +33,7 @@ templ Draft(player *services.Player, movies []types.Movie, room *services.Room) 
 	</div>
 }
 
-templ search(room *services.Room) {
+templ search(room *roomPkg.Room) {
 	<input
 		class="input"
 		aria-label="Search movies"
@@ -44,7 +44,7 @@ templ search(room *services.Room) {
 	/>
 }
 
-templ filters(room *services.Room) {
+templ filters(room *roomPkg.Room) {
 	<select
 		data-bind:genre
 		class="select"
@@ -90,7 +90,7 @@ templ filters(room *services.Room) {
 	</select>
 }
 
-templ submit(player *services.Player, room *services.Room) {
+templ submit(player *roomPkg.Player, room *roomPkg.Room) {
 	{{
 		selectedCount := len(player.DraftMovies)
 		disabled := selectedCount == 0
@@ -118,7 +118,7 @@ templ submit(player *services.Player, room *services.Room) {
 	</div>
 }
 
-templ selectedMovies(movies []types.Movie, selectedMovies []types.Movie, room *services.Room) {
+templ selectedMovies(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room) {
 	<div class="flex flex-wrap gap-2">
 		for _, movie := range selectedMovies {
 			<div class="inline-flex items-center pl-3 py-1 bg-primary tracking-wide text-sm text-text">
@@ -138,7 +138,7 @@ templ selectedMovies(movies []types.Movie, selectedMovies []types.Movie, room *s
 	</div>
 }
 
-templ DraftGrid(movies []types.Movie, selectedMovies []types.Movie, room *services.Room) {
+templ DraftGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room) {
 	{{
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true

@@ -5,21 +5,20 @@ import (
 	"log/slog"
 	"net/http"
 	"unicode"
-	"watchma/web/features/auth/pages"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
+	"watchma/pkg/auth"
 	"watchma/web"
+	"watchma/web/features/auth/pages"
 	"watchma/web/views/common"
 
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type handlers struct {
-	authService *services.AuthService
+	authService *auth.AuthService
 	logger      *slog.Logger
 }
 
-func newHandlers(auth *services.AuthService, l *slog.Logger) *handlers {
+func newHandlers(auth *auth.AuthService, l *slog.Logger) *handlers {
 	return &handlers{
 		logger:      l,
 		authService: auth,
@@ -111,7 +110,7 @@ func (h *handlers) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Set session token as HTTP-only cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     types.SESSION_COOKIE_NAME,
+		Name:     auth.SessionCookieName,
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,

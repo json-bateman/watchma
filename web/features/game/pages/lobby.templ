@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
+	roomPkg "watchma/pkg/room"
 )
 
 type ChatMessage struct {
@@ -13,7 +12,7 @@ type ChatMessage struct {
 	Message  string `json:"message"`
 }
 
-templ Lobby(room *services.Room, username string) {
+templ Lobby(room *roomPkg.Room, username string) {
 	<section id="moviesRoom" class="flex justify-center grow">
 		<span class="hidden" data-signals={ fmt.Sprintf("{room: '%s'}", room.Name) }></span>
 		<div class="flex max-w-[800px] flex-col justify-between grow">
@@ -67,7 +66,7 @@ templ Lobby(room *services.Room, username string) {
 	</section>
 }
 
-templ ChatBox(messages []types.Message) {
+templ ChatBox(messages []roomPkg.Message) {
 	<div id="chat" class="h-96 tracking-wide overflow-y-auto p-4 bg-primary/5">
 		for _, m := range messages {
 			<div class="mb-2 flex">
@@ -79,7 +78,7 @@ templ ChatBox(messages []types.Message) {
 	</div>
 }
 
-templ UserBox(room *services.Room, username string) {
+templ UserBox(room *roomPkg.Room, username string) {
 	{{
 		totalReady := 0
 		players := room.PlayersByJoinTime()
@@ -147,7 +146,7 @@ templ UserBox(room *services.Room, username string) {
 	</div>
 }
 
-templ Button(room *services.Room) {
+templ Button(room *roomPkg.Room) {
 	<div id="players" class="flex flex-col">
 		<div class="flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4">
 			<div class="text-text text-xl  uppercase tracking-wider">

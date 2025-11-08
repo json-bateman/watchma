@@ -1,14 +1,14 @@
 package debug
 
 import (
-	"watchma/pkg/services"
+	"watchma/pkg/room"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func SetupRoutes(
 	r chi.Router,
-	roomService *services.RoomService,
+	roomService *room.Service,
 ) error {
 	handlers := newHandlers(roomService)
 

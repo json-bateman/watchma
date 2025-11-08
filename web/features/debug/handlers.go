@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"watchma/web/features/debug/pages"
 	appctx "watchma/pkg/context"
-	"watchma/pkg/services"
+	"watchma/pkg/room"
 
 	"github.com/a-h/templ"
 )
 
 type handlers struct {
-	roomService *services.RoomService
+	roomService *room.Service
 }
 
-func newHandlers(rs *services.RoomService) *handlers {
+func newHandlers(rs *room.Service) *handlers {
 	return &handlers{
 		roomService: rs,
 	}

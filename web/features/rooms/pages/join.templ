@@ -1,12 +1,11 @@
-package pages 
+package pages
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
+	roomPkg "watchma/pkg/room"
 )
 
-templ JoinPage(rooms map[string]*services.Room) {
+templ JoinPage(rooms map[string]*roomPkg.Room) {
 	<section class="text-text mt-8 flex flex-col items-center justify-center px-4">
 		<div class="text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
 			Available Rooms
@@ -27,7 +26,7 @@ templ JoinPage(rooms map[string]*services.Room) {
 	</section>
 }
 
-templ RoomListBody(rooms map[string]*services.Room) {
+templ RoomListBody(rooms map[string]*roomPkg.Room) {
 	<tbody id="joinTable" data-init={ datastar.GetSSE("/sse/join") }>
 		if len(rooms) > 0 {
 			for _, room := range rooms {
@@ -46,15 +45,15 @@ templ RoomListBody(rooms map[string]*services.Room) {
 							<span class="hover:text-red-400">
 								Full!
 							</span>
-						} else if room.Game.Step == types.Voting || room.Game.Step == types.Draft {
+						} else if room.Game.Step == roomPkg.Voting || room.Game.Step == roomPkg.Draft {
 							<span class="hover:text-orange-500">
 								In Progress
 							</span>
-						} else if room.Game.Step == types.Announce {
+						} else if room.Game.Step == roomPkg.Announce {
 							<span class="hover:text-orange-500">
 								Preparing W	
 							</span>
-						} else if room.Game.Step == types.Results {
+						} else if room.Game.Step == roomPkg.Results {
 							<span class="hover:text-orange-500">
 								Finishing
 							</span>

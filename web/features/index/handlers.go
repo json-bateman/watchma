@@ -4,17 +4,17 @@ import (
 	"net/http"
 	"strconv"
 	"watchma/web/features/index/pages"
-	"watchma/pkg/services"
+	"watchma/pkg/movie"
 	"watchma/web"
 
 	"github.com/go-chi/chi/v5"
 )
 
 type handlers struct {
-	movieService *services.MovieService
+	movieService *movie.Service
 }
 
-func newHandlers(ms *services.MovieService) *handlers {
+func newHandlers(ms *movie.Service) *handlers {
 	return &handlers{
 		movieService: ms,
 	}

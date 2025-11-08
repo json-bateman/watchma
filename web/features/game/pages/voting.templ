@@ -2,12 +2,12 @@ package pages
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
+	roomPkg "watchma/pkg/room"
+	moviePkg "watchma/pkg/movie"
 	"watchma/web/views/common"
 )
 
-templ Voting(votingMovies []types.Movie, player *services.Player, room *services.Room) {
+templ Voting(votingMovies []moviePkg.Movie, player *roomPkg.Player, room *roomPkg.Room) {
 	<section class="w-full" id="moviesRoom">
 		<div class="flex flex-col w-full justify-center items-center">
 			<span class="text-3xl">Movies</span>
@@ -24,7 +24,7 @@ templ Voting(votingMovies []types.Movie, player *services.Player, room *services
 	</section>
 }
 
-templ VotingGrid(movies []types.Movie, selectedMovies []types.Movie, room *services.Room) {
+templ VotingGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room) {
 	{{
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true
@@ -37,7 +37,7 @@ templ VotingGrid(movies []types.Movie, selectedMovies []types.Movie, room *servi
 	@common.MovieGrid(movies, selectedMovies, gridOptions)
 }
 
-templ submitVoting(player *services.Player, room *services.Room) {
+templ submitVoting(player *roomPkg.Player, room *roomPkg.Room) {
 	{{
 		selectedCount := len(player.VotingMovies)
 		disabled := selectedCount == 0

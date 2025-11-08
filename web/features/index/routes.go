@@ -1,14 +1,14 @@
 package index
 
 import (
-	"watchma/pkg/services"
+	"watchma/pkg/movie"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func SetupRoutes(
 	r chi.Router,
-	movieService *services.MovieService,
+	movieService *movie.Service,
 ) error {
 	handlers := newHandlers(movieService)
 

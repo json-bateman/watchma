@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 
-	"watchma/pkg/types"
+	"watchma/pkg/movie"
 )
 
 type MovieTitleImageOptions struct {
@@ -13,7 +13,7 @@ type MovieTitleImageOptions struct {
 }
 
 templ MovieTitleImage(
-	movie types.Movie,
+	movie movie.Movie,
 	options MovieTitleImageOptions,
 ) {
 	{{

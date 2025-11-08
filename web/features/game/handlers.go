@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
+	appctx "watchma/pkg/context"
+	"watchma/pkg/movie"
+	"watchma/pkg/openai"
+	roomPkg "watchma/pkg/room"
+	"watchma/web"
 	"watchma/web/features/game/pages"
 	roompages "watchma/web/features/rooms/pages"
-	appctx "watchma/pkg/context"
-	"watchma/pkg/providers"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
-	"watchma/web"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/nats-io/nats.go"
@@ -23,17 +23,17 @@ import (
 )
 
 type handlers struct {
-	roomService    *services.RoomService
-	movieService   *services.MovieService
-	openAiProvider *providers.OpenApiProvider
+	roomService    *roomPkg.Service
+	movieService   *movie.Service
+	openAiProvider *openai.Provider
 	logger         *slog.Logger
 	nats           *nats.Conn
 }
 
 func newHandlers(
-	roomService *services.RoomService,
-	movieService *services.MovieService,
-	openAiProvider *providers.OpenApiProvider,
+	roomService *roomPkg.Service,
+	movieService *movie.Service,
+	openAiProvider *openai.Provider,
 	logger *slog.Logger,
 	nc *nats.Conn,
 ) *handlers {
@@ -123,9 +123,9 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Subscribe to room-specific NATS subject
-	roomSubject := types.RoomSubject(roomName)
+	roomSubject := roomPkg.RoomSubject(roomName)
 	sub, err := h.nats.SubscribeSync(roomSubject)
-	h.logger.Debug(types.NATS_SUB, "subject", roomSubject)
+	h.logger.Debug(roomPkg.NATSSub, "subject", roomSubject)
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
 		return
@@ -150,37 +150,37 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch string(msg.Data) {
-		case types.ROOM_UPDATE_EVENT:
+		case roomPkg.RoomUpdateEvent:
 			userBox := pages.UserBox(myRoom, user.Username)
 			if err := sse.PatchElementTempl(userBox); err != nil {
 				h.logger.Error("Error patching user list", "error", err)
 				return
 			}
-		case types.MESSAGE_SENT_EVENT:
+		case roomPkg.MessageSentEvent:
 			chat := pages.ChatBox(myRoom.RoomMessages)
 			if err := sse.PatchElementTempl(chat); err != nil {
 				h.logger.Error("Error patching chat message", "error", err)
 				return
 			}
-		case types.ROOM_START_EVENT:
+		case roomPkg.RoomStartEvent:
 			draft := pages.Draft(player, movies, myRoom)
 			if err := sse.PatchElementTempl(draft); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case types.ROOM_VOTING_EVENT:
+		case roomPkg.RoomVotingEvent:
 			movies := pages.Voting(myRoom.Game.VotingMovies, player, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case types.ROOM_ANNOUNCE_EVENT:
+		case roomPkg.RoomAnnounceEvent:
 			movies := pages.AiAnnounce(myRoom, []string{""})
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case types.ROOM_FINISH_EVENT:
+		case roomPkg.RoomFinishEvent:
 			movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
 			winnerMovies := getWinnerMovies(movieVotes, myRoom)
 			finalScreen := pages.ResultsScreen(winnerMovies)
@@ -227,7 +227,7 @@ func (h *handlers) leaveRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) publishChatMessage(w http.ResponseWriter, r *http.Request) {
-	var req types.Message
+	var req roomPkg.Message
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		web.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
 		return
@@ -267,7 +267,7 @@ func (h *handlers) startGame(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		room.Game.Step = types.Draft
+		room.Game.Step = roomPkg.Draft
 		movies, err := h.movieService.GetMovies()
 		if err != nil {
 			h.logger.Error("Call to MovieService.GetMovies failed", "Error", err)
@@ -350,7 +350,7 @@ func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 
 	// if voting is finished, add all players choices to the voting array
 	if isDraftFinished {
-		room.Game.Step = types.Voting
+		room.Game.Step = roomPkg.Voting
 		h.roomService.SubmitDraftVotes(room)
 		h.roomService.MoveToVoting(roomName)
 	} else {
@@ -386,36 +386,36 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var sortField services.MovieSortField
+	var sortField movie.SortField
 	descending := false
 	switch queryRequest.Sort {
 	case "name-asc":
-		sortField = services.SortByName
+		sortField = movie.SortByName
 	case "name-desc":
-		sortField = services.SortByName
+		sortField = movie.SortByName
 		descending = true
 	case "year-asc":
-		sortField = services.SortByYear
+		sortField = movie.SortByYear
 	case "year-desc":
-		sortField = services.SortByYear
+		sortField = movie.SortByYear
 		descending = true
 	case "critic-asc":
-		sortField = services.SortByCriticRating
+		sortField = movie.SortByCriticRating
 	case "critic-desc":
-		sortField = services.SortByCriticRating
+		sortField = movie.SortByCriticRating
 		descending = true
 	case "community-asc":
-		sortField = services.SortByCommunityRating
+		sortField = movie.SortByCommunityRating
 	case "community-desc":
-		sortField = services.SortByCommunityRating
+		sortField = movie.SortByCommunityRating
 		descending = true
 	default:
 		// default to name instead of blowing up for now
-		// sortField = services.SortByName
+		// sortField = movie.SortByName
 	}
 
 	movies, err := h.movieService.GetMoviesWithQuery(
-		services.MovieQuery{
+		movie.Query{
 			Search:     queryRequest.Search,
 			Genre:      queryRequest.Genre,
 			SortBy:     sortField,
@@ -460,7 +460,7 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 
 	// if voting is finished, add all players choices to the voting array
 	if isVotingFinished {
-		room.Game.Step = types.Results
+		room.Game.Step = roomPkg.Results
 		h.roomService.SubmitFinalVotes(room)
 		h.roomService.AnnounceWinner(roomName)
 	} else {
@@ -512,12 +512,12 @@ func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // sortMoviesByVotes converts a vote map to a sorted slice (descending by votes)
-func sortMoviesByVotes(votes map[*types.Movie]int) []types.MovieVote {
-	movieVotes := make([]types.MovieVote, 0, len(votes))
+func sortMoviesByVotes(votes map[*movie.Movie]int) []movie.Vote {
+	movieVotes := make([]movie.Vote, 0, len(votes))
 
-	for movie, voteCount := range votes {
-		movieVotes = append(movieVotes, types.MovieVote{
-			Movie: movie,
+	for m, voteCount := range votes {
+		movieVotes = append(movieVotes, movie.Vote{
+			Movie: m,
 			Votes: voteCount,
 		})
 	}
@@ -533,17 +533,17 @@ func sortMoviesByVotes(votes map[*types.Movie]int) []types.MovieVote {
 // getWinnerMovies returns only movies with the highest vote count
 // Will return a randomly selected movie if display ties is false
 // Since sortMoviesByVotes is ranging over a map, the selection is random
-func getWinnerMovies(moviesSortedByVote []types.MovieVote, room *services.Room) []types.MovieVote {
+func getWinnerMovies(moviesSortedByVote []movie.Vote, room *roomPkg.Room) []movie.Vote {
 	if len(moviesSortedByVote) == 0 {
-		return []types.MovieVote{}
+		return []movie.Vote{}
 	}
 
 	if !room.Game.DisplayTies {
-		return []types.MovieVote{moviesSortedByVote[0]}
+		return []movie.Vote{moviesSortedByVote[0]}
 	}
 
 	maxVotes := moviesSortedByVote[0].Votes
-	var winners []types.MovieVote
+	var winners []movie.Vote
 
 	for _, movie := range moviesSortedByVote {
 		if movie.Votes == maxVotes {

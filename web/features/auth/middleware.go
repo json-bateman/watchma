@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"strings"
 
+	"watchma/pkg/auth"
 	appctx "watchma/pkg/context"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
 )
 
 // RequireLogin middleware checks for session cookie, loads user data, and stores in context
-func RequireLogin(authService *services.AuthService, logger *slog.Logger) func(http.Handler) http.Handler {
+func RequireLogin(authService *auth.AuthService, logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Skip middleware for static assets
@@ -50,7 +49,7 @@ func RequireLogin(authService *services.AuthService, logger *slog.Logger) func(h
 
 // getSessionToken retrieves the session token from the request cookie
 func getSessionToken(r *http.Request) string {
-	cookie, err := r.Cookie(types.SESSION_COOKIE_NAME)
+	cookie, err := r.Cookie(auth.SESSION_COOKIE_NAME)
 	if err != nil {
 		return ""
 	}

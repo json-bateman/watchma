@@ -8,21 +8,21 @@ import (
 
 	"watchma/web/features/rooms/pages"
 	appctx "watchma/pkg/context"
-	"watchma/pkg/services"
-	"watchma/pkg/types"
+	"watchma/pkg/room"
 	"watchma/web"
+	"watchma/pkg/movie"
 
 	"github.com/nats-io/nats.go"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
 type handlers struct {
-	roomService *services.RoomService
+	roomService *room.Service
 	logger      *slog.Logger
 	nats        *nats.Conn
 }
 
-func newHandlers(rs *services.RoomService, logger *slog.Logger, nc *nats.Conn) *handlers {
+func newHandlers(rs *room.Service, logger *slog.Logger, nc *nats.Conn) *handlers {
 	return &handlers{
 		roomService: rs,
 		logger:      logger,
@@ -43,8 +43,8 @@ func (h *handlers) joinSSE(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("Error patching initial room list")
 	}
 
-	sub, err := h.nats.SubscribeSync(types.NATS_LOBBY_ROOMS)
-	h.logger.Debug(types.NATS_SUB, "subject", types.NATS_LOBBY_ROOMS)
+	sub, err := h.nats.SubscribeSync(room.NATSLobbyRooms)
+	h.logger.Debug(room.NATSSub, "subject", room.NATSLobbyRooms)
 	defer sub.Unsubscribe()
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
@@ -58,7 +58,7 @@ func (h *handlers) joinSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch string(msg.Data) {
-		case types.ROOM_LIST_UPDATE_EVENT:
+		case room.RoomListUpdateEvent:
 			roomList := pages.RoomListBody(h.roomService.Rooms)
 			if err := sse.PatchElementTempl(roomList); err != nil {
 				fmt.Println("Error patching room list")
@@ -106,13 +106,13 @@ func (h *handlers) hostForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "This room name already exists", http.StatusConflict)
 		return
 	}
-	h.roomService.AddRoom(roomName, &types.GameSession{
+	h.roomService.AddRoom(roomName, &room.Session{
 		MaxDraftCount: movies,
 		MaxVotes:      maxVotes,
 		MaxPlayers:    maxPlayers,
 		DisplayTies:   displayTies == "yes",
 		Host:          user.Username,
-		Votes:         make(map[*types.Movie]int),
+		Votes:         make(map[*movie.Movie]int),
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)

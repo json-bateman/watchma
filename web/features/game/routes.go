@@ -3,8 +3,9 @@ package game
 import (
 	"log/slog"
 
-	"watchma/pkg/providers"
-	"watchma/pkg/services"
+	"watchma/pkg/movie"
+	"watchma/pkg/openai"
+	"watchma/pkg/room"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/nats-io/nats.go"
@@ -12,9 +13,9 @@ import (
 
 func SetupRoutes(
 	r chi.Router,
-	roomService *services.RoomService,
-	movieService *services.MovieService,
-	openAiProvider *providers.OpenApiProvider,
+	roomService *room.Service,
+	movieService *movie.Service,
+	openAiProvider *openai.Provider,
 	logger *slog.Logger,
 	nats *nats.Conn,
 ) error {

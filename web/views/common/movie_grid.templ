@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 	"slices"
-	"watchma/pkg/types"
+	moviePkg "watchma/pkg/movie"
 )
 
 type MovieGridOptions struct {
@@ -27,7 +27,7 @@ func DefaultGridOptions() MovieGridOptions {
 	}
 }
 
-templ MovieGrid(movies []types.Movie, selectedMovies []types.Movie, opts MovieGridOptions) {
+templ MovieGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, opts MovieGridOptions) {
 	<div
 		id="moviegrid"
 		class="grid grid-cols-[repeat(auto-fill,minmax(var(--card-min),1fr))] gap-[var(--gap)]"
@@ -43,7 +43,7 @@ templ MovieGrid(movies []types.Movie, selectedMovies []types.Movie, opts MovieGr
 	</div>
 }
 
-templ MovieCard(movie types.Movie, selectedMovies []types.Movie, opts MovieGridOptions) {
+templ MovieCard(movie moviePkg.Movie, selectedMovies []moviePkg.Movie, opts MovieGridOptions) {
 	if opts.Selectable {
 		@SelectableMovieCard(movie, selectedMovies, opts)
 	} else {
@@ -51,9 +51,9 @@ templ MovieCard(movie types.Movie, selectedMovies []types.Movie, opts MovieGridO
 	}
 }
 
-templ SelectableMovieCard(movie types.Movie, selectedMovies []types.Movie, opts MovieGridOptions) {
+templ SelectableMovieCard(movie moviePkg.Movie, selectedMovies []moviePkg.Movie, opts MovieGridOptions) {
 	{{
-		selected := slices.ContainsFunc(selectedMovies, func(m types.Movie) bool {
+		selected := slices.ContainsFunc(selectedMovies, func(m moviePkg.Movie) bool {
 			return m.Id == movie.Id
 		})
 
@@ -85,7 +85,7 @@ templ SelectableMovieCard(movie types.Movie, selectedMovies []types.Movie, opts 
 	</label>
 }
 
-templ StaticMovieCard(movie types.Movie, opts MovieGridOptions) {
+templ StaticMovieCard(movie moviePkg.Movie, opts MovieGridOptions) {
 	@MovieTitleImage(movie, MovieTitleImageOptions{
 		Class: "aspect-[2/3] w-full object-cover transition-transform group-hover:scale-105",
 	})
@@ -94,7 +94,7 @@ templ StaticMovieCard(movie types.Movie, opts MovieGridOptions) {
 	}
 }
 
-templ overlay(movie types.Movie) {
+templ overlay(movie moviePkg.Movie) {
 	<div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
 		<div class="absolute bottom-0 left-0 right-0 p-3">
 			if movie.ProductionYear > 0 {

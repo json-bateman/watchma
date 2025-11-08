@@ -11,8 +11,10 @@ import (
 	"watchma/web/features/game"
 	"watchma/web/features/index"
 	"watchma/web/features/rooms"
-	"watchma/pkg/providers"
-	"watchma/pkg/services"
+	authPkg "watchma/pkg/auth"
+	"watchma/pkg/movie"
+	"watchma/pkg/openai"
+	"watchma/pkg/room"
 	"watchma/web"
 	"watchma/web/views/http_error"
 
@@ -21,10 +23,10 @@ import (
 )
 
 type WebHandlerServices struct {
-	MovieService   *services.MovieService
-	RoomService    *services.RoomService
-	AuthService    *services.AuthService
-	OpenAiProvider *providers.OpenApiProvider
+	MovieService   *movie.Service
+	RoomService    *room.Service
+	AuthService    *authPkg.AuthService
+	OpenAiProvider *openai.Provider
 }
 
 // WebHandler holds dependencies needed by web handlers

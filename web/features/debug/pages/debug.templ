@@ -1,9 +1,9 @@
 package pages 
 
-import "watchma/pkg/services"
+import "watchma/pkg/room"
 import "watchma/db/repository"
 
-templ Debug(roomSnapshot []services.RoomDebugInfo, user *repository.User) {
+templ Debug(roomSnapshot []room.DebugInfo, user *repository.User) {
 	<div>Debug</div>
 	<div>User Information</div>
 	<div>{ user.ID }</div>

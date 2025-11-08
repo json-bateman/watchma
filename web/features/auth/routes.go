@@ -2,14 +2,14 @@ package auth
 
 import (
 	"log/slog"
-	"watchma/pkg/services"
+	"watchma/pkg/auth"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func SetupRoutes(
 	r chi.Router,
-	authService *services.AuthService,
+	authService *auth.AuthService,
 	logger *slog.Logger,
 ) error {
 	handlers := newHandlers(authService, logger)
