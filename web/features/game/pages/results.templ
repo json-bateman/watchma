@@ -1,0 +1,32 @@
+package pages 
+
+import (
+	"watchma/pkg/types"
+	"watchma/web/views/common"
+)
+
+templ ResultsScreen(winnerMovies []types.MovieVote) {
+	<section id="moviesRoom" class="h-full" data-signals:movies>
+		<div class="flex flex-col justify-center h-full items-center">
+			if len(winnerMovies) > 1 {
+				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>
+			} else {
+				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winner is:</span>
+			}
+			<div class="text-text flex flex-col items-center justify-center">
+				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
+					for _, movieVote := range winnerMovies {
+						<div class="block glow-border w-72 md:w-96">
+							@common.MovieTitleImage(*movieVote.Movie, common.MovieTitleImageOptions{})
+						</div>
+					}
+				</div>
+				if winnerMovies[0].Votes > 1 {
+					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Votes!</div>
+				} else {
+					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Vote!</div>
+				}
+			</div>
+		</div>
+	</section>
+}

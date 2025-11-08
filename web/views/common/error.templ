@@ -1,0 +1,9 @@
+package common
+
+templ Error(m string) {
+	if m != "" {
+		<div id="error" class="text-red-500">{ m }</div>
+	} else {
+		<div id="error" class="hidden"></div>
+	}
+}

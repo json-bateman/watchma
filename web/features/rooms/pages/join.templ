@@ -1,0 +1,102 @@
+package pages 
+
+import (
+	"github.com/starfederation/datastar-go/datastar"
+	"watchma/pkg/services"
+	"watchma/pkg/types"
+)
+
+templ JoinPage(rooms map[string]*services.Room) {
+	<section class="text-text mt-8 flex flex-col items-center justify-center px-4">
+		<div class="text-text  font-bold text-4xl text-center uppercase tracking-widest mb-6 border-b-4 border-primary pb-2">
+			Available Rooms
+		</div>
+		<div class="w-full max-w-[800px] overflow-hidden border-4 border-primary shadow-brutalist">
+			<table class="w-full border-collapse">
+				<thead class="bg-primary text-background">
+					<tr>
+						<th class="th-join">Room Name</th>
+						<th class="th-join">Movies</th>
+						<th class="th-join">Players</th>
+						<th class="p-2 tracking-wider">Action</th>
+					</tr>
+				</thead>
+				@RoomListBody(rooms)
+			</table>
+		</div>
+	</section>
+}
+
+templ RoomListBody(rooms map[string]*services.Room) {
+	<tbody id="joinTable" data-init={ datastar.GetSSE("/sse/join") }>
+		if len(rooms) > 0 {
+			for _, room := range rooms {
+				<tr class={ "text-center text-text hover:bg-primary/10 px-4 border-b-2 border-primary/20 transition-colors" }>
+					<td class="py-2 font-bold text-xl">{ room.Name }</td>
+					<td class="py-2 font-bold text-xl">{ room.Game.MaxDraftCount }</td>
+					<td class="py-2">
+						<div class="flex justify-center items-center">
+							<div class="bg-accent px-2 py-1 rounded font-bold">
+								{ len(room.Players) }/{ room.Game.MaxPlayers }
+							</div>
+						</div>
+					</td>
+					<td class="hover:cursor-pointer transition-all py-2">
+						if room.Game.MaxPlayers == len(room.Players) {
+							<span class="hover:text-red-400">
+								Full!
+							</span>
+						} else if room.Game.Step == types.Voting || room.Game.Step == types.Draft {
+							<span class="hover:text-orange-500">
+								In Progress
+							</span>
+						} else if room.Game.Step == types.Announce {
+							<span class="hover:text-orange-500">
+								Preparing W	
+							</span>
+						} else if room.Game.Step == types.Results {
+							<span class="hover:text-orange-500">
+								Finishing
+							</span>
+						} else {
+							<a class="hover:text-primary" href={ templ.SafeURL("room/" + room.Name) }>
+								Join 
+							</a>
+						}
+					</td>
+				</tr>
+			}
+			<tr>
+				<td class="py-2"></td>
+				<td class="py-2"></td>
+				<td class="py-2"></td>
+				<td class="py-1">
+					<div class="flex text-text justify-center">
+						<a
+							href="/host"
+							class="text-2xl hover:text-primary transition-all"
+						>
+							+	
+						</a>
+					</div>
+				</td>
+			</tr>
+		} else {
+			<tr>
+				<td colspan="4" class="p-8 text-center">
+					<div class="flex flex-col items-center">
+						<div class="text-2xl font-bold text-primary mb-4">
+							No Active Rooms
+						</div>
+						<div class="text-lg mb-6 text-text/80">
+							Be the first to start a movie showdown!
+						</div>
+						<a href="/host" class="btn uppercase tracking-wider">
+							Host New Room
+						</a>
+					</div>
+				</td>
+			</tr>
+		}
+	</tbody>
+}

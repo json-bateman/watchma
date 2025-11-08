@@ -10,7 +10,7 @@ import (
 	"watchma/db/repository"
 	"watchma/pkg/providers"
 	"watchma/pkg/services"
-	"watchma/router"
+	"watchma/web/router"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
