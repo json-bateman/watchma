@@ -2,13 +2,17 @@ package pages
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
+	"watchma/pkg/room"
 	roomPkg "watchma/pkg/room"
 )
 
-templ AiAnnounce(r *roomPkg.Room, strStream []string) {
+templ AiAnnounce(r *roomPkg.Room, strStream []room.DialogueLine) {
 	<section data-init={ datastar.GetSSE("/announce/%s", r.Name) } id="moviesRoom">
 		for _, str := range strStream {
-			<div class="font-serif">{ str }</div>
+			<div class="flex gap-4">
+				<span class="font-serif text-primary text-2xl">{ str.Character }:</span>
+				<span class="font-serif text-text text-2xl">{ str.Dialogue }</span>
+			</div>
 		}
 	</section>
 }

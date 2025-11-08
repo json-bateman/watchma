@@ -11,7 +11,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var SESSION_COOKIE_NAME = "watchma_session"
+const (
+	SessionCookieName = "watchma_session"
+)
 
 type AuthService struct {
 	userRepo    *repository.UserRepository

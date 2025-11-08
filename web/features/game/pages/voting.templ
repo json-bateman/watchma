@@ -2,15 +2,17 @@ package pages
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
-	roomPkg "watchma/pkg/room"
 	moviePkg "watchma/pkg/movie"
+	roomPkg "watchma/pkg/room"
 	"watchma/web/views/common"
 )
 
 templ Voting(votingMovies []moviePkg.Movie, player *roomPkg.Player, room *roomPkg.Room) {
 	<section class="w-full" id="moviesRoom">
 		<div class="flex flex-col w-full justify-center items-center">
-			<span class="text-3xl">Movies</span>
+			<div class="my-8 flex justify-center">
+				<span class="text-5xl shadow-dance-text">Voting</span>
+			</div>
 			<div class="text-text w-full flex flex-col items-center justify-center">
 				@submitVoting(player, room)
 				@common.Error("")
@@ -29,7 +31,7 @@ templ VotingGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room 
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true
 		gridOptions.MaxCardWidth = "225px"
-		gridOptions.MinCardWidth = "200px"
+		gridOptions.MinCardWidth = "160px"
 		gridOptions.MakeOnClickMovie = func(movieId string) string {
 			return datastar.PatchSSE("/voting/%s/%s", room.Name, movieId)
 		}

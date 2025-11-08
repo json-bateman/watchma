@@ -59,3 +59,9 @@ type Message struct {
 	Message  string `json:"message"`
 	Room     string `json:"room"`
 }
+
+// DialogueLine represents the parsing of gippity
+type DialogueLine struct {
+	Character string
+	Dialogue  string
+}

@@ -11,7 +11,6 @@ import (
 
 // StartEmbeddedNATS starts an embedded NATS server and returns a client connection
 func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) {
-	// Configure the embedded NATS server
 	opts := &server.Options{
 		ServerName:    "watchma-nats-embedded",
 		Host:          "127.0.0.1",
@@ -24,13 +23,11 @@ func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) 
 		WriteDeadline: 10 * time.Second,
 	}
 
-	// Enable debug/trace logging if desired
 	if logger != nil {
 		opts.Debug = true
 		opts.Trace = true
 	}
 
-	// Create and start the NATS server
 	ns, err := server.NewServer(opts)
 	if err != nil {
 		return nil, nil, fmt.Errorf("create NATS server: %w", err)
@@ -39,7 +36,6 @@ func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) 
 	// Start the server in a goroutine
 	go ns.Start()
 
-	// Wait for the server to be ready
 	if !ns.ReadyForConnections(4 * time.Second) {
 		return nil, nil, fmt.Errorf("NATS server not ready after 4 seconds")
 	}
@@ -50,7 +46,6 @@ func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) 
 		"http_port", opts.HTTPPort,
 	)
 
-	// Connect a client to the embedded server
 	nc, err := nats.Connect(
 		fmt.Sprintf("nats://%s:%d", opts.Host, opts.Port),
 		nats.MaxReconnects(-1), // Unlimited reconnects

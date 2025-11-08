@@ -49,7 +49,7 @@ func RequireLogin(authService *auth.AuthService, logger *slog.Logger) func(http.
 
 // getSessionToken retrieves the session token from the request cookie
 func getSessionToken(r *http.Request) string {
-	cookie, err := r.Cookie(auth.SESSION_COOKIE_NAME)
+	cookie, err := r.Cookie(auth.SessionCookieName)
 	if err != nil {
 		return ""
 	}

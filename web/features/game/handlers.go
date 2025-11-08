@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -12,10 +13,9 @@ import (
 	appctx "watchma/pkg/context"
 	"watchma/pkg/movie"
 	"watchma/pkg/openai"
-	roomPkg "watchma/pkg/room"
+	"watchma/pkg/room"
 	"watchma/web"
 	"watchma/web/features/game/pages"
-	roompages "watchma/web/features/rooms/pages"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/nats-io/nats.go"
@@ -23,7 +23,7 @@ import (
 )
 
 type handlers struct {
-	roomService    *roomPkg.Service
+	roomService    *room.Service
 	movieService   *movie.Service
 	openAiProvider *openai.Provider
 	logger         *slog.Logger
@@ -31,7 +31,7 @@ type handlers struct {
 }
 
 func newHandlers(
-	roomService *roomPkg.Service,
+	roomService *room.Service,
 	movieService *movie.Service,
 	openAiProvider *openai.Provider,
 	logger *slog.Logger,
@@ -60,12 +60,12 @@ func (h *handlers) singleRoom(w http.ResponseWriter, r *http.Request) {
 	myRoom, ok := h.roomService.GetRoom(roomName)
 
 	if !ok {
-		web.RenderPage(roompages.NoRoom(roomName), roomName, w, r)
+		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
 		return
 	}
 
 	if myRoom.Game.MaxPlayers <= len(myRoom.Players) {
-		web.RenderPage(roompages.RoomFull(), roomName, w, r)
+		web.RenderPage(pages.RoomFull(), roomName, w, r)
 		return
 	}
 
@@ -123,9 +123,9 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Subscribe to room-specific NATS subject
-	roomSubject := roomPkg.RoomSubject(roomName)
+	roomSubject := room.RoomSubject(roomName)
 	sub, err := h.nats.SubscribeSync(roomSubject)
-	h.logger.Debug(roomPkg.NATSSub, "subject", roomSubject)
+	h.logger.Debug(room.NATSSub, "subject", roomSubject)
 	if err != nil {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
 		return
@@ -137,7 +137,6 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cleanup when connection closes
 	defer func() {
 		sub.Unsubscribe()
 		h.leaveRoom(w, r)
@@ -150,37 +149,42 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch string(msg.Data) {
-		case roomPkg.RoomUpdateEvent:
+		case room.RoomUpdateEvent:
 			userBox := pages.UserBox(myRoom, user.Username)
 			if err := sse.PatchElementTempl(userBox); err != nil {
 				h.logger.Error("Error patching user list", "error", err)
 				return
 			}
-		case roomPkg.MessageSentEvent:
+		case room.MessageSentEvent:
 			chat := pages.ChatBox(myRoom.RoomMessages)
 			if err := sse.PatchElementTempl(chat); err != nil {
 				h.logger.Error("Error patching chat message", "error", err)
 				return
 			}
-		case roomPkg.RoomStartEvent:
+		case room.RoomStartEvent:
 			draft := pages.Draft(player, movies, myRoom)
 			if err := sse.PatchElementTempl(draft); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case roomPkg.RoomVotingEvent:
+		case room.RoomVotingEvent:
 			movies := pages.Voting(myRoom.Game.VotingMovies, player, myRoom)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case roomPkg.RoomAnnounceEvent:
-			movies := pages.AiAnnounce(myRoom, []string{""})
+		case room.RoomAnnounceEvent:
+			movies := pages.AiAnnounce(myRoom, []room.DialogueLine{
+				{
+					Character: "Announcer",
+					Dialogue:  "Drum roll Please...",
+				},
+			})
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
-		case roomPkg.RoomFinishEvent:
+		case room.RoomFinishEvent:
 			movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
 			winnerMovies := getWinnerMovies(movieVotes, myRoom)
 			finalScreen := pages.ResultsScreen(winnerMovies)
@@ -204,7 +208,6 @@ func (h *handlers) leaveRoom(w http.ResponseWriter, r *http.Request) {
 
 	room, ok := h.roomService.GetRoom(roomName)
 	if !ok {
-		// Room doesn't exist
 		web.WriteJSONError(w, http.StatusNotFound, "Room not found")
 		return
 	}
@@ -227,7 +230,7 @@ func (h *handlers) leaveRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) publishChatMessage(w http.ResponseWriter, r *http.Request) {
-	var req roomPkg.Message
+	var req room.Message
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		web.WriteJSONError(w, http.StatusBadRequest, "Invalid Request Body")
 		return
@@ -265,9 +268,9 @@ func (h *handlers) ready(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) startGame(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.roomService.GetRoom(roomName)
+	myRoom, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		room.Game.Step = roomPkg.Draft
+		myRoom.Game.Step = room.Draft
 		movies, err := h.movieService.GetMovies()
 		if err != nil {
 			h.logger.Error("Call to MovieService.GetMovies failed", "Error", err)
@@ -275,12 +278,12 @@ func (h *handlers) startGame(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(movies) == 0 {
-			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", room.Name))
+			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", myRoom.Name))
 		}
 
-		room.Game.AllMovies = movies
+		myRoom.Game.AllMovies = movies
 
-		h.roomService.StartGame(roomName, room.Game.AllMovies)
+		h.roomService.StartGame(roomName, myRoom.Game.AllMovies)
 	}
 }
 
@@ -326,7 +329,7 @@ func (h *handlers) queryMovies(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.roomService.GetRoom(roomName)
+	myRoom, ok := h.roomService.GetRoom(roomName)
 
 	currentUser := appctx.GetUserFromRequest(r)
 	if currentUser == nil {
@@ -334,7 +337,7 @@ func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, ok := room.GetPlayer(currentUser.Username)
+	player, ok := myRoom.GetPlayer(currentUser.Username)
 	if !ok {
 		h.logger.Error("Player not in room")
 		return
@@ -346,12 +349,12 @@ func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 
 	player.HasFinishedDraft = true
 
-	isDraftFinished := room.IsDraftFinished()
+	isDraftFinished := myRoom.IsDraftFinished()
 
 	// if voting is finished, add all players choices to the voting array
 	if isDraftFinished {
-		room.Game.Step = roomPkg.Voting
-		h.roomService.SubmitDraftVotes(room)
+		myRoom.Game.Step = room.Voting
+		h.roomService.SubmitDraftVotes(myRoom)
 		h.roomService.MoveToVoting(roomName)
 	} else {
 		h.renderDraftPage(w, r)
@@ -436,7 +439,7 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.roomService.GetRoom(roomName)
+	myRoom, ok := h.roomService.GetRoom(roomName)
 
 	currentUser := appctx.GetUserFromRequest(r)
 	if currentUser == nil {
@@ -444,7 +447,7 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	player, ok := room.GetPlayer(currentUser.Username)
+	player, ok := myRoom.GetPlayer(currentUser.Username)
 	if !ok {
 		h.logger.Error("Player not in room")
 		return
@@ -456,12 +459,12 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 
 	player.HasFinishedVoting = true
 
-	isVotingFinished := room.IsVotingFinished()
+	isVotingFinished := myRoom.IsVotingFinished()
 
 	// if voting is finished, add all players choices to the voting array
 	if isVotingFinished {
-		room.Game.Step = roomPkg.Results
-		h.roomService.SubmitFinalVotes(room)
+		myRoom.Game.Step = room.Results
+		h.roomService.SubmitFinalVotes(myRoom)
 		h.roomService.AnnounceWinner(roomName)
 	} else {
 		h.renderVotingPage(w, r)
@@ -522,7 +525,6 @@ func sortMoviesByVotes(votes map[*movie.Movie]int) []movie.Vote {
 		})
 	}
 
-	// Sort by votes (descending - highest votes first)
 	sort.Slice(movieVotes, func(i, j int) bool {
 		return movieVotes[i].Votes > movieVotes[j].Votes
 	})
@@ -533,7 +535,7 @@ func sortMoviesByVotes(votes map[*movie.Movie]int) []movie.Vote {
 // getWinnerMovies returns only movies with the highest vote count
 // Will return a randomly selected movie if display ties is false
 // Since sortMoviesByVotes is ranging over a map, the selection is random
-func getWinnerMovies(moviesSortedByVote []movie.Vote, room *roomPkg.Room) []movie.Vote {
+func getWinnerMovies(moviesSortedByVote []movie.Vote, room *room.Room) []movie.Vote {
 	if len(moviesSortedByVote) == 0 {
 		return []movie.Vote{}
 	}
@@ -555,13 +557,12 @@ func getWinnerMovies(moviesSortedByVote []movie.Vote, room *roomPkg.Room) []movi
 }
 
 // ============= ANNOUNCE HANDLERS =============
-
 func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	room, _ := h.roomService.GetRoom(roomName)
+	myRoom, _ := h.roomService.GetRoom(roomName)
 
-	sorted := sortMoviesByVotes(room.Game.Votes)
-	winners := getWinnerMovies(sorted, room)
+	sorted := sortMoviesByVotes(myRoom.Game.Votes)
+	winners := getWinnerMovies(sorted, myRoom)
 
 	finalMessage := "And the winner is...\n"
 	winnerNum := len(winners)
@@ -599,21 +600,40 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	lines := strings.SplitSeq(finalMessage, "\n")
+	dialogueRegex := regexp.MustCompile(`\*\*\[?([^\]:]+)\]?:\*\*\s*\*"([^"]+)"\*`)
 
-	var strStream []string
-	for line := range lines {
-		strStream = append(strStream, line)
-		announce := pages.AiAnnounce(room, strStream)
-		if err := datastar.NewSSE(w, r).PatchElementTempl(announce); err != nil {
+	// Example len() == 3 Match:
+	// ["**[Trinity]:** *"The question isn't how, it's why."*", "Trinity", "The question isn't how, it's why."]
+
+	matches := dialogueRegex.FindAllStringSubmatch(finalMessage, -1)
+	lines := make([]room.DialogueLine, 0, len(matches))
+
+	for _, match := range matches {
+		if len(match) == 3 {
+			lines = append(lines, room.DialogueLine{
+				Character: strings.TrimSpace(match[1]),
+				Dialogue:  strings.TrimSpace(match[2]),
+			})
+		}
+	}
+
+	streamedLines := make([]room.DialogueLine, 0, len(matches))
+	for _, line := range lines {
+		streamedLines = append(streamedLines, line)
+		announce2 := pages.AiAnnounce(myRoom, streamedLines)
+		if err := datastar.NewSSE(w, r).PatchElementTempl(announce2); err != nil {
 			h.logger.Error("Error Rendering Results Page Page", "Error", err)
 		}
 		time.Sleep(2000 * time.Millisecond)
 	}
 
-	strStream = append(strStream, finalMessage)
-	announce := pages.AiAnnounce(room, strStream)
-	if err := datastar.NewSSE(w, r).PatchElementTempl(announce); err != nil {
+	time.Sleep(4000 * time.Millisecond)
+	strStream := []room.DialogueLine{{
+		Character: "Announcer",
+		Dialogue:  "And the Winner Is...",
+	}}
+	announce3 := pages.AiAnnounce(myRoom, strStream)
+	if err := datastar.NewSSE(w, r).PatchElementTempl(announce3); err != nil {
 		h.logger.Error("Error Rendering Results Page Page", "Error", err)
 	}
 	time.Sleep(5000 * time.Millisecond)

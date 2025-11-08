@@ -2,14 +2,17 @@ package pages
 
 import (
 	"github.com/starfederation/datastar-go/datastar"
-	roomPkg "watchma/pkg/room"
 	moviePkg "watchma/pkg/movie"
+	roomPkg "watchma/pkg/room"
 	"watchma/web/views/common"
 )
 
 templ Draft(player *roomPkg.Player, movies []moviePkg.Movie, room *roomPkg.Room) {
 	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
 	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
+		<div class="my-8 flex justify-center">
+			<span class="text-5xl shadow-dance-text">Draft</span>
+		</div>
 		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
 			<section class="flex gap-4 flex-wrap">
 				@search(room)

@@ -6,16 +6,16 @@ import (
 	"log/slog"
 	"net/http"
 
-	"watchma/web/features/auth"
-	"watchma/web/features/debug"
-	"watchma/web/features/game"
-	"watchma/web/features/index"
-	"watchma/web/features/rooms"
 	authPkg "watchma/pkg/auth"
 	"watchma/pkg/movie"
 	"watchma/pkg/openai"
 	"watchma/pkg/room"
 	"watchma/web"
+	"watchma/web/features/auth"
+	"watchma/web/features/debug"
+	"watchma/web/features/game"
+	"watchma/web/features/index"
+	"watchma/web/features/rooms"
 	"watchma/web/views/http_error"
 
 	"github.com/go-chi/chi/v5"
@@ -73,6 +73,8 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 	})
 }
 
+// proxyJellyfinImage is to allow aggressive caching of jellyfin movie posters.
+// Jellyfin by default is no-cache.
 func proxyJellyfinImage(jfinBaseUrl string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		itemId := chi.URLParam(r, "itemId")
