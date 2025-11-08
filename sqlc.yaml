@@ -1,12 +1,12 @@
 version: "2"
 sql:
   - engine: "sqlite"
-    queries: "pkg/database/queries/"
-    schema: "pkg/database/migrations"
+    queries: "db/queries/"
+    schema: "db/migrations"
     gen:
       go:
         package: "sqlcgen"
-        out: "pkg/database/sqlcgen"
+        out: "db/sqlcgen"
         sql_package: "database/sql"
         emit_json_tags: true
         emit_prepared_queries: false

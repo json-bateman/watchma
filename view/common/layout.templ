@@ -3,7 +3,7 @@ package common
 import (
 	"strings"
 	"time"
-	"watchma/pkg/database/repository"
+	"watchma/db/repository"
 )
 
 type PageContext struct {
@@ -31,7 +31,7 @@ templ Layout(pc PageContext) {
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 			<link href="https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow" rel="stylesheet"/>
-			<!-- Inline script to prevent theme flash - MUST run before CSS loads -->
+			<!-- Inline script to prevent theme flash - runs before CSS loads -->
 			<script>
                 (function() {
                     const theme = localStorage.getItem('theme') || 'burgundy-light';
@@ -71,8 +71,6 @@ templ Layout(pc PageContext) {
 						</a>
 					</footer>
 				}
-				<!-- Helpful inspector element for data-star -->
-				<dataspa-inspector></dataspa-inspector>
 			</main>
 			<!-- Custom Attribute for theme storage -->
 			<script type="module" src="/public/custom-attribute-theme-storage.js"></script>
@@ -81,8 +79,6 @@ templ Layout(pc PageContext) {
 			<!-- main is version 1.0.0-RC.5, not latest keeping for now in case of breaking changes
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
             -->
-			<!-- Inspector -->
-			<script defer type="module" src="https://cdn.jsdelivr.net/gh/dataSPA/dataSPA-inspector@main/dataspa-inspector.bundled.js"></script>
 			<!-- Auto animate -->
 			<script defer type="module">
 				import autoAnimate from 'https://unpkg.com/@formkit/auto-animate@1.0.0-beta.5/index.mjs';

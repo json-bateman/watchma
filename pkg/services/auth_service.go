@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"log/slog"
-	"watchma/pkg/database/repository"
+	"watchma/db/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )

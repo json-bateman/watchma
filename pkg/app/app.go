@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"watchma/pkg/config"
-	"watchma/pkg/database"
-	"watchma/pkg/database/repository"
-	"watchma/pkg/handlers/web"
+	"watchma/db"
+	"watchma/db/repository"
 	"watchma/pkg/providers"
 	"watchma/pkg/services"
+	"watchma/router"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -20,31 +19,31 @@ import (
 )
 
 type App struct {
-	Settings   *config.Settings
+	Settings   *Settings
 	Logger     *slog.Logger
 	Router     *chi.Mux
 	NATS       *nats.Conn
 	NATSServer *server.Server // Embedded NATS server instance
-	DB         *database.DB
+	DB         *db.DB
 }
 
 func New() *App {
 	return &App{
-		Settings: config.LoadSettings(),
+		Settings: LoadSettings(),
 	}
 }
 
 func (a *App) Initialize() error {
-	a.Logger = config.NewColorLog(a.Settings.LogLevel)
+	a.Logger = NewColorLog(a.Settings.LogLevel)
 	slog.SetDefault(a.Logger)
 
 	// Initialize database with goose migrations
-	db, err := database.New("./watchma.db", a.Logger)
+	db, err := db.New("./watchma.db", a.Logger)
 	if err != nil {
 		return fmt.Errorf("initialize database: %w", err)
 	}
 
-	ns, nc, err := config.StartEmbeddedNATS(a.Logger)
+	ns, nc, err := StartEmbeddedNATS(a.Logger)
 	if err != nil {
 		return fmt.Errorf("start embedded NATS: %w", err)
 	}
@@ -83,25 +82,23 @@ func (a *App) Initialize() error {
 	authService := services.NewAuthService(userRepo, sessionRepo, a.Logger)
 	movieService := services.NewMovieService(movieProvider, a.Logger)
 	roomService := services.NewRoomService(eventPublisher, a.Logger)
-	movieOfTheDayService := services.NewMovieOfTheDayService(movieService)
 
-	webHandler := web.NewWebHandler(
-		a.Settings,
+	webHandler := router.NewWebHandler(
+		a.Settings.JellyfinBaseURL,
 		a.Logger,
 		a.NATS,
-		&web.WebHandlerServices{
-			MovieService:         movieService,
-			RoomService:          roomService,
-			MovieOfTheDayService: movieOfTheDayService,
-			AuthService:          authService,
-			OpenAiProvider:       openAiProvider,
+		&router.WebHandlerServices{
+			MovieService:   movieService,
+			RoomService:    roomService,
+			AuthService:    authService,
+			OpenAiProvider: openAiProvider,
 		},
 	)
 
 	a.Router = chi.NewRouter()
 	a.Router.Use(middleware.Logger)
 	webHandler.SetupRoutes(a.Router)
-	config.SetupFileServer(a.Logger, a.Router)
+	SetupFileServer(a.Logger, a.Router)
 
 	return nil
 }
