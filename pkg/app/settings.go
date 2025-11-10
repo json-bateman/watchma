@@ -30,10 +30,7 @@ type Settings struct {
 
 	Port     int
 	LogLevel slog.Level
-	Env      bool
-
-	//TODO: Timeout users who are inactive maybe?
-	SessionTimeout time.Duration
+	IsDev    bool
 }
 
 func LoadSettings() *Settings {
@@ -50,9 +47,8 @@ func LoadSettings() *Settings {
 
 		OpenAIApiKey: os.Getenv(OPENAI_API_KEY),
 
-		Port:           getEnvAsInt(PORT, 8080),
-		Env:            strings.ToLower(os.Getenv(IS_DEV)) == "true",
-		SessionTimeout: getEnvAsDuration("SESSION_TIMEOUT", 30*time.Minute),
+		Port:  getEnvAsInt(PORT, 8080),
+		IsDev: strings.ToLower(os.Getenv(IS_DEV)) == "true",
 	}
 
 	if err := config.validate(); err != nil {
@@ -94,15 +90,8 @@ func (c *Settings) logConfig() {
 	}
 	slog.Info("PORT", "port", c.Port)
 	slog.Info("LOG_LEVEL", "level", c.LogLevel)
-	slog.Info("ENVIRONMENT", "env", c.Env)
+	slog.Info("ENVIRONMENT", "env", c.IsDev)
 	fmt.Println("------------------------------------------------------------------")
-}
-
-func getEnvAsString(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
 
 func getEnvAsInt(key string, defaultValue int) int {

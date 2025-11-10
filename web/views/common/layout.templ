@@ -11,6 +11,7 @@ type PageContext struct {
 	User         *repository.User
 	HeaderFooter bool
 	Content      templ.Component
+	IsDev        bool
 }
 
 templ Layout(pc PageContext) {
@@ -83,7 +84,7 @@ templ Layout(pc PageContext) {
 			<script defer type="module">
 				import autoAnimate from 'https://unpkg.com/@formkit/auto-animate@1.0.0-beta.5/index.mjs';
 
-				const container = document.getElementById('movie-list');
+				const container = document.getElementById('moviesRoom');
 				if (container) {
 					autoAnimate(container);
 				}

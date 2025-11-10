@@ -174,12 +174,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomAnnounceEvent:
-			movies := pages.AiAnnounce(myRoom, []room.DialogueLine{
-				{
-					Character: "Announcer",
-					Dialogue:  "Drum roll Please...",
-				},
-			})
+			movies := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
 			if err := sse.PatchElementTempl(movies); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
@@ -560,15 +555,31 @@ func getWinnerMovies(moviesSortedByVote []movie.Vote, room *room.Room) []movie.V
 func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	myRoom, _ := h.roomService.GetRoom(roomName)
+	user := appctx.GetUserFromRequest(r)
+	player, ok := myRoom.GetPlayer(user.Username)
+
+	if !ok {
+		h.logger.Error("Player not in room")
+		return
+	}
 
 	sorted := sortMoviesByVotes(myRoom.Game.Votes)
 	winners := getWinnerMovies(sorted, myRoom)
 
-	finalMessage := "And the winner is...\n"
-	winnerNum := len(winners)
-	if winnerNum > 1 {
-		finalMessage = "And the winners are...\n"
+	if player.Username != myRoom.Game.Host {
+		// Exit early, only the host generates the GPT response for the room
+		return
 	}
+
+	myRoom.Game.Announcement = []room.DialogueLine{
+		{
+			Character: "Announcer: ",
+			Dialogue:  "Drum Roll Please",
+		},
+	}
+	// Stream to all rooms
+	h.roomService.StreamAnnouncement(roomName)
+	myRoom.Game.Announcement = []room.DialogueLine{}
 
 	buildGptMessage := fmt.Sprintf(`You are writing a reveal scene for: %s
 
@@ -592,6 +603,7 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 
   NOW write the scene for:`, winners[0].Movie.Name)
 
+	var finalMessage string
 	if h.openAiProvider != nil {
 		var err error
 		finalMessage, err = h.openAiProvider.FetchAiResponse(buildGptMessage)
@@ -617,25 +629,19 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	streamedLines := make([]room.DialogueLine, 0, len(matches))
 	for _, line := range lines {
-		streamedLines = append(streamedLines, line)
-		announce2 := pages.AiAnnounce(myRoom, streamedLines)
-		if err := datastar.NewSSE(w, r).PatchElementTempl(announce2); err != nil {
-			h.logger.Error("Error Rendering Results Page Page", "Error", err)
-		}
+		myRoom.Game.Announcement = append(myRoom.Game.Announcement, line)
+		h.roomService.StreamAnnouncement(roomName)
 		time.Sleep(2000 * time.Millisecond)
 	}
 
 	time.Sleep(4000 * time.Millisecond)
-	strStream := []room.DialogueLine{{
+	myRoom.Game.Announcement = []room.DialogueLine{{
 		Character: "Announcer",
 		Dialogue:  "And the Winner Is...",
 	}}
-	announce3 := pages.AiAnnounce(myRoom, strStream)
-	if err := datastar.NewSSE(w, r).PatchElementTempl(announce3); err != nil {
-		h.logger.Error("Error Rendering Results Page Page", "Error", err)
-	}
+
+	h.roomService.StreamAnnouncement(roomName)
 	time.Sleep(5000 * time.Millisecond)
 
 	h.roomService.FinishGame(roomName)

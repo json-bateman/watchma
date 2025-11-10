@@ -21,17 +21,17 @@ templ Lobby(room *roomPkg.Room, username string) {
 					<div class="text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2">
 						<span class="text-4xl tracking-widest">{ room.Name }</span>
 					</div>
-					<div class="grid grid-cols-3 gap-4">
+					<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
 						<div class="bg-white text-black p-3 border-2 border-black">
-							<div class="text-xs  uppercase tracking-wide">DRAFT MOVIES COUNT</div>
+							<div class="text-xs  uppercase tracking-wide">Draft Movies</div>
 							<div class="text-3xl ">{ room.Game.MaxDraftCount }</div>
 						</div>
 						<div class="bg-white text-black p-3 border-2 border-black">
-							<div class="text-xs  uppercase tracking-wide">MAX VOTES</div>
+							<div class="text-xs  uppercase tracking-wide">Max Votes</div>
 							<div class="text-3xl ">{ room.Game.MaxVotes }</div>
 						</div>
 						<div class="bg-white text-black p-3 border-2 border-black">
-							<div class="text-xs  uppercase tracking-wide">MAX PLAYERS</div>
+							<div class="text-xs  uppercase tracking-wide">Max Players</div>
 							<div class="text-3xl ">{ room.Game.MaxPlayers }</div>
 						</div>
 					</div>

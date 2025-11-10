@@ -21,11 +21,10 @@ type Session struct {
 	MaxDraftCount int
 	MaxVotes      int
 	DisplayTies   bool
+	Announcement  []DialogueLine
 	Votes         map[*movie.Movie]int // Movie -> vote count
 	Step          Step
 }
-
-// Helper methods for Session
 
 // SetAllMovies sets the movies and builds the lookup map
 func (g *Session) SetAllMovies(movies []movie.Movie) {

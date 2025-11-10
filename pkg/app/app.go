@@ -99,7 +99,11 @@ func (a *App) Initialize() error {
 	)
 
 	a.Router = chi.NewRouter()
-	a.Router.Use(middleware.Logger)
+
+	if a.Settings.IsDev {
+		a.Router.Use(middleware.Logger)
+	}
+
 	webHandler.SetupRoutes(a.Router)
 	SetupFileServer(a.Logger, a.Router)
 

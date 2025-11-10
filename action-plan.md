@@ -34,33 +34,30 @@
     number of movies people can add, maybe set timer to 1 minute
     - [X] cache movies somehow - (Cached GET req for 1 minute)
     - [X] players add movies --> Aggregate all choices to vote on.
-    - [ ] Post game lobby? Links to various things about the movie?
-    - [ ] Or Alternatively, Host presses play, SSE event pushes everyone to a playing session of the movie in a 
-    `<video></video>` player. Now that would be sweet. `https://api.jellyfin.org/` might have the juice, I think 
+    - [X] Right now everyone gets their own unique streamed announcement response which I don't want // I want to stream a single message, need to save the res in room.Game.Announce
+    - [ ] Veto round
+    - [ ] Somehow lock users to current game, if they accidentally navigate away they can rejoin. 
+    - [ ] Ending alternative, Host presses play, SSE event pushes everyone to a playing session of the movie in a 
+    `<video></video>` player. Now that would be sweet. `https://api.jellyfin.org/` might have endponts to do this, I think 
     `GET/POST ---  http://localhost/Items/{itemId}/PlaybackInfo` this might be the api call
-
-- Potential Refactor
-    - [ ] Make a function that acts as the state machine, watches for step changes, maybe emits a message that the subscribed SSE channel is listening for.
 
 - Deploy
     - [ ] Deploy this as a docker container so people can download and use with their Jellyfin servers
     - [ ] Figure out how to set env variables and upload stuff to dockerhub for unRAID
 
 - Side quests
-    - [ ] Figure out if there's a way to remove javascript for setting theme on page load in Layou
+    - [X] Figure out if there's a way to remove javascript for setting theme on page load in Layou
     if there is, whole page can be replaced with SSE, and I can remove header and footer when game
         starts
-    - [ ] make skeleton loader for movies?? 
 
 - Stretch goals
-    - [ ] Stretch goal tournament, for now maybe just display winner(s)?
-    - [ ] create DB to store results of finished games (Have DB need to make table and save it)
     - [X] let individual users log in
+    - [ ] Multiple Rounds of voting to narrow down to a single winner
+    - [ ] create DB to store results of finished games (Have DB need to make table and save it)
     - [ ] save users selections over time in the DB
 
 - Stretchier goals
-    - [ ] Add an input field for the host of each room to choose an actor
     - [ ] Generate LLM prompt or use a preconfigured one, that makes the LLM a host for the game
-    - [ ] Have the LLM say something funny or witty in-betwixt rounds, deliver with SSE???
-    - [ ] Generate a tournament bracket
+    - [X] Have the LLM say something funny or witty in-betwixt rounds, deliver with SSE???
+    - [ ] Generate a tournament bracket?
     - [ ] People vote on the faceoffs 1 at a time

@@ -14,7 +14,6 @@ type Provider struct {
 	logger     *slog.Logger
 }
 
-// OpenAI API response structures
 type ChatCompletionResponse struct {
 	ID                string   `json:"id"`
 	Object            string   `json:"object"`
