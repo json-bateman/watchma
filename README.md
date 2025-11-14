@@ -16,11 +16,12 @@ Ok maybe this is a specific me problem, but if it's not, that's why I made this 
 - [templ](https://github.com/a-h/templ?tab=readme-ov-file)
 - [tailwindcss](https://github.com/tailwindlabs/tailwindcss/) - Download from Releases
 
-### Setting .env variables (loaded by `internal/config/settings.go`)
-Must have a Jellyfin server with API key in your `.env` for this to run properly.
+### Setting .env variables
+Must have a Jellyfin server with API key in your `.env` for this to run properly. For a fun message that plays before the end of the game, you can include an `OPENAI_API_KEY`, it only uses one small token request at the end of each game. 100 games has cost me ~ $0.01. 
 
 `JELLYFIN_API_KEY`  
 `JELLYFIN_BASE_URL`  
+`OPENAI_API_KEY`
 `PORT`  (to run the app on)  
 `LOG_LEVEL` (DEBUG | INFO | WARN | ERROR)
 
