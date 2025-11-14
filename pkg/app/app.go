@@ -82,7 +82,7 @@ func (a *App) Initialize() error {
 	}
 
 	eventPublisher := room.NewEventPublisher(a.NATS, a.Logger)
-	authService := auth.NewAuthService(userRepo, sessionRepo, a.Logger)
+	authService := auth.NewAuthService(userRepo, sessionRepo, a.Logger, a.Settings.IsDev)
 	movieService := movie.NewService(movieProvider, a.Logger)
 	roomService := room.NewService(eventPublisher, a.Logger)
 

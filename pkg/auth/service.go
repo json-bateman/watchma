@@ -19,13 +19,15 @@ type AuthService struct {
 	userRepo    *repository.UserRepository
 	sessionRepo *repository.SessionRepository
 	logger      *slog.Logger
+	IsDev       bool
 }
 
-func NewAuthService(userRepo *repository.UserRepository, sessionRepo *repository.SessionRepository, logger *slog.Logger) *AuthService {
+func NewAuthService(userRepo *repository.UserRepository, sessionRepo *repository.SessionRepository, logger *slog.Logger, isDev bool) *AuthService {
 	return &AuthService{
 		userRepo:    userRepo,
 		sessionRepo: sessionRepo,
 		logger:      logger,
+		IsDev:       isDev,
 	}
 }
 
@@ -51,7 +53,6 @@ func (s *AuthService) LoginOrCreate(username, password string) (*repository.User
 		s.logger.Info("User logged in", "username", username)
 	}
 
-	// Create session token
 	token := generateRandomToken()
 	if err := s.sessionRepo.Create(user.ID, token); err != nil {
 		return nil, "", err

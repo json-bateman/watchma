@@ -15,7 +15,7 @@ const (
 	ColorRed    = "\033[1;31m"
 	ColorYellow = "\033[1;33m"
 	ColorGreen  = "\033[1;32m"
-	ColorBlue   = "\033[34m" // WebSocket non bolded
+	ColorBlue   = "\033[34m"
 	ColorGray   = "\033[1;90m"
 )
 

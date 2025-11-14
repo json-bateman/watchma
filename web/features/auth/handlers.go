@@ -114,7 +114,7 @@ func (h *handlers) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false, // set to true in production with HTTPS
+		Secure:   !h.authService.IsDev,
 		SameSite: http.SameSiteLaxMode,
 	})
 
