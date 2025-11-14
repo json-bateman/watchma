@@ -88,6 +88,7 @@ func (a *App) Initialize() error {
 
 	webHandler := router.NewWebHandler(
 		a.Settings.JellyfinBaseURL,
+		a.Settings.JellyfinApiKey,
 		a.Logger,
 		a.NATS,
 		&router.WebHandlerServices{
