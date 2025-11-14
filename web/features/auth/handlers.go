@@ -73,7 +73,7 @@ func (h *handlers) Login(w http.ResponseWriter, r *http.Request) {
 		HasUpper:  false,
 		HasNumber: false,
 	})
-	web.RenderPageNoLayout(component, "Movie Showdown", w, r)
+	web.RenderPageNoLayout(component, "Watchma", w, r)
 }
 
 func (h *handlers) HandleLogin(w http.ResponseWriter, r *http.Request) {

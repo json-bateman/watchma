@@ -3,9 +3,9 @@ package index
 import (
 	"net/http"
 	"strconv"
-	"watchma/web/features/index/pages"
 	"watchma/pkg/movie"
 	"watchma/web"
+	"watchma/web/features/index/pages"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -28,7 +28,7 @@ func (h *handlers) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	web.RenderPage(pages.IndexPage(movieOfTheDay), "Movie Showdown", w, r)
+	web.RenderPage(pages.IndexPage(movieOfTheDay), "Watchma", w, r)
 }
 
 // Shuffle returns a page with a shuffled list of movies, up to the number requested in the query parameters

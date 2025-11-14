@@ -60,7 +60,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 		r.Use(auth.RequireLogin(h.services.AuthService, h.logger))
 
 		index.SetupRoutes(r, h.services.MovieService)
-		debug.SetupRoutes(r, h.services.RoomService)
+		debug.SetupRoutes(r, h.services.RoomService, h.logger, h.NATS)
 		// Room Setup
 		rooms.SetupRoutes(r, h.services.RoomService, h.logger, h.NATS)
 		// Main Game Loop (lobby, draft, voting, announce)

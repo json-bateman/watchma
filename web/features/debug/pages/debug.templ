@@ -1,51 +1,124 @@
 package pages 
 
-import "watchma/pkg/room"
-import "watchma/db/repository"
+import (
+	"fmt"
+	"watchma/db/repository"
+	"watchma/pkg/room"
+)
 
 templ Debug(roomSnapshot []room.DebugInfo, user *repository.User) {
-	<div>Debug</div>
-	<div>User Information</div>
-	<div>{ user.ID }</div>
-	<div>{ user.Username }</div>
-	<div>{ user.PasswordHash }</div>
-	<div>{ user.CreatedAt.GoString() }</div>
-	<div>{ user.UpdatedAt.GoString() }</div>
-	<br/>
-	if len(roomSnapshot) == 0 {
-		<div>No Rooms!</div>
-	} else {
-		for _, room := range roomSnapshot {
-			<section class="justify-center border-2 border-primary shadow-hard w-20 h-20 flex flex-wrap">
-				<div>{ room.RoomName }</div>
-				<div class="flex justify-between">
-					<span>Step</span>
-					<span>{ room.Step }</span>
+	<div
+		id="debugPage"
+		class="container text-sans mx-auto p-6 space-y-8"
+		data-init="@get('/debug/sse')"
+	>
+		<h1 class="text-3xl font-bold text-primary">Debug Dashboard</h1>
+		<section class="border-2 border-primary shadow-hard w-1/2 p-6 bg-secondary/10">
+			<h2 class="text-2xl font-bold mb-4 text-primary">User Information</h2>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div class="flex flex-col">
+					<span class="font-semibold text-primary">User ID:</span>
+					<span class="text-text">{ user.ID }</span>
 				</div>
-				<div class="flex justify-between">
-					<span>Host</span>
-					<span>{ room.Host }</span>
+				<div class="flex flex-col">
+					<span class="font-semibold text-primary">Username:</span>
+					<span class="text-text">{ user.Username }</span>
 				</div>
-				<div class="flex justify-between">
-					<span>Max Draft Count</span>
-					<span>{ room.MaxDraftCount }</span>
+				<div class="flex flex-col">
+					<span class="font-semibold text-primary">Created At:</span>
+					<span class="text-text text-sm">{ user.CreatedAt.Format("2006-01-02 15:04:05") }</span>
 				</div>
-				<div class="flex justify-between">
-					<span>Player Count</span>
-					<span>{ room.PlayerCount }</span>
+				<div class="flex flex-col">
+					<span class="font-semibold text-primary">Updated At:</span>
+					<span class="text-text text-sm">{ user.UpdatedAt.Format("2006-01-02 15:04:05") }</span>
 				</div>
-				<div class="flex justify-between">
-					<span>Max Players</span>
-					<span>{ room.MaxPlayers }</span>
+			</div>
+		</section>
+		<section>
+			<h2 class="text-2xl font-bold mb-4 text-primary">Active Rooms ({ fmt.Sprint(len(roomSnapshot)) })</h2>
+			if len(roomSnapshot) == 0 {
+				<div class="border-2 border-dashed border-gray-300 p-8 text-center text-primary">
+					<p class="text-lg">No Active Rooms</p>
 				</div>
-				<div class="flex justify-between">
-					<span>Max Draft Count</span>
-					<span>{ room.MaxDraftCount }</span>
+			} else {
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					for _, room := range roomSnapshot {
+						<div class="border-2 border-primary shadow-hard bg-secondary/10">
+							<div class="bg-primary text-text p-4">
+								<h3 class="text-xl font-bold">{ room.RoomName }</h3>
+								<p class="text-sm opacity-90">Step: { room.Step }</p>
+							</div>
+							<div class="p-4 space-y-4">
+								<div class="grid grid-cols-2 gap-3">
+									<div class="flex justify-between border-b pb-2">
+										<span class="font-semibold">Host:</span>
+										<span>{ room.Host }</span>
+									</div>
+									<div class="flex justify-between border-b pb-2">
+										<span class="font-semibold">Players:</span>
+										<span>{ fmt.Sprint(room.PlayerCount) }/{ fmt.Sprint(room.MaxPlayers) }</span>
+									</div>
+									<div class="flex justify-between border-b pb-2">
+										<span class="font-semibold">Max Draft:</span>
+										<span>{ fmt.Sprint(room.MaxDraftCount) }</span>
+									</div>
+									<div class="flex justify-between border-b pb-2">
+										<span class="font-semibold">Voting Movies:</span>
+										<span>{ fmt.Sprint(len(room.VotingMovies)) }</span>
+									</div>
+								</div>
+								if len(room.Players) > 0 {
+									<div class="mt-4">
+										<h4 class="font-bold text-primary mb-2">Players:</h4>
+										<div class="space-y-2">
+											for _, player := range room.Players {
+												<div class="border border-gray-300 p-2 rounded">
+													<div class="flex justify-between items-center">
+														<span class="font-semibold">{ player.Username }</span>
+														if player.Ready {
+															<span class="text-xs bg-green-500 text-text px-2 py-1 rounded">Ready</span>
+														} else {
+															<span class="text-xs bg-gray-400 text-text px-2 py-1 rounded">Not Ready</span>
+														}
+													</div>
+													<div class="grid grid-cols-2 gap-2 mt-2 text-sm text-primary">
+														<div>Draft: { fmt.Sprint(player.DraftMovies) }</div>
+														<div>Voting: { fmt.Sprint(player.VotingMovies) }</div>
+														<div>
+															if player.HasFinishedDraft {
+																✓ Finished Draft
+															} else {
+																○ Drafting
+															}
+														</div>
+														<div>
+															if player.HasSelectedMovies {
+																✓ Selected Movies
+															} else {
+																○ Selecting
+															}
+														</div>
+													</div>
+												</div>
+											}
+										</div>
+									</div>
+								}
+								if len(room.DraftMovies) > 0 {
+									<div class="mt-4">
+										<h4 class="font-bold text-primary mb-2">Draft Movies ({ fmt.Sprint(len(room.DraftMovies)) }):</h4>
+										<div class="space-y-1 max-h-32 overflow-y-auto">
+											for _, movie := range room.DraftMovies {
+												<div class="text-sm border-l-2 border-primary pl-2">{ movie.Name }</div>
+											}
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					}
 				</div>
-				<!-- Implement Players -->
-				<!-- Implement Voting Movies -->
-				<!-- Implement Draft Movies -->
-			</section>
-		}
-	}
+			}
+		</section>
+	</div>
 }
