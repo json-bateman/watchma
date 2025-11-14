@@ -47,7 +47,7 @@ func LoadSettings() *Settings {
 
 		OpenAIApiKey: os.Getenv(OPENAI_API_KEY),
 
-		Port:  getEnvAsInt(PORT, 8080),
+		Port:  getEnvAsInt(PORT, 58008),
 		IsDev: strings.ToLower(os.Getenv(IS_DEV)) == "true",
 	}
 

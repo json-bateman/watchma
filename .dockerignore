@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Development files
+.air.toml
+Taskfile.yml
+action-plan.md
+README.md
+
+# Build artifacts
+tmp/
+release/
+main
+*.exe
+
+# Database files (will be created at runtime)
+*.db
+*.db-shm
+*.db-wal
+
+# Dependencies
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.claude/
+
+# Generated files (will be regenerated during build)
+*_templ.go
+public/style.css
+
+# API testing
+_bruno/
+
+# Environment files (pass via docker run -e or docker-compose)
+.env
+.env.local

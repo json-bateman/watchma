@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  watchma:
+    build: .
+    ports:
+      - "58008:58008"
+    environment:
+      - PORT=58008
+      - LOG_LEVEL=INFO
+      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
+      - JELLYFIN_BASE_URL=${JELLYFIN_BASE_URL}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

@@ -95,17 +95,20 @@ Applied Tailwind Styles
 -------------------- */
 
 .btn {
-  @apply text-text flex bg-primary/80 border-primary justify-center items-center py-1 border-3 w-52 cursor-pointer hover:bg-primary/90 h-9;
+  @apply flex bg-primary/80 border-primary justify-center items-center py-1 border-3 w-52 cursor-pointer hover:bg-primary/90 h-9;
+  color: var(--color-text);
   box-shadow: 2px 2px 0px oklch(var(--primary) / 0.8);
 }
 
 .btn-secondary {
-  @apply flex bg-secondary/80 border-secondary justify-center items-center py-1 border-3 text-text w-52 cursor-pointer hover:bg-secondary/90 h-9;
+  @apply flex bg-secondary/80 border-secondary justify-center items-center py-1 border-3 w-52 cursor-pointer hover:bg-secondary/90 h-9;
+  color: var(--color-text);
   box-shadow: 2px 2px 0px oklch(var(--secondary) / 0.8);
 }
 
 .btn-accent {
-  @apply flex bg-accent/80 border-accent justify-center items-center py-1 border-3 text-text w-52 cursor-pointer hover:bg-accent/90 h-9;
+  @apply flex bg-accent/80 border-accent justify-center items-center py-1 border-3 w-52 cursor-pointer hover:bg-accent/90 h-9;
+  color: var(--color-text);
   box-shadow: 3px 3px 0px oklch(var(--accent) / 0.8);
 }
 

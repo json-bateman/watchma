@@ -35,14 +35,11 @@
     - [X] cache movies somehow - (Cached GET req for 1 minute)
     - [X] players add movies --> Aggregate all choices to vote on.
     - [X] Right now everyone gets their own unique streamed announcement response which I don't want // I want to stream a single message, need to save the res in room.Game.Announce
-    - [ ] Veto round
-    - [ ] Somehow lock users to current game, if they accidentally navigate away they can rejoin. 
-    - [ ] Ending alternative, Host presses play, SSE event pushes everyone to a playing session of the movie in a 
-    `<video></video>` player. Now that would be sweet. `https://api.jellyfin.org/` might have endponts to do this, I think 
-    `GET/POST ---  http://localhost/Items/{itemId}/PlaybackInfo` this might be the api call
+    - [X] Multiple Rounds of voting to narrow down to a single winner
 
 - Deploy
-    - [ ] Deploy this as a docker container so people can download and use with their Jellyfin servers
+    - [X] Deploy this as a docker container
+    - [ ] Figure out how people can use this docker container with their Jellyfin servers
     - [ ] Figure out how to set env variables and upload stuff to dockerhub for unRAID
 
 - Side quests
@@ -52,9 +49,13 @@
 
 - Stretch goals
     - [X] let individual users log in
-    - [ ] Multiple Rounds of voting to narrow down to a single winner
     - [ ] create DB to store results of finished games (Have DB need to make table and save it)
     - [ ] save users selections over time in the DB
+    - [ ] Veto round
+    - [ ] Somehow lock users to current game, if they accidentally navigate away they can rejoin. 
+    - [ ] Ending alternative, Host presses play, SSE event pushes everyone to a playing session of the movie in a 
+    `<video></video>` player. Now that would be sweet. `https://api.jellyfin.org/` might have endponts to do this, I think 
+    `GET/POST ---  http://localhost/Items/{itemId}/PlaybackInfo` this might be the api call
 
 - Stretchier goals
     - [ ] Generate LLM prompt or use a preconfigured one, that makes the LLM a host for the game
