@@ -19,10 +19,9 @@ type Session struct {
 	VotingMovies  []movie.Movie
 	MaxPlayers    int
 	MaxDraftCount int
-	MaxVotes      int
-	DisplayTies   bool
 	Announcement  []DialogueLine
 	Votes         map[*movie.Movie]int // Movie -> vote count
+	VotingNumber  int
 	Step          Step
 }
 

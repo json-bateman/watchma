@@ -69,7 +69,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		web.RenderPageNoLayout(http_error.NotFound(), "This ain't it chief", w, r)
+		web.RenderPageNoLayout(http_error.NotFound(), "404-gang", w, r)
 	})
 }
 

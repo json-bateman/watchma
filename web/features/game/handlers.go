@@ -181,7 +181,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 			}
 		case room.RoomFinishEvent:
 			movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
-			winnerMovies := getWinnerMovies(movieVotes, myRoom)
+			winnerMovies := getWinnerMovies(movieVotes)
 			finalScreen := pages.ResultsScreen(winnerMovies)
 			if err := sse.PatchElementTempl(finalScreen); err != nil {
 				h.logger.Error("Error patching final screen", "error", err)
@@ -456,11 +456,31 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 
 	isVotingFinished := myRoom.IsVotingFinished()
 
-	// if voting is finished, add all players choices to the voting array
 	if isVotingFinished {
-		myRoom.Game.Step = room.Results
 		h.roomService.SubmitFinalVotes(myRoom)
-		h.roomService.AnnounceWinner(roomName)
+
+		movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
+		tiedMovies := getWinnerMovies(movieVotes)
+		myRoom.Game.VotingNumber = tiedMovies[0].Votes
+		if len(tiedMovies) > 1 {
+			// If there's a tie, find number of votes and reset players
+			// so they can vote again
+			tied := make([]movie.Movie, 0, len(tiedMovies))
+			for _, m := range tiedMovies {
+				tied = append(tied, *m.Movie)
+			}
+			// reset vote map for game and voting movies for each player
+			myRoom.Game.Votes = map[*movie.Movie]int{}
+			myRoom.Game.VotingMovies = tied
+			for _, p := range myRoom.Players {
+				p.VotingMovies = []movie.Movie{}
+				p.HasFinishedVoting = false
+			}
+			h.roomService.MoveToVoting(myRoom.Name)
+		} else {
+			myRoom.Game.Step = room.Results
+			h.roomService.AnnounceWinner(roomName)
+		}
 	} else {
 		h.renderVotingPage(w, r)
 	}
@@ -528,15 +548,10 @@ func sortMoviesByVotes(votes map[*movie.Movie]int) []movie.Vote {
 }
 
 // getWinnerMovies returns only movies with the highest vote count
-// Will return a randomly selected movie if display ties is false
 // Since sortMoviesByVotes is ranging over a map, the selection is random
-func getWinnerMovies(moviesSortedByVote []movie.Vote, room *room.Room) []movie.Vote {
+func getWinnerMovies(moviesSortedByVote []movie.Vote) []movie.Vote {
 	if len(moviesSortedByVote) == 0 {
 		return []movie.Vote{}
-	}
-
-	if !room.Game.DisplayTies {
-		return []movie.Vote{moviesSortedByVote[0]}
 	}
 
 	maxVotes := moviesSortedByVote[0].Votes
@@ -564,7 +579,7 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sorted := sortMoviesByVotes(myRoom.Game.Votes)
-	winners := getWinnerMovies(sorted, myRoom)
+	winners := getWinnerMovies(sorted)
 
 	if player.Username != myRoom.Game.Host {
 		// Exit early, only the host generates the GPT response for the room
@@ -577,7 +592,6 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 			Dialogue:  "Drum Roll Please",
 		},
 	}
-	// Stream to all rooms
 	h.roomService.StreamAnnouncement(roomName)
 	myRoom.Game.Announcement = []room.DialogueLine{}
 

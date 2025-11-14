@@ -354,14 +354,9 @@ func (rs *Service) ToggleVotingMovie(roomName, username string, movie movie.Movi
 		}
 	}
 
-	// Movie not found in draft, try to add it if under limit
-	if len(player.VotingMovies) < room.Game.MaxVotes {
-		player.VotingMovies = append(player.VotingMovies, movie)
-		rs.logger.Debug("Movie toggled on in Voting", "roomName", roomName, "player", username, "movie", movie)
-		return true
-	}
-
-	return false
+	player.VotingMovies = append(player.VotingMovies, movie)
+	rs.logger.Debug("Movie toggled on in Voting", "roomName", roomName, "player", username, "movie", movie)
+	return true
 }
 
 func (r *Room) GetPlayer(username string) (*Player, bool) {

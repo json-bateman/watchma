@@ -9,14 +9,8 @@ templ HostPage() {
 				<input id="room-name" class="input" name="roomName" required placeholder="Room Name..." spellcheck="false"/>
 				<label class="label" for="draftNumber">Max movie draft number</label>
 				<select id="draftNumber" name="draftNumber" class="select">
-					<option value="2">2</option>
-					<option value="3">3</option>
-					<option value="4">4</option>
-					<option value="5">5</option>
-				</select>
-				<label class="label" for="maxvotes">Max votes per player</label>
-				<select id="maxvotes" name="maxvotes" class="select">
-					<option value="2">2</option>
+					<option value="1">1</option>
+					<option selected value="2">2</option>
 					<option value="3">3</option>
 					<option value="4">4</option>
 					<option value="5">5</option>
@@ -25,7 +19,7 @@ templ HostPage() {
 				<select id="maxplayers" name="maxplayers" class="select">
 					<option value="2">2</option>
 					<option value="3">3</option>
-					<option value="4">4</option>
+					<option selected value="4">4</option>
 					<option value="5">5</option>
 					<option value="6">6</option>
 					<option value="7">7</option>
@@ -35,12 +29,6 @@ templ HostPage() {
 					<option value="11">11</option>
 					<option value="12">12</option>
 				</select>
-				<label class="label" for="displayTies">*Display Tied Votes?</label>
-				<select id="displayTies" name="displayTies" class="select">
-					<option selected value="no">No!</option>
-					<option value="yes">Yes!</option>
-				</select>
-				<span class="text-xs tracking-wider text-text/80">*If you choose no, a single winner will be randomly selected in case of a tie.</span>
 			</div>
 			<button type="submit" class="btn mt-6">Host Room</button>
 		</form>

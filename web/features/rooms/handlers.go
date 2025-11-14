@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"watchma/web/features/rooms/pages"
 	appctx "watchma/pkg/context"
+	"watchma/pkg/movie"
 	"watchma/pkg/room"
 	"watchma/web"
-	"watchma/pkg/movie"
+	"watchma/web/features/rooms/pages"
 
 	"github.com/nats-io/nats.go"
 	"github.com/starfederation/datastar-go/datastar"
@@ -31,7 +31,7 @@ func newHandlers(rs *room.Service, logger *slog.Logger, nc *nats.Conn) *handlers
 }
 
 func (h *handlers) join(w http.ResponseWriter, r *http.Request) {
-	web.RenderPage(pages.JoinPage(h.roomService.Rooms), "Join page", w, r)
+	web.RenderPage(pages.JoinPage(h.roomService.Rooms), "Join Room", w, r)
 }
 
 func (h *handlers) joinSSE(w http.ResponseWriter, r *http.Request) {
@@ -89,31 +89,40 @@ func (h *handlers) hostForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	roomName := r.FormValue("roomName")
-	moviesStr := r.FormValue("draftNumber")
-	maxPlayersStr := r.FormValue("maxplayers")
-	maxVotesStr := r.FormValue("maxvotes")
-	displayTies := r.FormValue("displayTies")
 
-	movies, err := strconv.Atoi(moviesStr)
-	maxPlayers, err := strconv.Atoi(maxPlayersStr)
-	maxVotes, err := strconv.Atoi(maxVotesStr)
+	movies, err := atoiField(r, "draftNumber")
 	if err != nil {
-		http.Error(w, "Error converting form strings", http.StatusInternalServerError)
-		h.logger.Error("Error converting form strings", "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	maxPlayers, err := atoiField(r, "maxplayers")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if h.roomService.RoomExists(roomName) {
 		http.Error(w, "This room name already exists", http.StatusConflict)
 		return
 	}
 	h.roomService.AddRoom(roomName, &room.Session{
 		MaxDraftCount: movies,
-		MaxVotes:      maxVotes,
 		MaxPlayers:    maxPlayers,
-		DisplayTies:   displayTies == "yes",
 		Host:          user.Username,
 		Votes:         make(map[*movie.Movie]int),
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
+}
+
+func atoiField(r *http.Request, key string) (int, error) {
+	v := r.FormValue(key)
+	if v == "" {
+		return 0, fmt.Errorf("missing field %s", key)
+	}
+	i, err := strconv.Atoi(v)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s: %w", key, err)
+	}
+	return i, nil
 }

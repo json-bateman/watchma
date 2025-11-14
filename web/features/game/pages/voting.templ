@@ -10,8 +10,17 @@ import (
 templ Voting(votingMovies []movie.Movie, player *room.Player, room *room.Room) {
 	<section class="w-full" id="moviesRoom">
 		<div class="flex flex-col w-full justify-center items-center">
-			<div class="my-8 flex justify-center">
+			<div class="my-8 text-center flex flex-col justify-center">
 				<span class="text-5xl shadow-dance-text">Voting</span>
+				if room.Game.VotingNumber > 0 {
+					<div class="mt-4">
+						There was a&nbsp; 
+						<span class="text-2xl text-primary">Tie Vote</span>&nbsp;
+						with&nbsp;
+						<span class="text-primary text-2xl">{ room.Game.VotingNumber } votes!</span>
+					</div>
+					<div>Vote Again!</div>
+				}
 			</div>
 			<div class="text-text w-full flex flex-col items-center justify-center">
 				@submitVoting(player, room)
@@ -45,7 +54,11 @@ templ submitVoting(player *room.Player, room *room.Room) {
 		disabled := selectedCount == 0
 	}}
 	<div class="flex flex-wrap items-center gap-2">
-		<span>Selected { selectedCount } of { room.Game.MaxVotes } movies</span>
+		if selectedCount == 1 {
+			<span>Selected { selectedCount } movie</span>
+		} else {
+			<span>Selected { selectedCount } movies</span>
+		}
 		if player.HasFinishedVoting {
 			<button disabled class="btn-success">Movies Submitted!</button>
 			<div class="text-primary">Waiting for other players...</div>
