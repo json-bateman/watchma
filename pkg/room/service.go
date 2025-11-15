@@ -64,7 +64,7 @@ func (rs *Service) AddPlayerToRoom(roomName, username string) (*Player, bool) {
 	}
 	room.Players[username] = player
 
-	rs.logger.Info("Player added to room", "roomName", roomName, "playerName", username)
+	rs.logger.Debug("Player added to room", "roomName", roomName, "playerName", username)
 
 	rs.pub.PublishRoomEvent(roomName, RoomUpdateEvent)
 	rs.pub.PublishLobbyEvent(RoomListUpdateEvent)
@@ -86,7 +86,7 @@ func (rs *Service) RemovePlayerFromRoom(roomName, username string) bool {
 		rs.DeleteRoom(room.Name)
 	}
 
-	rs.logger.Info("Player removed from room", "roomName", roomName, "playerName", username)
+	rs.logger.Debug("Player removed from room", "roomName", roomName, "playerName", username)
 
 	rs.pub.PublishRoomEvent(roomName, RoomUpdateEvent)
 	rs.pub.PublishLobbyEvent(RoomListUpdateEvent)
@@ -236,7 +236,7 @@ func (rs *Service) SubmitDraftVotes(room *Room) {
 		}
 	}
 
-	rs.logger.Info("All Draft Votes Submitted to Voting Array", "Room Name", room.Name)
+	rs.logger.Debug("All Draft Votes Submitted to Voting Array", "Room Name", room.Name)
 }
 
 func (rs *Service) SubmitFinalVotes(room *Room) {
@@ -254,7 +254,7 @@ func (rs *Service) SubmitFinalVotes(room *Room) {
 		}
 	}
 
-	rs.logger.Info("All Movie Votes submitted to Voting Movies Results Array", "Room Name", room.Name, "votes", room.Game.Votes)
+	rs.logger.Debug("All Movie Votes submitted to Voting Movies Results Array", "Room Name", room.Name, "votes", room.Game.Votes)
 }
 
 // RemoveDraftMovie removes a specific movie from a player's draft selection

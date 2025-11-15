@@ -42,7 +42,7 @@ func New(dbPath string, logger *slog.Logger) (*DB, error) {
 		return nil, fmt.Errorf("run migrations: %w", err)
 	}
 
-	logger.Info("Database connected", "path", dbPath)
+	logger.Debug("Database connected", "path", dbPath)
 	return db, nil
 }
 
@@ -58,7 +58,7 @@ func (db *DB) runMigrations() error {
 		return fmt.Errorf("goose up: %w", err)
 	}
 
-	db.Logger.Info("Migrations completed successfully")
+	db.Logger.Debug("Migrations completed successfully")
 	return nil
 }
 

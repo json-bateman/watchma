@@ -48,7 +48,7 @@ func (r *UserRepository) GetByUsername(username string) (*User, error) {
 
 	user, err := r.queries.GetUserByUsername(ctx, username)
 	if err == sql.ErrNoRows {
-		r.l.Error("query user: Not found", "username", username)
+		r.l.Warn("query user: Not found", "username", username)
 		return nil, sql.ErrNoRows
 	}
 	if err != nil {

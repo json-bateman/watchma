@@ -42,7 +42,7 @@ func (h *handlers) sse(w http.ResponseWriter, r *http.Request) {
 	// Send initial debug snapshot to new client
 	debugSnapshot := h.roomService.GetDebugSnapshot()
 	if err := sse.PatchElementTempl(pages.Debug(debugSnapshot, user)); err != nil {
-		h.logger.Error("Error patching initial debug snapshot")
+		h.logger.Error("Error patching initial debug snapshot", "error", err)
 		return
 	}
 

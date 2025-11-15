@@ -40,7 +40,7 @@ func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) 
 		return nil, nil, fmt.Errorf("NATS server not ready after 4 seconds")
 	}
 
-	logger.Info("Embedded NATS server started",
+	logger.Debug("Embedded NATS server started",
 		"host", opts.Host,
 		"port", opts.Port,
 		"http_port", opts.HTTPPort,
@@ -62,7 +62,7 @@ func StartEmbeddedNATS(logger *slog.Logger) (*server.Server, *nats.Conn, error) 
 		return nil, nil, fmt.Errorf("NATS flush failed: %w", err)
 	}
 
-	logger.Info("Connected to embedded NATS",
+	logger.Debug("Connected to embedded NATS",
 		"url", nc.ConnectedUrl(),
 		"server_id", nc.ConnectedServerId(),
 		"max_payload", nc.MaxPayload(),

@@ -77,11 +77,13 @@ func (o *Provider) FetchAiResponse(contentToSend string) (string, error) {
 
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
+		o.logger.Error("Failed to marshal OpenAI request body", "error", err)
 		return "", fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(jsonBody))
 	if err != nil {
+		o.logger.Error("Failed to create OpenAI HTTP request", "error", err)
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
@@ -90,16 +92,19 @@ func (o *Provider) FetchAiResponse(contentToSend string) (string, error) {
 
 	resp, err := o.httpClient.Do(req)
 	if err != nil {
+		o.logger.Error("OpenAI API request failed", "error", err)
 		return "", fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		o.logger.Error("OpenAI API returned non-200 status", "status", resp.StatusCode)
 		return "", fmt.Errorf("OpenAI API returned status %d", resp.StatusCode)
 	}
 
 	var result ChatCompletionResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		o.logger.Error("Failed to decode OpenAI response", "error", err)
 		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
@@ -111,6 +116,7 @@ func (o *Provider) FetchAiResponse(contentToSend string) (string, error) {
 	)
 
 	if len(result.Choices) == 0 {
+		o.logger.Error("OpenAI returned empty choices array")
 		return "", fmt.Errorf("no choices returned from OpenAI")
 	}
 

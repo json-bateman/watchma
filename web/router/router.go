@@ -84,13 +84,19 @@ func proxyJellyfinImage(jfinBaseUrl string, jfinApiKey string, logger *slog.Logg
 		width := r.URL.Query().Get("width")
 		height := r.URL.Query().Get("height")
 
+		if jfinApiKey == "" {
+			http.Error(w, "Failed to fetch image", http.StatusInternalServerError)
+			logger.Warn("Cannot fetch Image without jellyfinApiKey, Please set JELLYFIN_API_KEY in your environment")
+			return
+		}
+
 		jellyfinURL := fmt.Sprintf("%s/Items/%s/Images/Primary?tag=%s&width=%s&height=%s",
 			jfinBaseUrl, itemId, tag, width, height)
 
 		req, err := http.NewRequest("GET", jellyfinURL, nil)
 		if err != nil {
-			logger.Error("Failed to create jellyfin image request", "error", err, "url", jellyfinURL)
 			http.Error(w, "Failed to fetch image", http.StatusInternalServerError)
+			logger.Error("Failed to create jellyfin image request", "error", err, "url", jellyfinURL)
 			return
 		}
 
@@ -98,15 +104,15 @@ func proxyJellyfinImage(jfinBaseUrl string, jfinApiKey string, logger *slog.Logg
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			logger.Error("Failed to fetch jellyfin image", "error", err, "url", jellyfinURL)
 			http.Error(w, "Failed to fetch image", http.StatusInternalServerError)
+			logger.Error("Failed to fetch jellyfin image", "error", err, "url", jellyfinURL)
 			return
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			logger.Error("Jellyfin returned non-200 status", "status", resp.StatusCode, "url", jellyfinURL)
 			http.Error(w, fmt.Sprintf("Jellyfin error: %d", resp.StatusCode), http.StatusInternalServerError)
+			logger.Warn("Jellyfin returned non-200 status", "status", resp.StatusCode, "url", jellyfinURL)
 			return
 		}
 

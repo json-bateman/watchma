@@ -10,6 +10,9 @@ services:
       - LOG_LEVEL=INFO
       - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
       - JELLYFIN_BASE_URL=${JELLYFIN_BASE_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - IS_DEV=false
+
     volumes:
       - ./data:/app/data
     restart: unless-stopped

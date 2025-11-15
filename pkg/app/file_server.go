@@ -36,5 +36,5 @@ func SetupFileServer(l *slog.Logger, r *chi.Mux) {
 	publicPath := filepath.Join(workdir, "public")
 	filesDir := http.Dir(publicPath)
 	fileServer(r, "/public", filesDir)
-	l.Info("File server configured for /public/*")
+	l.Debug("File server configured for /public/*")
 }

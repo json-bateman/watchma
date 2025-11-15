@@ -89,10 +89,10 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	// Check if room exists
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if !ok {
-		h.logger.Error("Room not found on SSE reconnect", "Room", roomName, "Username", user.Username)
+		h.logger.Warn("Room not found on SSE reconnect", "Room", roomName, "Username", user.Username)
 		// Send error and redirect to home
 		if err := sse.ExecuteScript("window.location.href = '/'"); err != nil {
-			h.logger.Error("Error redirecting after room not found", "error", err)
+			h.logger.Warn("Error redirecting after room not found", "error", err)
 		}
 		return
 	}
@@ -100,15 +100,15 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	// Send existing user list to new client
 	userBox := pages.UserBox(myRoom, user.Username)
 	if err := sse.PatchElementTempl(userBox); err != nil {
-		h.logger.Error("Error patching initial user list")
+		h.logger.Error("Error patching initial user list", "error", err)
 	}
 
 	player, ok := myRoom.GetPlayer(user.Username)
 	if !ok {
-		h.logger.Error("User not in room", "Username", user.Username, "Room", myRoom.Name)
+		h.logger.Warn("User not in room", "Username", user.Username, "Room", myRoom.Name)
 		// Send error and redirect to home
 		if err := sse.ExecuteScript("window.location.href = '/'"); err != nil {
-			h.logger.Error("Error redirecting after player not found", "error", err)
+			h.logger.Warn("Error redirecting after player not found", "error", err)
 		}
 		return
 	}
@@ -117,7 +117,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	if len(myRoom.RoomMessages) > 0 {
 		chat := pages.ChatBox(myRoom.RoomMessages)
 		if err := sse.PatchElementTempl(chat); err != nil {
-			h.logger.Error("Error patching chatbox on load")
+			h.logger.Error("Error patching chatbox on load", "error", err)
 			return
 		}
 	}
@@ -273,7 +273,7 @@ func (h *handlers) startGame(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(movies) == 0 {
-			h.logger.Info(fmt.Sprintf("Room %s: No Movies Found", myRoom.Name))
+			h.logger.Warn(fmt.Sprintf("Room %s: No Movies Found", myRoom.Name))
 		}
 
 		myRoom.Game.AllMovies = movies
@@ -297,7 +297,7 @@ func (h *handlers) deleteFromSelectedMovies(w http.ResponseWriter, r *http.Reque
 
 	// Use RoomService to handle business logic
 	if !h.roomService.RemoveDraftMovie(roomName, user.Username, movieId) {
-		h.logger.Error("Failed to remove draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
+		h.logger.Warn("Failed to remove draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
 	h.renderDraftPage(w, r)
@@ -312,7 +312,7 @@ func (h *handlers) toggleDraftMovie(w http.ResponseWriter, r *http.Request) {
 	movie := room.Game.AllMoviesMap[movieId]
 
 	if !h.roomService.ToggleDraftMovie(roomName, user.Username, *movie) {
-		h.logger.Error("Failed to toggle draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
+		h.logger.Warn("Failed to toggle draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
 	h.renderDraftPage(w, r)
@@ -328,13 +328,13 @@ func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 
 	currentUser := appctx.GetUserFromRequest(r)
 	if currentUser == nil {
-		h.logger.Error("No User found from session cookie")
+		h.logger.Warn("No User found from session cookie")
 		return
 	}
 
 	player, ok := myRoom.GetPlayer(currentUser.Username)
 	if !ok {
-		h.logger.Error("Player not in room")
+		h.logger.Warn("Player not in room")
 		return
 	}
 	if len(player.DraftMovies) == 0 {
@@ -361,26 +361,26 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 
 	if !ok {
-		h.logger.Error("Could not obtain room", "room", roomName)
+		h.logger.Warn("Could not obtain room", "room", roomName)
 		return
 	}
 
 	currentUser := appctx.GetUserFromRequest(r)
 	if currentUser == nil {
-		h.logger.Error("No User found from session cookie")
+		h.logger.Warn("No User found from session cookie")
 		return
 	}
 
 	player, ok := room.GetPlayer(currentUser.Username)
 	if !ok {
-		h.logger.Error("Player not in room")
+		h.logger.Warn("Player not in room")
 		return
 	}
 
 	var queryRequest movieQueryRequest
 	if err := json.NewDecoder(r.Body).Decode(&queryRequest); err != nil {
-		h.logger.Error("Error decoding SortFilter", "error", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		h.logger.Warn("Error decoding SortFilter", "error", err)
 		return
 	}
 
@@ -426,7 +426,7 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 	}
 	draft := pages.Draft(player, movies, room)
 	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
-		h.logger.Error("Error Rendering Draft Page")
+		h.logger.Error("Error Rendering Draft Page", "error", err)
 	}
 }
 
@@ -438,13 +438,13 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 
 	currentUser := appctx.GetUserFromRequest(r)
 	if currentUser == nil {
-		h.logger.Error("No User found from session cookie")
+		h.logger.Warn("No User found from session cookie")
 		return
 	}
 
 	player, ok := myRoom.GetPlayer(currentUser.Username)
 	if !ok {
-		h.logger.Error("Player not in room")
+		h.logger.Warn("Player not in room")
 		return
 	}
 	if len(player.VotingMovies) == 0 {
@@ -495,7 +495,7 @@ func (h *handlers) toggleVotingMovie(w http.ResponseWriter, r *http.Request) {
 	movie := room.Game.AllMoviesMap[movieId]
 
 	if !h.roomService.ToggleVotingMovie(roomName, user.Username, *movie) {
-		h.logger.Error("Failed to toggle steps.Voting movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
+		h.logger.Warn("Failed to toggle steps.Voting movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 
 	h.renderVotingPage(w, r)
@@ -507,25 +507,25 @@ func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
 	room, ok := h.roomService.GetRoom(roomName)
 
 	if !ok {
-		h.logger.Error("Could not obtain room", "room", roomName)
+		h.logger.Warn("Could not obtain room", "room", roomName)
 		return
 	}
 
 	currentUser := appctx.GetUserFromRequest(r)
 	if currentUser == nil {
-		h.logger.Error("No User found from session cookie")
+		h.logger.Warn("No User found from session cookie")
 		return
 	}
 
 	player, ok := room.GetPlayer(currentUser.Username)
 	if !ok {
-		h.logger.Error("Player not in room")
+		h.logger.Warn("Player not in room")
 		return
 	}
 
 	draft := pages.Voting(room.Game.VotingMovies, player, room)
 	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
-		h.logger.Error("Error Rendering Draft Page")
+		h.logger.Error("Error Rendering Voting Page", "error", err)
 	}
 }
 
@@ -574,7 +574,7 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 	player, ok := myRoom.GetPlayer(user.Username)
 
 	if !ok {
-		h.logger.Error("Player not in room")
+		h.logger.Warn("Player not in room")
 		return
 	}
 

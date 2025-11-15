@@ -40,6 +40,8 @@ func (a *App) Initialize() error {
 	a.Logger = NewColorLog(a.Settings.LogLevel)
 	slog.SetDefault(a.Logger)
 
+	a.logConfig()
+
 	// Initialize database with goose migrations
 	db, err := db.New("./watchma.db", a.Logger)
 	if err != nil {
@@ -51,17 +53,6 @@ func (a *App) Initialize() error {
 		return fmt.Errorf("start embedded NATS: %w", err)
 	}
 
-	var openAiProvider *openai.Provider
-	if a.Settings.OpenAIApiKey != "" {
-		openAiProvider = openai.NewProvider(
-			a.Settings.OpenAIApiKey,
-			a.Logger,
-		)
-		a.Logger.Info("OpenAI provider initialized")
-	} else {
-		a.Logger.Warn("OpenAI API key not found, AI features disabled")
-	}
-
 	a.NATS = nc
 	a.NATSServer = ns
 
@@ -69,16 +60,24 @@ func (a *App) Initialize() error {
 	userRepo := repository.NewUserRepository(db.DB, a.Logger)
 	sessionRepo := repository.NewSessionRepository(db.DB)
 
+	var openAiProvider *openai.Provider
+	if a.Settings.OpenAIApiKey != "" {
+		openAiProvider = openai.NewProvider(
+			a.Settings.OpenAIApiKey,
+			a.Logger,
+		)
+	}
+
 	var movieProvider movie.Provider
-	if a.Settings.UseDummyData {
-		movieProvider = movie.NewDummyProvider()
-	} else {
+	if a.Settings.JellyfinApiKey != "" {
 		movieProvider = movie.NewCachingProvider(
 			jellyfin.NewJellyfinMovieProvider(
 				a.Settings.JellyfinApiKey,
 				a.Settings.JellyfinBaseURL,
 				a.Logger),
 			time.Minute)
+	} else {
+		movieProvider = movie.NewDummyProvider()
 	}
 
 	eventPublisher := room.NewEventPublisher(a.NATS, a.Logger)
@@ -139,4 +138,24 @@ func (a *App) Run() error {
 
 	port := fmt.Sprintf(":%d", a.Settings.Port)
 	return http.ListenAndServe(port, a.Router)
+}
+
+func (a *App) logConfig() {
+	fmt.Println("~~~~~Environment~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+	a.Logger.Info("JELLYFIN_URL", "url", a.Settings.JellyfinBaseURL)
+	if a.Settings.JellyfinApiKey != "" {
+		a.Logger.Info("JELLYFIN_API_KEY", "status", "loaded")
+	} else {
+		a.Logger.Warn("JELLYFIN_API_KEY", "status", "NOT FOUND -- Loading test data")
+	}
+
+	if a.Settings.OpenAIApiKey != "" {
+		a.Logger.Info("OPENAI_API_KEY", "status", "loaded")
+	} else {
+		a.Logger.Warn("OPENAI_API_KEY", "status", "NOT FOUND -- AI features disabled")
+	}
+	a.Logger.Info("PORT", "port", a.Settings.Port)
+	a.Logger.Info("LOG_LEVEL", "level", a.Settings.LogLevel)
+	a.Logger.Info("IS_DEV", "isDev", a.Settings.IsDev)
+	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 }

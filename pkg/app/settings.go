@@ -6,18 +6,17 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/joho/godotenv"
 )
 
 const (
-	J_API_KEY      = "JELLYFIN_API_KEY"
-	J_BASE_URL     = "JELLYFIN_BASE_URL"
-	OPENAI_API_KEY = "OPENAI_API_KEY"
-	PORT           = "PORT"
-	LOG_LEVEL      = "LOG_LEVEL"
-	IS_DEV         = "IS_DEV"
+	JELLYFIN_API_KEY  = "JELLYFIN_API_KEY"
+	JELLYFIN_BASE_URL = "JELLYFIN_BASE_URL"
+	OPENAI_API_KEY    = "OPENAI_API_KEY"
+	PORT              = "PORT"
+	LOG_LEVEL         = "LOG_LEVEL"
+	IS_DEV            = "IS_DEV"
 )
 
 type Settings struct {
@@ -40,9 +39,9 @@ func LoadSettings() *Settings {
 
 	config := &Settings{
 		// Once again, don't log the api keys!
-		JellyfinApiKey:  os.Getenv(J_API_KEY),
-		JellyfinBaseURL: os.Getenv(J_BASE_URL),
-		UseDummyData:    os.Getenv(J_API_KEY) == "" || os.Getenv(J_BASE_URL) == "",
+		JellyfinApiKey:  os.Getenv(JELLYFIN_API_KEY),
+		JellyfinBaseURL: os.Getenv(JELLYFIN_BASE_URL),
+		UseDummyData:    os.Getenv(JELLYFIN_API_KEY) == "" || os.Getenv(JELLYFIN_BASE_URL) == "",
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
 
 		OpenAIApiKey: os.Getenv(OPENAI_API_KEY),
@@ -56,57 +55,30 @@ func LoadSettings() *Settings {
 		os.Exit(1)
 	}
 
-	config.logConfig()
 	return config
 }
 
 // Validate checks for essential .env variables
-func (c *Settings) validate() error {
+func (a *Settings) validate() error {
 	// Only require Jellyfin credentials if not using dummy data
-	if !c.UseDummyData {
-		if c.JellyfinApiKey == "" {
-			return fmt.Errorf("required environment variable %s is not set", J_API_KEY)
+	if !a.UseDummyData {
+		if a.JellyfinApiKey == "" {
+			return fmt.Errorf("required environment variable %s is not set", JELLYFIN_API_KEY)
 		}
-		if c.JellyfinBaseURL == "" {
-			return fmt.Errorf("required environment variable %s is not set", J_BASE_URL)
+		if a.JellyfinBaseURL == "" {
+			return fmt.Errorf("required environment variable %s is not set", JELLYFIN_BASE_URL)
 		}
 	}
-	if c.Port < 1 || c.Port > 65535 {
-		return fmt.Errorf("invalid port: %d", c.Port)
+	if a.Port < 1 || a.Port > 65535 {
+		return fmt.Errorf("invalid port: %d", a.Port)
 	}
 	return nil
-}
-
-func (c *Settings) logConfig() {
-	fmt.Println("------------------------------------------------------------------")
-	slog.Info("Configuration loaded")
-	if c.UseDummyData {
-		slog.Info("LOADING TEST DATA", "status", "Using dummy data (no Jellyfin credentials provided)")
-	} else {
-		slog.Info("JELLYFIN_URL", "url", c.JellyfinBaseURL)
-		if c.JellyfinApiKey != "" {
-			slog.Info("JELLYFIN_API_KEY", "status", "loaded") // Confirm value exists only
-		}
-	}
-	slog.Info("PORT", "port", c.Port)
-	slog.Info("LOG_LEVEL", "level", c.LogLevel)
-	slog.Info("ENVIRONMENT", "env", c.IsDev)
-	fmt.Println("------------------------------------------------------------------")
 }
 
 func getEnvAsInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intVal, err := strconv.Atoi(value); err == nil {
 			return intVal
-		}
-	}
-	return defaultValue
-}
-
-func getEnvAsDuration(key string, defaultValue time.Duration) time.Duration {
-	if value := os.Getenv(key); value != "" {
-		if duration, err := time.ParseDuration(value); err == nil {
-			return duration
 		}
 	}
 	return defaultValue

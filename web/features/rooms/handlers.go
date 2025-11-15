@@ -40,7 +40,7 @@ func (h *handlers) joinSSE(w http.ResponseWriter, r *http.Request) {
 	// Send initial room list to new client
 	roomList := pages.RoomListBody(h.roomService.Rooms)
 	if err := sse.PatchElementTempl(roomList); err != nil {
-		h.logger.Error("Error patching initial room list")
+		h.logger.Error("Error patching initial room list", "error", err)
 	}
 
 	sub, err := h.nats.SubscribeSync(room.NATSLobbyRooms)
@@ -61,7 +61,7 @@ func (h *handlers) joinSSE(w http.ResponseWriter, r *http.Request) {
 		case room.RoomListUpdateEvent:
 			roomList := pages.RoomListBody(h.roomService.Rooms)
 			if err := sse.PatchElementTempl(roomList); err != nil {
-				fmt.Println("Error patching room list")
+				h.logger.Error("Error patching room list", "error", err)
 				return
 			}
 		default: // discard unknown non-matching messages
@@ -84,7 +84,7 @@ func (h *handlers) hostForm(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form", http.StatusBadRequest)
-		h.logger.Error("Error parsing form", "error", err)
+		h.logger.Warn("Error parsing form", "error", err)
 		return
 	}
 

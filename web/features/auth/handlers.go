@@ -103,7 +103,7 @@ func (h *handlers) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	user, token, err := h.authService.LoginOrCreate(username, password)
 	if err != nil {
 		sse := datastar.NewSSE(w, r)
-		h.logger.Error("Login failed", "error", err, "username", username)
+		h.logger.Warn("Login failed", "error", err, "username", username)
 		sse.PatchElementTempl(common.Error(err.Error()))
 		return
 	}
