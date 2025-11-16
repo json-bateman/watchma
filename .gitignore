@@ -8,3 +8,11 @@ __debug
 **/*_templ.go
 **/style.css
 watchma.db
+
+# Playwright
+node_modules/
+test-results/
+playwright-report/
+playwright/.cache/
+*.db-shm
+*.db-wal

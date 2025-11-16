@@ -38,6 +38,8 @@ templ Draft(player *roomPkg.Player, movies []moviePkg.Movie, room *roomPkg.Room)
 
 templ search(room *roomPkg.Room) {
 	<input
+		type="search"
+		name="search"
 		class="input"
 		aria-label="Search movies"
 		placeholder="Search..."
@@ -50,6 +52,7 @@ templ search(room *roomPkg.Room) {
 templ filters(room *roomPkg.Room) {
 	<select
 		data-bind:genre
+		name="genre"
 		class="select"
 		aria-label="Filter movies by genre"
 		data-on:change={ datastar.PostSSE("/draft/%s/query", room.Name) }
@@ -77,6 +80,7 @@ templ filters(room *roomPkg.Room) {
 	</select>
 	<select
 		class="select"
+		name="sort"
 		aria-label="Sort movies"
 		data-bind:sort
 		data-on:change={ datastar.PostSSE("/draft/%s/query", room.Name) }

@@ -16,7 +16,9 @@ func SetupRoutes(
 
 	// Public web routes
 	r.Get("/login", handlers.Login)
+
 	r.Post("/login", handlers.HandleLogin)
+	r.Post("/logout", handlers.HandleLogout)
 	r.Post("/validate", handlers.ValidatePassword)
 
 	return nil

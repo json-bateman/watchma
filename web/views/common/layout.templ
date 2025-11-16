@@ -50,9 +50,24 @@ templ Layout(pc PageContext) {
 						<div class="flex items-center gap-4">
 							@homeIcon()
 							if pc.User != nil {
-								<span class="px-2 py-1 border-3 text-xs tracking-wide border-primary bg-primary/10 shadow-hard">
-									{ capitalizeFirst(pc.User.Username) }
-								</span>
+								<div class="relative">
+									<span
+										id="userDropdown"
+										data-signals="$showDropdown"
+										data-on:click="$showDropdown=!$showDropdown"
+										class="px-2 cursor-pointer py-1 border-3 text-xs tracking-wide border-primary bg-primary/10 shadow-hard"
+									>
+										{ capitalizeFirst(pc.User.Username) }
+									</span>
+									<div
+										id="logout"
+										data-show="$showDropdown"
+										data-on:click="@post('/logout')"
+										class="absolute mt-4 cursor-pointer"
+									>
+										Logout
+									</div>
+								</div>
 							}
 						</div>
 						@themeToggle()

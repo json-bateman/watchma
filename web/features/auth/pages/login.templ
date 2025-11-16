@@ -13,58 +13,61 @@ type PwRules struct {
 }
 
 templ LoginForm(pwRules PwRules) {
-	<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
-		<span class="font-bold shadow-dance-text">Watchma</span>
-	</div>
-	<form
-		id="fattyMorph"
-		class="flex flex-col w-full space-y-3 items-center justify-center mt-6"
-		data-on:submit="@post('/login', {contentType: 'form'})"
-	>
-		<span class=" flex flex-wrap gap-3 text-text mt-8 justify-center text-center">Enter Username</span>
-		<div class="flex flex-col">
+	<section id="loginMorph">
+		<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
+			<span class="font-bold shadow-dance-text">Watchma</span>
+		</div>
+		<form
+			class="flex flex-col w-full space-y-3 items-center justify-center mt-6"
+			data-on:submit="@post('/login', {contentType: 'form'})"
+		>
+			<span class=" flex flex-wrap gap-3 text-text mt-8 justify-center text-center">Enter Username</span>
+			<div class="flex flex-col">
+				<input
+					class="input"
+					type="text"
+					name="username"
+					autocomplete="username"
+					id="username"
+					placeholder="Enter your username"
+					required
+				/>
+			</div>
+			<span class=" flex flex-wrap gap-3 text-text justify-center text-center">Enter Password</span>
 			<input
+				type="password"
+				name="password"
+				autocomplete="current-password"
+				id="password"
+				data-bind:password
+				placeholder="Enter password"
 				class="input"
-				type="text"
-				name="username"
-				id="username"
-				placeholder="Enter your username"
-				required
+				data-on:input__debounce.200ms={ datastar.PostSSE("/validate") }
 			/>
-		</div>
-		<span class=" flex flex-wrap gap-3 text-text justify-center text-center">Enter Password</span>
-		<input
-			type="password"
-			name="password"
-			id="password"
-			data-bind:password
-			placeholder="Enter password"
-			class="input"
-			data-on:input__debounce.200ms={ datastar.PostSSE("/validate") }
-		/>
-		<div>
-			if !pwRules.Has8 {
-				<span class="text-gray flex flex-col">8+ Characters</span>
-			} else {
-				<span class="text-green-500 flex flex-col">✓ 8+ Characters</span>
-			}
-			if !pwRules.HasLower {
-				<span class="text-gray flex flex-col">Lowercase letter</span>
-			} else {
-				<span class="text-green-500 flex flex-col">✓ Lowercase letter</span>
-			}
-			if !pwRules.HasUpper {
-				<span class="text-gray flex flex-col">Uppercase letter</span>
-			} else {
-				<span class="text-green-500 flex flex-col">✓ Uppercase letter</span>
-			}
-			if !pwRules.HasNumber {
-				<span class="text-gray flex flex-col">Number</span>
-			} else {
-				<span class="text-green-500 flex flex-col">✓ Number</span>
-			}
-		</div>
-		<button class="btn" type="submit">Create User / Login</button>
-		@common.Error("")
-	</form>
+			<div>
+				if !pwRules.Has8 {
+					<span class="text-gray flex flex-col">8+ Characters</span>
+				} else {
+					<span class="text-green-500 flex flex-col">✓ 8+ Characters</span>
+				}
+				if !pwRules.HasLower {
+					<span class="text-gray flex flex-col">Lowercase letter</span>
+				} else {
+					<span class="text-green-500 flex flex-col">✓ Lowercase letter</span>
+				}
+				if !pwRules.HasUpper {
+					<span class="text-gray flex flex-col">Uppercase letter</span>
+				} else {
+					<span class="text-green-500 flex flex-col">✓ Uppercase letter</span>
+				}
+				if !pwRules.HasNumber {
+					<span class="text-gray flex flex-col">Number</span>
+				} else {
+					<span class="text-green-500 flex flex-col">✓ Number</span>
+				}
+			</div>
+			<button class="btn" type="submit">Create User / Login</button>
+			@common.Error("")
+		</form>
+	</section>
 }

@@ -6,7 +6,7 @@ import (
 )
 
 templ ResultsScreen(winnerMovies []moviePkg.Vote) {
-	<section id="moviesRoom" class="h-full" data-signals:movies>
+	<section data-testid="results-screen" id="moviesRoom" class="h-full" data-signals:movies>
 		<div class="flex flex-col justify-center h-full items-center">
 			if len(winnerMovies) > 1 {
 				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>

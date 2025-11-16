@@ -119,6 +119,23 @@ func (h *handlers) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 
 	sse := datastar.NewSSE(w, r)
-	h.logger.Info("Login successful", "user_id", user.ID, "username", user.Username)
+	h.logger.Debug("Login successful", "user_id", user.ID, "username", user.Username)
+	sse.Redirect("/")
+}
+
+func (h *handlers) HandleLogout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     auth.SessionCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !h.authService.IsDev,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1, // This deletes the cookie
+	})
+
+	// Redirect to login page
+	sse := datastar.NewSSE(w, r)
+	h.logger.Debug("Logout successful")
 	sse.Redirect("/")
 }
