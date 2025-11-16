@@ -8,10 +8,6 @@ pre-commit:
       glob: "*.go"
       run: go fmt {staged_files}
 
-    prettier:
-      glob: "*.{ts,js,json}"
-      run: npx prettier --write {staged_files}
-
 pre-push:
   parallel: false  # Run sequentially for clear error messages
   commands:

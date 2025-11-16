@@ -4,6 +4,7 @@
   "description": "<a  target=\"_blank\" href=\"https://data-star.dev/\" ><img src=\"public/datastar-rocket.png\" width=\"32\"/></a> + <a target=\"_blank\" href=\"https://templ.guide/\"><img src=\"public/templ.svg\" width=\"120\"/></a> + <a target=\"_blank\" href=\"https://tailwindcss.com/\"><img src=\"public/tailwind.png\" width=\"36\"/></a>",
   "main": "tailwind.config.js",
   "scripts": {
+    "postinstall": "npx lefthook install",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/json-bateman/watchma#readme",
   "devDependencies": {
-    "@playwright/test": "^1.56.1"
+    "@playwright/test": "^1.56.1",
+    "lefthook": "^1.9.3"
   }
 }
