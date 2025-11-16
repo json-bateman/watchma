@@ -58,7 +58,8 @@ export default defineConfig({
 
   // Run local dev server before tests
   webServer: {
-    command: "go run cmd/main.go",
+    command:
+      "templ generate && tailwindcss -i web/input.css -o public/styles.css && go run cmd/main.go",
     url: "http://localhost:58008",
     timeout: 30 * 1000, // 30 seconds to start server
     env: {

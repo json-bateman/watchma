@@ -28,8 +28,8 @@ RUN npm install --save-dev tailwindcss@latest @tailwindcss/cli@latest
 RUN templ generate
 
 # Build CSS with Tailwind v4 CLI
-# Ensure public/input.css uses:  @import "tailwindcss";
-RUN npx @tailwindcss/cli@latest -i ./public/input.css -o ./public/style.css --minify
+# Ensure web/input.css uses:  @import "tailwindcss";
+RUN npx @tailwindcss/cli@latest -i ./web/input.css -o ./public/style.css --minify
 
 # Build the Go application
 RUN CGO_ENABLED=1 GOOS=linux go build -o watchma ./cmd/main.go

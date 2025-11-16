@@ -21,6 +21,7 @@ pre-push:
 
     # Run quick smoke tests on feature branches (NOT on main)
     smoke-tests:
+      interactive: true
       run: |
         echo "Running smoke tests (auth + rooms)..."
         npx playwright test auth.spec.ts rooms.spec.ts --workers=1
@@ -33,6 +34,7 @@ pre-push:
 
     # Run full test suite when pushing to main
     full-tests:
+      interactive: true
       run: |
         echo "Running FULL test suite..."
         npx playwright test --workers=1

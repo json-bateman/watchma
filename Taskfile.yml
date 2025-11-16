@@ -4,7 +4,7 @@ tasks:
   # Individual watchers
   css:watch:
     desc: Watch CSS changes and rebuild
-    cmd: tailwindcss -i ./public/input.css -o ./public/style.css --watch
+    cmd: tailwindcss -i ./web/input.css -o ./public/style.css --watch
 
   templ:watch:
     desc: Watch templ files and regenerate
@@ -18,7 +18,7 @@ tasks:
   # Build tasks
   css:build:
     desc: Build CSS for production
-    cmd: tailwindcss -i ./public/input.css -o ./public/style.css --minify
+    cmd: tailwindcss -i ./web/input.css -o ./public/style.css --minify
 
   templ:build:
     desc: Generate templ files
@@ -52,7 +52,7 @@ tasks:
     cmds:
       - |
         sqlc generate
-        tailwindcss -i ./public/input.css -o ./public/style.css --watch &
+        tailwindcss -i ./web/input.css -o ./public/style.css --watch &
         templ generate --watch &
         if [ "$OS" = "Windows_NT" ]; then
           air -build.cmd "templ generate; if (\$?) { go build -o tmp/main.exe ./cmd }" -build.bin "tmp/main.exe" &
