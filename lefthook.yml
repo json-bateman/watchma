@@ -2,19 +2,19 @@
 # Docs: https://github.com/evilmartians/lefthook
 
 pre-commit:
-  parallel: true
   commands:
     go-fmt:
       glob: "*.go"
       run: go fmt {staged_files}
 
 pre-push:
-  parallel: false
+  parallel: true 
   commands:
     go-build:
+      interactive: true
       run: |
         echo "Building Go application..."
-        go build -o tmp/watchma ./cmd/main.go
+        templ generate && tailwindcss -i web/input.css -o public/styles.css && go run cmd/main.go
       fail_text: |
         Go build failed!
         Fix build errors before pushing.
