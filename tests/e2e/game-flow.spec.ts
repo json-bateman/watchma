@@ -24,7 +24,7 @@ test.describe("Room Management", () => {
     const username = generateUsername("host");
     const roomName = generateRoomName("DeleteTest");
 
-    await signup(page, username, "Testpass123");
+    await signup(page, username, "ClamCHOWDA32");
     await createRoom(page, roomName, 3, 2);
 
     await expect(page).toHaveURL(`/room/${roomName}`);
@@ -49,15 +49,15 @@ test.describe("Room Management", () => {
 
     try {
       // Create room with max 2 players
-      await signup(pageA, generateUsername("user1"), "Testpass123");
+      await signup(pageA, generateUsername("user1"), "FlibberNUT87");
       await createRoom(pageA, roomName, 3, 2);
 
       // User 2 joins
-      await signup(pageB, generateUsername("user2"), "testPass456");
+      await signup(pageB, generateUsername("user2"), "SnozzBerry29");
       await joinRoom(pageB, roomName);
 
       // User 3 tries to join (should fail or see "room full")
-      await signup(pageC, generateUsername("user3"), "testpASS789");
+      await signup(pageC, generateUsername("user3"), "HamburgaHelpin289");
       await pageC.goto("/join");
 
       // Try to join
@@ -92,7 +92,7 @@ test.describe("Complete Game Flow", () => {
     const userA = generateUsername("gumbissimo");
     const userB = generateUsername("blumbisdog");
     const roomName = generateRoomName("gamertime");
-    const password = "Blumbis123";
+    const password = "CrumbONium73";
 
     try {
       await test.step("Users sign up", async () => {
@@ -189,7 +189,7 @@ test.describe("Complete Game Flow", () => {
     const userA = generateUsername("drafteroni");
     const userB = generateUsername("draftercheesy");
     const roomName = generateRoomName("DraftTest");
-    const password = "Blumburry123";
+    const password = "PlimpleGANG56";
 
     try {
       await signup(pageA, userA, password);

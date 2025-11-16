@@ -7,7 +7,7 @@ import { generateUsername, login, logout, signup } from "./helpers/auth";
 test.describe("Authentication", () => {
   test("user can sign up with valid credentials", async ({ page }) => {
     const username = generateUsername("newuser");
-    const password = "Securepass123";
+    const password = "ExpectoPasswordum08";
 
     await signup(page, username, password);
 
@@ -18,7 +18,7 @@ test.describe("Authentication", () => {
 
   test("user can login with existing credentials", async ({ page }) => {
     const username = generateUsername("existinguser");
-    const password = "Testpass123";
+    const password = "QUibbLer83";
 
     await signup(page, username, password);
 
@@ -33,8 +33,8 @@ test.describe("Authentication", () => {
 
   test("user cannot login with wrong password", async ({ page }) => {
     const username = generateUsername("testuser");
-    const correctPassword = "Correctpass123";
-    const wrongPassword = "Wrongpass123";
+    const correctPassword = "InvaderZOD99";
+    const wrongPassword = "PlankleTON88";
 
     await signup(page, username, correctPassword);
     await logout(page);
@@ -62,7 +62,7 @@ test.describe("Authentication", () => {
 
   test("user can logout", async ({ page }) => {
     const username = generateUsername("logouttest");
-    const password = "Testpass123";
+    const password = "GoSlangin15";
 
     await signup(page, username, password);
 
