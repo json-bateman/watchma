@@ -1,0 +1,46 @@
+# Lefthook configuration for Watchma
+# Docs: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    go-fmt:
+      glob: "*.go"
+      run: go fmt {staged_files}
+
+    prettier:
+      glob: "*.{ts,js,json}"
+      run: npx prettier --write {staged_files}
+
+pre-push:
+  parallel: false  # Run sequentially for clear error messages
+  commands:
+    go-build:
+      run: |
+        echo "Building Go application..."
+        go build -o tmp/watchma ./cmd/main.go
+      fail_text: |
+        Go build failed!
+        Fix build errors before pushing.
+
+    # Run quick smoke tests on feature branches
+    smoke-tests:
+      run: |
+        echo "Running smoke tests (auth + rooms)..."
+        npx playwright test auth.spec.ts rooms.spec.ts --workers=1
+      exclude: "main"  # Don't run on main
+      fail_text: |
+        Smoke tests failed!
+        Run 'npm test' locally to debug.
+        Use 'git push --no-verify' to skip (not recommended).
+
+    # Run full test suite when pushing to main
+    full-tests:
+      run: |
+        echo "Running FULL test suite..."
+        npx playwright test --workers=1
+      only: "main"  # Only run when pushing to main
+      fail_text: |
+        Full test suite failed!
+        Fix all test failures before pushing to main.
+        Use 'git push --no-verify' to skip (not recommended).

@@ -1,0 +1,5 @@
+# .gitguardian.yaml
+  paths-ignore:
+    - tests/**
+    - **/*.spec.ts
+    - **/*.test.ts

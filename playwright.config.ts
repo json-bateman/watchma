@@ -11,9 +11,7 @@ export default defineConfig({
   timeout: 60 * 1000,
 
   // Test execution settings
-  fullyParallel: false, // Run tests sequentially to avoid database conflicts
-  forbidOnly: !!process.env.CI, // Fail CI if test.only is used
-  retries: process.env.CI ? 2 : 0, // Retry failed tests in CI
+  fullyParallel: false,
   workers: 1, // Run one test at a time (SQLite limitation)
 
   // Reporter settings
@@ -58,15 +56,14 @@ export default defineConfig({
     // },
   ],
 
-  // Run local dev server before tests (optional)
+  // Run local dev server before tests
   webServer: {
     command: "go run cmd/main.go",
     url: "http://localhost:58008",
-    timeout: 120 * 1000, // 2 minutes to start server
-    reuseExistingServer: !process.env.CI, // Use existing server in dev
+    timeout: 30 * 1000, // 30 seconds to start server
     env: {
       PORT: "58008",
-      LOG_LEVEL: "WARN", // Reduce noise during tests
+      LOG_LEVEL: "WARN",
       IS_DEV: "true",
     },
   },
