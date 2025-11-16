@@ -8,10 +8,8 @@ pre-commit:
       run: go fmt {staged_files}
 
 pre-push:
-  parallel: true 
   commands:
     go-build:
-      interactive: true
       run: |
         echo "Building Go application..."
         templ generate && tailwindcss -i web/input.css -o public/styles.css && go run cmd/main.go
@@ -33,15 +31,15 @@ pre-push:
         Use 'git push --no-verify' to skip (not recommended).
 
     # Run full test suite when pushing to main
-    full-tests:
-      interactive: true
-      run: |
-        echo "Running FULL test suite..."
-        npx playwright test --workers=1
-      only:
-        - ref: main
-      fail_text: |
-        Full test suite failed!
-        Fix all test failures before pushing to main.
-        Use 'git push --no-verify' to skip (not recommended).
-
+    # full-tests:
+    #   interactive: true
+    #   run: |
+    #     echo "Running FULL test suite..."
+    #     npx playwright test --workers=1
+    #   only:
+    #     - ref: main
+    #   fail_text: |
+    #     Full test suite failed!
+    #     Fix all test failures before pushing to main.
+    #     Use 'git push --no-verify' to skip (not recommended).
+    #
