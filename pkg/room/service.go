@@ -280,7 +280,6 @@ func (rs *Service) RemoveDraftMovie(roomName, username string, movieId string) b
 				player.DraftMovies[i+1:]...,
 			)
 			rs.logger.Debug("Movie removed from draft", "roomName", roomName, "player", username, "movie", m.Name)
-			rs.pub.PublishRoomEvent(roomName, RoomUpdateEvent)
 			return true
 		}
 	}

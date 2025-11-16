@@ -309,9 +309,15 @@ func (h *handlers) toggleDraftMovie(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, _ := h.roomService.GetRoom(roomName)
 
-	movie := room.Game.AllMoviesMap[movieId]
+	var mov movie.Movie
 
-	if !h.roomService.ToggleDraftMovie(roomName, user.Username, *movie) {
+	for _, m := range room.Game.AllMovies {
+		if m.Id == movieId {
+			mov = m
+		}
+	}
+
+	if !h.roomService.ToggleDraftMovie(roomName, user.Username, mov) {
 		h.logger.Warn("Failed to toggle draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
 	}
 

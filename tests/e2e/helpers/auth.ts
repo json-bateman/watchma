@@ -37,9 +37,7 @@ export async function logout(page: Page) {
   await page.click("#userDropdown");
   await page.click("#logout");
 
-  await page.waitForURL((url) =>
-    url.pathname === "/" || url.pathname.startsWith("/rooms")
-  );
+  await page.waitForURL("**\/login");
 }
 
 /**

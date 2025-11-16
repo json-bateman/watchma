@@ -5,7 +5,7 @@ pre-commit:
   commands:
     go-fmt:
       glob: "*.go"
-      run: go fmt {staged_files}
+      run: go fmt ./...
 
 pre-push:
   commands:

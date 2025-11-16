@@ -43,8 +43,8 @@ templ Layout(pc PageContext) {
 			<link href="/public/style.css" rel="stylesheet"/>
 			<title>{ pc.Title }</title>
 		</head>
-		<body class="bg-background min-h-svh font-serif">
-			<main class="text-text min-h-full flex flex-col p-4">
+		<body class="bg-background h-svh font-serif">
+			<main class="text-text h-full flex flex-col p-4">
 				if pc.HeaderFooter {
 					<header class="mb-4 flex justify-between">
 						<div class="flex items-center gap-4">
@@ -96,14 +96,25 @@ templ Layout(pc PageContext) {
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@main/bundles/datastar.js"></script>
             -->
 			<!-- Auto animate -->
-			<script defer type="module">
-				import autoAnimate from 'https://unpkg.com/@formkit/auto-animate@1.0.0-beta.5/index.mjs';
+			<script type="module">
+      import autoAnimate from 'https://unpkg.com/@formkit/auto-animate@1.0.0-beta.5/index.mjs';
 
-				const container = document.getElementById('moviesRoom');
-				if (container) {
-					autoAnimate(container);
-				}
-			</script>
+      const container = document.getElementById('moviegrid');
+      if (container) {
+        autoAnimate(container);
+      }
+
+      // Also observe for when the container gets added dynamically
+      const observer = new MutationObserver(() => {
+        const container = document.getElementById('moviegrid');
+        if (container && !container.hasAttribute('data-animated')) {
+          container.setAttribute('data-animated', 'true');
+          autoAnimate(container);
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
 		</body>
 	</html>
 }

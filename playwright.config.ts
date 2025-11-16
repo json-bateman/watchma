@@ -46,14 +46,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     // Uncomment to test in other browsers:
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
   ],
 
   // Run local dev server before tests
