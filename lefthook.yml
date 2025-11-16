@@ -9,7 +9,7 @@ pre-commit:
       run: go fmt {staged_files}
 
 pre-push:
-  parallel: false  # Run sequentially for clear error messages
+  parallel: false
   commands:
     go-build:
       run: |
@@ -19,12 +19,13 @@ pre-push:
         Go build failed!
         Fix build errors before pushing.
 
-    # Run quick smoke tests on feature branches
+    # Run quick smoke tests on feature branches (NOT on main)
     smoke-tests:
       run: |
         echo "Running smoke tests (auth + rooms)..."
         npx playwright test auth.spec.ts rooms.spec.ts --workers=1
-      exclude: "main"  # Don't run on main
+      skip:
+        - ref: main
       fail_text: |
         Smoke tests failed!
         Run 'npm test' locally to debug.
@@ -35,8 +36,10 @@ pre-push:
       run: |
         echo "Running FULL test suite..."
         npx playwright test --workers=1
-      only: "main"  # Only run when pushing to main
+      only:
+        - ref: main
       fail_text: |
         Full test suite failed!
         Fix all test failures before pushing to main.
         Use 'git push --no-verify' to skip (not recommended).
+
