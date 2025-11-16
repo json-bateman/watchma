@@ -23,7 +23,7 @@ pre-push:
     smoke-tests:
       run: |
         echo "Running smoke tests (auth + rooms)..."
-        npx playwright test auth.spec.ts rooms.spec.ts --workers=1
+        npx playwright test auth.spec.ts rooms.spec.ts --workers=1 --reporter=line
       skip:
         - ref: main
       fail_text: |
@@ -35,7 +35,7 @@ pre-push:
     full-tests:
       run: |
         echo "Running FULL test suite..."
-        npx playwright test --workers=1
+        npx playwright test --workers=1 --reporter=line
       only:
         - ref: main
       fail_text: |
