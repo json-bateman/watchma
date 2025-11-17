@@ -43,16 +43,20 @@ func (s *Service) GetShuffledMovies() ([]Movie, error) {
 }
 
 func (s *Service) GetMoviesWithQuery(q Query) ([]Movie, error) {
+
 	movies, err := s.GetMovies()
 	if err != nil {
 		return nil, err
 	}
 
-	movies = filterByGenre(movies, q.Genre)
-	movies = searchByName(movies, q.Search)
-	sortMovies(movies, q.SortBy, q.Descending)
+	// Make a deep copy to avoid mutating the cached movies
+	moviesCopy := CopySlice(movies)
 
-	return movies, nil
+	filteredMovies := filterByGenre(moviesCopy, q.Genre)
+	searchMovies := searchByName(filteredMovies, q.Search)
+	sortMovies(searchMovies, q.SortBy, q.Descending)
+
+	return searchMovies, nil
 }
 
 func filterByGenre(movies []Movie, genre string) []Movie {

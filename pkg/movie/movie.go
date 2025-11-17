@@ -40,3 +40,30 @@ type Vote struct {
 	Movie *Movie
 	Votes int
 }
+
+// CopySlice creates a deep copy of a movie slice to avoid shared references
+func CopySlice(movies []Movie) []Movie {
+	if movies == nil {
+		return nil
+	}
+
+	copied := make([]Movie, len(movies))
+	for i, m := range movies {
+		// Copy the genres slice to avoid shared references
+		genresCopy := make([]string, len(m.Genres))
+		copy(genresCopy, m.Genres)
+
+		copied[i] = Movie{
+			CommunityRating: m.CommunityRating,
+			CriticRating:    m.CriticRating,
+			Genres:          genresCopy,
+			Id:              m.Id,
+			Name:            m.Name,
+			OfficialRating:  m.OfficialRating,
+			PremiereDate:    m.PremiereDate,
+			PrimaryImageTag: m.PrimaryImageTag,
+			ProductionYear:  m.ProductionYear,
+		}
+	}
+	return copied
+}

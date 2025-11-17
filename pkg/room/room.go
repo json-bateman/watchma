@@ -20,6 +20,7 @@ type Player struct {
 	Username          string
 	JoinedAt          time.Time
 	Ready             bool
+	AvailableMovies   []movie.Movie // Each player's own copy of all movies
 	DraftMovies       []movie.Movie
 	VotingMovies      []movie.Movie
 	HasFinishedDraft  bool

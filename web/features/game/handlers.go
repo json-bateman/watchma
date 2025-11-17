@@ -131,12 +131,6 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	movies, err := h.movieService.GetMovies()
-	if err != nil {
-		h.logger.Error("Call to MovieService.GetMovies failed", "Error", err)
-		return
-	}
-
 	defer func() {
 		sub.Unsubscribe()
 		h.leaveRoom(w, r)
@@ -162,7 +156,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomStartEvent:
-			draft := pages.Draft(player, movies, myRoom)
+			draft := pages.Draft(player, myRoom)
 			if err := sse.PatchElementTempl(draft); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
@@ -309,11 +303,19 @@ func (h *handlers) toggleDraftMovie(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	room, _ := h.roomService.GetRoom(roomName)
 
+	player, ok := room.GetPlayer(user.Username)
+	if !ok {
+		h.logger.Warn("Player not in room")
+		return
+	}
+
 	var mov movie.Movie
 
-	for _, m := range room.Game.AllMovies {
+	// Use the player's own copy of available movies
+	for _, m := range player.AvailableMovies {
 		if m.Id == movieId {
 			mov = m
+			break
 		}
 	}
 
@@ -418,7 +420,8 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 		// sortField = movie.SortByName
 	}
 
-	movies, err := h.movieService.GetMoviesWithQuery(
+	var err error
+	player.AvailableMovies, err = h.movieService.GetMoviesWithQuery(
 		movie.Query{
 			Search:     queryRequest.Search,
 			Genre:      queryRequest.Genre,
@@ -430,7 +433,7 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error("Movie Query Error", "Error", err)
 	}
-	draft := pages.Draft(player, movies, room)
+	draft := pages.Draft(player, room)
 	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
 		h.logger.Error("Error Rendering Draft Page", "error", err)
 	}

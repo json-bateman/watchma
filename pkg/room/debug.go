@@ -24,6 +24,7 @@ type PlayerDebug struct {
 	VotingMovies      int
 	HasFinishedDraft  bool
 	HasSelectedMovies bool
+	AvailableMovies   []movie.Movie
 }
 
 // GetDebugSnapshot returns a snapshot of all room states
@@ -45,6 +46,7 @@ func (rs *Service) GetDebugSnapshot() []DebugInfo {
 				VotingMovies:      len(p.VotingMovies),
 				HasFinishedDraft:  p.HasFinishedDraft,
 				HasSelectedMovies: p.HasFinishedVoting,
+				AvailableMovies:   p.AvailableMovies,
 			})
 		}
 

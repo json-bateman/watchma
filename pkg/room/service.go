@@ -151,6 +151,11 @@ func (rs *Service) StartGame(roomName string, movies []movie.Movie) bool {
 	room.Game.Step = Draft
 	room.Game.SetAllMovies(movies)
 
+	// Give each player their own copy of the movies
+	for _, player := range room.Players {
+		player.AvailableMovies = movie.CopySlice(movies)
+	}
+
 	rs.logger.Info("Game Started", "roomName", roomName)
 
 	rs.pub.PublishRoomEvent(roomName, RoomStartEvent)
