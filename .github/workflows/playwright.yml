@@ -37,12 +37,11 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Build Go application
-        run: go build -o watchma ./cmd/main.go
+        run: templ generate && tailwindcss -i web/input.css -o public/styles.css && go build -o ./tmp/main ./cmd/main.go 
 
       - name: Run Playwright tests
         run: npx playwright test
         env:
-          CI: true
           PORT: 58008
           LOG_LEVEL: WARN
           IS_DEV: true

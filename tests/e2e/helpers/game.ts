@@ -5,16 +5,6 @@ import { expect, Page } from "@playwright/test";
  */
 
 /**
- * Wait for results screen
- * This takes some time, because AI presents a message during this timeout
- */
-export async function waitForResults(page: Page, timeout: number = 50000) {
-  await expect(
-    page.locator('[data-testid="results-screen"]'),
-  ).toBeVisible({ timeout });
-}
-
-/**
  * Wait for a specific game phase
  */
 export async function waitForPhase(
