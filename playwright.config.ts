@@ -25,18 +25,23 @@ export default defineConfig({
   use: {
     // Base URL for all navigation
     baseURL: "http://localhost:58008",
-
-    // Collect trace on failure for debugging
-    trace: "on-first-retry",
-
-    // Screenshot on failure
-    screenshot: "only-on-failure",
-
-    // Video on failure
-    video: "retain-on-failure",
-
     // Timeout for each action (click, fill, etc.)
     actionTimeout: 10 * 1000,
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+    // For maximum speed
+    // trace: "off",
+    // screenshot: "off",
+    // video: "off",
+
+    // launchOptions: {
+    //   args: [
+    //     "--disable-gpu",
+    //     "--disable-dev-shm-usage",
+    //     "--no-sandbox",
+    //   ],
+    // },
   },
 
   // Configure projects for different browsers (if needed)
@@ -46,14 +51,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     // Uncomment to test in other browsers:
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
+    // {
+    //   name: "firefox",
+    //   use: { ...devices["Desktop Firefox"] },
+    // },
+    // {
+    //   name: "webkit",
+    //   use: { ...devices["Desktop Safari"] },
+    // },
   ],
 
   // Run local dev server before tests
@@ -61,11 +66,12 @@ export default defineConfig({
     command:
       "templ generate && tailwindcss -i web/input.css -o public/styles.css && go run cmd/main.go",
     url: "http://localhost:58008",
-    timeout: 30 * 1000, // 30 seconds to start server
+    timeout: 10 * 1000, // 10 seconds to start server
     env: {
       PORT: "58008",
       LOG_LEVEL: "WARN",
       IS_DEV: "true",
+      OPENAI_API_KEY: "",
     },
   },
 });

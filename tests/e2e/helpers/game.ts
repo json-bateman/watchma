@@ -1,63 +1,36 @@
-import { expect, Page } from "@playwright/test";
+import { Browser } from "@playwright/test";
+import { generateUsername, signup } from "./auth";
+import {
+  clickReady,
+  createRoom,
+  generateRoomName,
+  joinRoom,
+  waitForPlayer,
+} from "./rooms";
 
-/**
- * Helper functions for game interactions (draft, voting, results)
- */
+export async function createRoomAndReady2Users(browser: Browser) {
+  const contextA = await browser.newContext();
+  const contextB = await browser.newContext();
 
-/**
- * Wait for a specific game phase
- */
-export async function waitForPhase(
-  page: Page,
-  phase: "lobby" | "draft" | "voting" | "announce" | "results",
-  timeout: number = 10000,
-) {
-  const phaseSelectors: Record<string, string> = {
-    lobby: "text=/ready|waiting/i",
-    draft: "text=/draft|select.*movie/i",
-    voting: "text=/voting|vote/i",
-    announce: "text=/announcer|drum roll/i",
-    results: "text=/winner|result/i",
-  };
+  const pageA = await contextA.newPage();
+  const pageB = await contextB.newPage();
 
-  const selector = phaseSelectors[phase];
-  await expect(page.locator(selector)).toBeVisible({ timeout });
-}
+  const userA = generateUsername("drafteroni");
+  const userB = generateUsername("draftercheesy");
+  const roomName = generateRoomName("DraftTest");
+  const password = "PlimpleGANG56";
 
-/**
- * Search for movies in draft phase
- */
-export async function searchMovies(page: Page, query: string) {
-  const searchInput = page.locator(
-    'input[name="search"], input[type="search"]',
-  );
-  await searchInput.fill(query);
+  await signup(pageA, userA, password);
+  await signup(pageB, userB, password);
 
-  // Wait for results to update (HTMX/SSE)
-  await page.waitForTimeout(500);
-}
+  await createRoom(pageA, roomName, 5, 2);
 
-/**
- * Filter movies by genre
- */
-export async function filterByGenre(page: Page, genre: string) {
-  const genreSelect = page.locator('select[name="genre"]');
-  await genreSelect.selectOption(genre);
+  await joinRoom(pageB, roomName);
 
-  // Wait for results to update
-  await page.waitForTimeout(500);
-}
+  waitForPlayer(pageB, userA, 1000);
 
-/**
- * Sort movies
- */
-export async function sortMovies(
-  page: Page,
-  sortBy: "name" | "year" | "rating",
-) {
-  const sortSelect = page.locator('select[name="sort"]');
-  await sortSelect.selectOption(sortBy);
+  await clickReady(pageA);
+  await clickReady(pageB);
 
-  // Wait for results to update
-  await page.waitForTimeout(500);
+  return { pageA, pageB, contextA, contextB };
 }

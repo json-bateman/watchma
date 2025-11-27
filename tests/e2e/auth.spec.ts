@@ -5,7 +5,7 @@ import { generateUsername, login, logout, signup } from "./helpers/auth";
  * Authentication flow tests
  */
 test.describe("Authentication", () => {
-  test("user can sign up with valid credentials", async ({ page }) => {
+  test("User can sign up with valid credentials", async ({ page }) => {
     const username = generateUsername("newuser");
     const password = "ExpectoPasswordum08";
 
@@ -16,7 +16,7 @@ test.describe("Authentication", () => {
     );
   });
 
-  test("user can login with existing credentials", async ({ page }) => {
+  test("User can login with existing credentials", async ({ page }) => {
     const username = generateUsername("existinguser");
     const password = "QUibbLer83";
 
@@ -31,7 +31,7 @@ test.describe("Authentication", () => {
     );
   });
 
-  test("user cannot login with wrong password", async ({ page }) => {
+  test("User cannot login with wrong password", async ({ page }) => {
     const username = generateUsername("testuser");
     const correctPassword = "InvaderZOD99";
     const wrongPassword = "PlankleTON88";
@@ -54,13 +54,13 @@ test.describe("Authentication", () => {
     expect(isOnLoginPage || hasErrorMessage).toBe(true);
   });
 
-  test("unauthenticated user is redirected to login", async ({ page }) => {
+  test("Unauthenticated user is redirected to login", async ({ page }) => {
     await page.goto("/host");
 
     await expect(page).toHaveURL(/\/(login|signup)/);
   });
 
-  test("user can logout", async ({ page }) => {
+  test("User can logout", async ({ page }) => {
     const username = generateUsername("logouttest");
     const password = "GoSlangin15";
 

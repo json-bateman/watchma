@@ -658,14 +658,13 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(2000 * time.Millisecond)
 	}
 
-	time.Sleep(4000 * time.Millisecond)
 	myRoom.Game.Announcement = []room.DialogueLine{{
 		Character: "Announcer",
 		Dialogue:  "And the Winner Is...",
 	}}
 
 	h.roomService.StreamAnnouncement(roomName)
-	time.Sleep(5000 * time.Millisecond)
+	time.Sleep(3000 * time.Millisecond)
 
 	h.roomService.FinishGame(roomName)
 }

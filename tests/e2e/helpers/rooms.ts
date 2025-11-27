@@ -31,7 +31,7 @@ export async function joinRoom(page: Page, roomName: string) {
 
   await page.waitForSelector("text=Join", { timeout: 5000 });
 
-  await page.click("text=Join");
+  await page.click(`a[href="room/${roomName}"]`);
   await page.waitForURL(`/room/${roomName}`);
 }
 

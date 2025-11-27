@@ -6,7 +6,7 @@ import { createRoom, generateRoomName, joinRoom } from "./helpers/rooms";
  * Room management tests
  */
 test.describe("Room Management", () => {
-  test("host can create and delete room", async ({ page }) => {
+  test("Host can create and delete room", async ({ page }) => {
     const username = generateUsername("host");
     const roomName = generateRoomName("DeleteTest");
 
@@ -22,7 +22,7 @@ test.describe("Room Management", () => {
     await expect(roomLink).not.toBeVisible();
   });
 
-  test("cannot join full room", async ({ browser }) => {
+  test("User cannot join full room", async ({ browser }) => {
     const contextA = await browser.newContext();
     const contextB = await browser.newContext();
     const contextC = await browser.newContext();
@@ -57,6 +57,43 @@ test.describe("Room Management", () => {
       await contextA.close();
       await contextB.close();
       await contextC.close();
+    }
+  });
+
+  const TOTAL_USERS = 50;
+  test(`Mock ${TOTAL_USERS} simultaneous users hosting/joining rooms`, async ({ browser }) => {
+    const USERS_PER_ROOM = 10;
+    // Create all pages and contexts
+    const contexts = await Promise.all(
+      Array.from({ length: TOTAL_USERS }, () => browser.newContext()),
+    );
+    const pages = await Promise.all(
+      contexts.map((context) => context.newPage()),
+    );
+
+    try {
+      // UUID Needs a capital letter for password validation
+      await Promise.all(
+        pages.map((page, i) =>
+          signup(page, generateUsername(`user${i}`), crypto.randomUUID() + "A")
+        ),
+      );
+
+      const totalRooms = Math.ceil(TOTAL_USERS / USERS_PER_ROOM);
+
+      for (let roomIndex = 0; roomIndex < totalRooms; roomIndex++) {
+        const startIdx = roomIndex * USERS_PER_ROOM;
+        const endIdx = Math.min(startIdx + USERS_PER_ROOM, TOTAL_USERS);
+        const roomUsers = pages.slice(startIdx, endIdx);
+        const roomName = `room${roomIndex}`;
+
+        await createRoom(roomUsers[0], roomName, 3, USERS_PER_ROOM);
+        await Promise.all(
+          roomUsers.slice(1).map((page) => joinRoom(page, roomName)),
+        );
+      }
+    } finally {
+      await Promise.all(contexts.map((c) => c.close()));
     }
   });
 });
