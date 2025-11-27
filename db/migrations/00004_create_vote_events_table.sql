@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS vote_events (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
-
 -- +goose StatementEnd
 
 -- +goose Down
+-- +goose StatementBegin
 DROP TABLE IF EXISTS vote_events;
 -- +goose StatementEnd
 
