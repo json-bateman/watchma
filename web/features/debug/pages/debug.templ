@@ -2,11 +2,11 @@ package pages
 
 import (
 	"fmt"
-	"watchma/db/repository"
+	"watchma/db/sqlcgen"
 	"watchma/pkg/room"
 )
 
-templ Debug(roomSnapshot []room.DebugInfo, user *repository.User) {
+templ Debug(roomSnapshot []room.DebugInfo, user *sqlcgen.User) {
 	<div
 		id="debugPage"
 		class="container text-sans mx-auto p-6 space-y-8"

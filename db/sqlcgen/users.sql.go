@@ -7,29 +7,21 @@ package sqlcgen
 
 import (
 	"context"
-	"time"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (username, password_hash, created_at, updated_at)
-VALUES (?, ?, ?, ?)
+INSERT INTO users (username, password_hash)
+VALUES (?, ?)
 RETURNING id, username, password_hash, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Username     string    `json:"username"`
-	PasswordHash string    `json:"password_hash"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	Username     string `json:"username"`
+	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
-		arg.Username,
-		arg.PasswordHash,
-		arg.CreatedAt,
-		arg.UpdatedAt,
-	)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,

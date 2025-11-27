@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"watchma/db"
-	"watchma/db/repository"
+	"watchma/db/sqlcgen"
 	"watchma/pkg/auth"
 	"watchma/pkg/jellyfin"
 	"watchma/pkg/movie"
@@ -57,8 +57,7 @@ func (a *App) Initialize() error {
 	a.NATSServer = ns
 
 	a.DB = db
-	userRepo := repository.NewUserRepository(db.DB, a.Logger)
-	sessionRepo := repository.NewSessionRepository(db.DB)
+	queries := sqlcgen.New(db.DB)
 
 	var openAiProvider *openai.Provider
 	if a.Settings.OpenAIApiKey != "" {
@@ -81,7 +80,7 @@ func (a *App) Initialize() error {
 	}
 
 	eventPublisher := room.NewEventPublisher(a.NATS, a.Logger)
-	authService := auth.NewAuthService(userRepo, sessionRepo, a.Logger, a.Settings.IsDev)
+	authService := auth.NewAuthService(queries, a.Logger, a.Settings.IsDev)
 	movieService := movie.NewService(movieProvider, a.Logger)
 	roomService := room.NewService(eventPublisher, a.Logger)
 

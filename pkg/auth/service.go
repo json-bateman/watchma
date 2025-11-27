@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"context"
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
 	"errors"
 	"log/slog"
-	"watchma/db/repository"
+	"time"
+	"watchma/db/sqlcgen"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,28 +18,30 @@ const (
 )
 
 type AuthService struct {
-	userRepo    *repository.UserRepository
-	sessionRepo *repository.SessionRepository
-	logger      *slog.Logger
-	IsDev       bool
+	queries *sqlcgen.Queries
+	logger  *slog.Logger
+	IsDev   bool
 }
 
-func NewAuthService(userRepo *repository.UserRepository, sessionRepo *repository.SessionRepository, logger *slog.Logger, isDev bool) *AuthService {
+func NewAuthService(queries *sqlcgen.Queries, logger *slog.Logger, isDev bool) *AuthService {
 	return &AuthService{
-		userRepo:    userRepo,
-		sessionRepo: sessionRepo,
-		logger:      logger,
-		IsDev:       isDev,
+		queries: queries,
+		logger:  logger,
+		IsDev:   isDev,
 	}
 }
 
-func (s *AuthService) LoginOrCreate(username, password string) (*repository.User, string, error) {
-	user, err := s.userRepo.GetByUsername(username)
+func (s *AuthService) LoginOrCreate(username, password string) (*sqlcgen.User, string, error) {
+	ctx := context.Background()
+	user, err := s.queries.GetUserByUsername(ctx, username)
 
 	if err == sql.ErrNoRows {
 		// User doesn't exist - create them
 		hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		user, err = s.userRepo.CreateUser(username, string(hash))
+		user, err = s.queries.CreateUser(ctx, sqlcgen.CreateUserParams{
+			Username:     username,
+			PasswordHash: string(hash),
+		})
 		if err != nil {
 			return nil, "", err
 		}
@@ -54,17 +58,26 @@ func (s *AuthService) LoginOrCreate(username, password string) (*repository.User
 	}
 
 	token := generateRandomToken()
-	if err := s.sessionRepo.Create(user.ID, token); err != nil {
+	if err := s.queries.CreateSession(ctx, sqlcgen.CreateSessionParams{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: time.Now().Add(30 * 24 * time.Hour), // 30 days
+	}); err != nil {
 		return nil, "", err
 	}
 
-	return user, token, nil
+	return &user, token, nil
 
 }
 
 // GetUserBySessionToken fetches a user by their session token
-func (s *AuthService) GetUserBySessionToken(token string) (*repository.User, error) {
-	return s.userRepo.GetUserBySessionToken(token)
+func (s *AuthService) GetUserBySessionToken(token string) (*sqlcgen.User, error) {
+	ctx := context.Background()
+	user, err := s.queries.GetUserBySessionToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func generateRandomToken() string {

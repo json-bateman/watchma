@@ -3,12 +3,12 @@ package common
 import (
 	"strings"
 	"time"
-	"watchma/db/repository"
+	"watchma/db/sqlcgen"
 )
 
 type PageContext struct {
 	Title        string
-	User         *repository.User
+	User         *sqlcgen.User
 	HeaderFooter bool
 	Content      templ.Component
 	IsDev        bool
