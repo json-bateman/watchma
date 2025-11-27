@@ -11,11 +11,13 @@ import (
 type Querier interface {
 	CreateSession(ctx context.Context, arg CreateSessionParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	CreateVoteEvent(ctx context.Context, arg CreateVoteEventParams) (VoteEvent, error)
 	DeleteSession(ctx context.Context, token string) error
 	GetUserByID(ctx context.Context, id int64) (User, error)
 	GetUserBySessionToken(ctx context.Context, token string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserIDByToken(ctx context.Context, token string) (int64, error)
+	GetVoteEventsByUser(ctx context.Context, userID int64) ([]VoteEvent, error)
 }
 
 var _ Querier = (*Queries)(nil)
