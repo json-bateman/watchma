@@ -156,9 +156,10 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomStartEvent:
+			h.logger.Info("Received RoomStartEvent in SSE loop", "room", roomName, "user", user.Username)
 			draft := pages.Draft(player, myRoom)
 			if err := sse.PatchElementTempl(draft); err != nil {
-				h.logger.Error("Error patching movies", "error", err)
+				h.logger.Error("Error patching draft page", "error", err, "room", roomName, "user", user.Username)
 				return
 			}
 		case room.RoomVotingEvent:

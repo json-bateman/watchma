@@ -55,6 +55,14 @@ func NewWebHandler(jellyfinBaseUrl string, jellyfinApiKey string, logger *slog.L
 // Sets up all Web Routes through Chi Router.
 // Web Routes should write web elements to http.ResponseWriter (I.E. SSE, HTML, JSON)
 func (h *WebHandler) SetupRoutes(r chi.Router) {
+	// Disable buffering for reverse proxies like NGINX
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("X-Accel-Buffering", "no")
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	r.Get("/images/{itemId}", proxyJellyfinImage(h.jfinBaseUrl, h.jfinApiKey, h.logger))
 
 	auth.SetupRoutes(r, h.services.AuthService, h.logger)

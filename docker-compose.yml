@@ -1,13 +1,12 @@
-version: '3.8'
-
 services:
   watchma:
-    build: .
+    image: jsonbateman/watchma:latest
+    container_name: watchma
     ports:
       - "58008:58008"
     environment:
       - PORT=58008
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=WARN
       - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
       - JELLYFIN_BASE_URL=${JELLYFIN_BASE_URL}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
