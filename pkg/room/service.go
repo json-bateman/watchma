@@ -1,27 +1,33 @@
 package room
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
 	"log/slog"
 	"sort"
 	"sync"
 	"time"
 
+	"watchma/db/sqlcgen"
 	"watchma/pkg/movie"
 )
 
 // Service represents the orchestrator of all rooms and room operations
 type Service struct {
-	mu     sync.RWMutex
-	Rooms  map[string]*Room
-	pub    *EventPublisher
-	logger *slog.Logger
+	mu      sync.RWMutex
+	Rooms   map[string]*Room
+	pub     *EventPublisher
+	queries *sqlcgen.Queries
+	logger  *slog.Logger
 }
 
-func NewService(pub *EventPublisher, l *slog.Logger) *Service {
+func NewService(queries *sqlcgen.Queries, pub *EventPublisher, l *slog.Logger) *Service {
 	return &Service{
-		Rooms:  make(map[string]*Room),
-		pub:    pub,
-		logger: l,
+		Rooms:   make(map[string]*Room),
+		pub:     pub,
+		queries: queries,
+		logger:  l,
 	}
 }
 
@@ -204,6 +210,13 @@ func (rs *Service) FinishGame(roomName string) bool {
 	room.Game.Step = Results
 	rs.logger.Info("Game Finished", "roomName", roomName)
 
+	// Save Game result and participants to DB
+	go func() {
+		if err := rs.SaveGameResult(roomName); err != nil {
+			rs.logger.Error("Failed to save game result", "error", err, "room", roomName)
+		}
+	}()
+
 	rs.pub.PublishRoomEvent(roomName, RoomFinishEvent)
 	return true
 }
@@ -295,7 +308,7 @@ func (rs *Service) RemoveDraftMovie(roomName, username string, movieId string) b
 // ToggleDraftMovie adds or removes a movie from a player's draft selection
 // If the movie is already in the draft, it will be removed
 // If the movie is not in the draft and the player hasn't reached MaxDraftCount, it will be added
-// Returns true if the operation was successful
+// Returns true if toggle occurred
 func (rs *Service) ToggleDraftMovie(roomName, username string, movie movie.Movie) bool {
 	room, ok := rs.GetRoom(roomName)
 	if !ok {
@@ -309,6 +322,8 @@ func (rs *Service) ToggleDraftMovie(roomName, username string, movie movie.Movie
 	if !ok {
 		return false
 	}
+	var wasToggled bool
+	var action string
 
 	// Try to remove the movie if it exists in the draft
 	for i, m := range player.DraftMovies {
@@ -317,19 +332,28 @@ func (rs *Service) ToggleDraftMovie(roomName, username string, movie movie.Movie
 				player.DraftMovies[:i],
 				player.DraftMovies[i+1:]...,
 			)
+			action = "deselected"
+			wasToggled = true
+
 			rs.logger.Debug("Movie toggled off in draft", "roomName", roomName, "player", username, "movie", movie.Name)
-			return true
+			break
 		}
 	}
 
 	// Movie not found in draft, try to add it if under limit
-	if len(player.DraftMovies) < room.Game.MaxDraftCount {
+	if !wasToggled && len(player.DraftMovies) < room.Game.MaxDraftCount {
 		player.DraftMovies = append(player.DraftMovies, movie)
+		action = "selected"
+		wasToggled = true
+
 		rs.logger.Debug("Movie toggled on in draft", "roomName", roomName, "player", username, "movie", movie)
-		return true
 	}
 
-	return false
+	if wasToggled && rs.queries != nil {
+		go rs.recordVoteEvent(username, "draft_toggle", action, movie)
+	}
+
+	return wasToggled
 }
 
 func (rs *Service) ToggleVotingMovie(roomName, username string, movie movie.Movie) bool {
@@ -346,21 +370,38 @@ func (rs *Service) ToggleVotingMovie(roomName, username string, movie movie.Movi
 		return false
 	}
 
-	// Try to remove the movie if it exists in the draft
+	var wasToggled bool
+	var action string
+
+	// Try to remove the movie if it exists in voting
 	for i, m := range player.VotingMovies {
 		if m.Id == movie.Id {
 			player.VotingMovies = append(
 				player.VotingMovies[:i],
 				player.VotingMovies[i+1:]...,
 			)
+			action = "deselected"
+			wasToggled = true
 			rs.logger.Debug("Movie toggled off in Voting", "roomName", roomName, "player", username, "movie", movie.Name)
-			return true
+			break
 		}
 	}
 
-	player.VotingMovies = append(player.VotingMovies, movie)
-	rs.logger.Debug("Movie toggled on in Voting", "roomName", roomName, "player", username, "movie", movie)
-	return true
+	// Movie not in voting list, add it
+	if !wasToggled {
+		player.VotingMovies = append(player.VotingMovies, movie)
+		action = "selected"
+		wasToggled = true
+
+		rs.logger.Debug("Movie toggled on in Voting", "roomName", roomName, "player",
+			username, "movie", movie)
+	}
+
+	if wasToggled && rs.queries != nil {
+		go rs.recordVoteEvent(username, "vote_toggle", action, movie)
+	}
+
+	return wasToggled
 }
 
 func (r *Room) GetPlayer(username string) (*Player, bool) {
@@ -416,4 +457,119 @@ func (r *Room) IsDraftFinished() bool {
 		}
 	}
 	return true
+}
+
+func (rs *Service) recordVoteEvent(username, eventType, action string,
+	movie movie.Movie) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	user, err := rs.queries.GetUserByUsername(ctx, username)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			rs.logger.Error("Failed to get user for event recording", "error", err, "username",
+				username)
+		}
+		return
+	}
+
+	_, err = rs.queries.CreateVoteEvent(ctx, sqlcgen.CreateVoteEventParams{
+		UserID:    user.ID,
+		EventType: eventType,
+		Action:    action,
+		MovieID:   movie.Id,
+		MovieName: movie.Name,
+	})
+
+	if err != nil {
+		rs.logger.Error("Failed to record vote event",
+			"error", err,
+			"user", username,
+			"type", eventType,
+			"action", action,
+			"movie", movie.Name)
+	} else {
+		rs.logger.Debug("Vote event recorded",
+			"user", username,
+			"type", eventType,
+			"action", action,
+			"movie", movie.Name)
+	}
+}
+
+func (rs *Service) SaveGameResult(roomName string) error {
+	room, ok := rs.GetRoom(roomName)
+	if !ok {
+		return fmt.Errorf("room not found: %s", roomName)
+	}
+
+	if room.Game.Step != Results {
+		return nil
+	}
+
+	room.mu.RLock()
+	defer room.mu.RUnlock()
+
+	var winningMovie *movie.Movie
+	var winningVoteCount int
+
+	for movie, voteCount := range room.Game.Votes {
+		if voteCount > winningVoteCount {
+			winningMovie = movie
+			winningVoteCount = voteCount
+		}
+	}
+
+	if winningMovie == nil {
+		rs.logger.Warn("Could not determine winning movie", "room", roomName)
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	gameResult, err := rs.queries.CreateGameResult(ctx, sqlcgen.CreateGameResultParams{
+		RoomName:         roomName,
+		WinningMovieID:   winningMovie.Id,
+		WinningMovieName: winningMovie.Name,
+		WinningVoteCount: int64(winningVoteCount),
+		TotalPlayers:     int64(len(room.Players)),
+	})
+
+	if err != nil {
+		rs.logger.Error("Failed to create game result", "error", err, "room", roomName)
+		return fmt.Errorf("create game result: %w", err)
+	}
+
+	rs.logger.Info("Game result saved",
+		"room", roomName,
+		"winner", winningMovie.Name,
+		"votes", winningVoteCount,
+		"players", len(room.Players))
+
+	// Save participants
+	for _, player := range room.Players {
+		// Get user ID from username
+		user, err := rs.queries.GetUserByUsername(ctx, player.Username)
+		if err != nil {
+			rs.logger.Error("Failed to get user for participant",
+				"error", err,
+				"username", player.Username)
+			continue
+		}
+
+		_, err = rs.queries.CreateGameParticipant(ctx, sqlcgen.CreateGameParticipantParams{
+			GameID: gameResult.ID,
+			UserID: user.ID,
+		})
+
+		if err != nil {
+			rs.logger.Error("Failed to create game participant",
+				"error", err,
+				"username", player.Username)
+		}
+	}
+
+	return nil
+
 }

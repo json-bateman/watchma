@@ -8,6 +8,23 @@ import (
 	"time"
 )
 
+type GameParticipant struct {
+	ID      int64       `json:"id"`
+	GameID  int64       `json:"game_id"`
+	UserID  int64       `json:"user_id"`
+	Foreign interface{} `json:"foreign"`
+}
+
+type GameResult struct {
+	ID               int64     `json:"id"`
+	RoomName         string    `json:"room_name"`
+	WinningMovieID   string    `json:"winning_movie_id"`
+	WinningMovieName string    `json:"winning_movie_name"`
+	WinningVoteCount int64     `json:"winning_vote_count"`
+	TotalPlayers     int64     `json:"total_players"`
+	CompletedAt      time.Time `json:"completed_at"`
+}
+
 type RefreshToken struct {
 	ID        int64     `json:"id"`
 	UserID    int64     `json:"user_id"`

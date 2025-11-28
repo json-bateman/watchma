@@ -368,9 +368,6 @@
   .w-20 {
     width: calc(var(--spacing) * 20);
   }
-  .w-40 {
-    width: calc(var(--spacing) * 40);
-  }
   .w-72 {
     width: calc(var(--spacing) * 72);
   }
@@ -425,6 +422,9 @@
   .justify-center {
     justify-content: center;
   }
+  .gap-\(--gap\) {
+    gap: var(--gap);
+  }
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
@@ -436,9 +436,6 @@
   }
   .gap-6 {
     gap: calc(var(--spacing) * 6);
-  }
-  .gap-\[var\(--gap\)\] {
-    gap: var(--gap);
   }
   .space-y-1 {
     :where(& > :not(:last-child)) {
@@ -594,8 +591,11 @@
   .bg-white {
     background-color: var(--color-white);
   }
-  .bg-gradient-to-t {
-    --tw-gradient-position: to top in oklab;
+  .bg-linear-to-t {
+    --tw-gradient-position: to top;
+    @supports (background-image: linear-gradient(in lab, red, red)) {
+      --tw-gradient-position: to top in oklab;
+    }
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
   .from-black\/70 {
@@ -786,10 +786,6 @@
   .opacity-90 {
     opacity: 90%;
   }
-  .ring-0 {
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
   .ring-4 {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -885,11 +881,6 @@
   .sm\:flex-row {
     @media (width >= 40rem) {
       flex-direction: row;
-    }
-  }
-  .md\:w-64 {
-    @media (width >= 48rem) {
-      width: calc(var(--spacing) * 64);
     }
   }
   .md\:w-96 {

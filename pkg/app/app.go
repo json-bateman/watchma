@@ -82,7 +82,7 @@ func (a *App) Initialize() error {
 	eventPublisher := room.NewEventPublisher(a.NATS, a.Logger)
 	authService := auth.NewAuthService(queries, a.Logger, a.Settings.IsDev)
 	movieService := movie.NewService(movieProvider, a.Logger)
-	roomService := room.NewService(eventPublisher, a.Logger)
+	roomService := room.NewService(queries, eventPublisher, a.Logger)
 
 	webHandler := router.NewWebHandler(
 		a.Settings.JellyfinBaseURL,
