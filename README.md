@@ -7,6 +7,8 @@ How many times have you thought "Man there's nothing to watch"? But then you act
 
 Ok maybe this is a specific me problem, but if it's not, that's why I made this site, hopefully to make the process of picking a movie more fun, as of now it's a basic voting system with lobbies. But if I'm feeling ambitious I'd like to make this jackbox style one day.
 
+The voting system is influenced by the young CGP Grey. [Everyone Should Vote More Than Once](https://www.youtube.com/watch?v=orybDrUj4vA)
+
 ## Dev Setup
 
 ### For this to work you must have 5 things installed and in your `$PATH`
@@ -17,7 +19,7 @@ Ok maybe this is a specific me problem, but if it's not, that's why I made this 
 - [tailwindcss](https://github.com/tailwindlabs/tailwindcss/) - Download from Releases
 
 ### Setting .env variables
-Must have a Jellyfin server with API key in your `.env` for this to run properly. For a fun message that plays before the end of the game, you can include an `OPENAI_API_KEY`, it only uses one small token request at the end of each game. 100 games has cost me ~ $0.01. 
+Must have a Jellyfin server with API key in your `.env` for this to run properly. For a fun message that plays before the end of the game, you can include an `OPENAI_API_KEY`, it only uses one small token request at the end of each game. 100 games has cost me ~ $0.01. If you don't define `OPENAI_API_KEY` that's ok, the app will still run just fine.
 
 `JELLYFIN_API_KEY`  
 `JELLYFIN_BASE_URL`  
@@ -39,3 +41,5 @@ I have this project split into distinct layers to keep things organized.
 ### Testing
 
 Right now I have basic clickthrough testing setup using playwright, `npm test` or `npm run test:ui` for detailed results
+Testing is put in place on push to prevent regression, if your git client is giving you an error, try running `npm test` to see more
+detailed errors.

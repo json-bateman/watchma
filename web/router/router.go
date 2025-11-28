@@ -52,7 +52,6 @@ func NewWebHandler(jellyfinBaseUrl string, jellyfinApiKey string, logger *slog.L
 // Sets up all Web Routes through Chi Router.
 // Web Routes should write web elements to http.ResponseWriter (I.E. SSE, HTML, JSON)
 func (h *WebHandler) SetupRoutes(r chi.Router) {
-	// Image proxy (public so images load everywhere)
 	r.Get("/images/{itemId}", proxyJellyfinImage(h.jfinBaseUrl, h.jfinApiKey, h.logger))
 
 	auth.SetupRoutes(r, h.services.AuthService, h.logger)

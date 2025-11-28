@@ -46,7 +46,7 @@ templ Layout(pc PageContext) {
 		<body class="bg-background h-svh font-serif">
 			<main class="text-text h-full flex flex-col p-4">
 				if pc.HeaderFooter {
-					<header class="mb-4 flex justify-between">
+					<header class="mb-12 flex justify-between">
 						<div class="flex items-center gap-4">
 							@homeIcon()
 							if pc.User != nil {
@@ -59,13 +59,22 @@ templ Layout(pc PageContext) {
 									>
 										{ capitalizeFirst(pc.User.Username) }
 									</span>
-									<div
-										id="logout"
-										data-show="$showDropdown"
-										data-on:click="@post('/logout')"
-										class="absolute mt-4 cursor-pointer"
-									>
-										Logout
+									<div class="flex flex-col absolute mt-3 cursor-pointer">
+										<div
+											id="logout"
+											data-show="$showDropdown"
+											data-on:click="@post('/logout')"
+										>
+											Logout
+										</div>
+										<a
+											id="stats"
+											data-show="$showDropdown"
+											href="/stats"
+											class="absolute mt-6 cursor-pointer"
+										>
+											Stats	
+										</a>
 									</div>
 								</div>
 							}

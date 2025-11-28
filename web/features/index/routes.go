@@ -14,6 +14,7 @@ func SetupRoutes(
 
 	r.Get("/", handlers.index)
 	r.Get("/shuffle/{number}", handlers.shuffle)
+	r.Get("/stats", handlers.stats)
 
 	return nil
 }

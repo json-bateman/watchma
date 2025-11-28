@@ -3,6 +3,7 @@ package index
 import (
 	"net/http"
 	"strconv"
+	appctx "watchma/pkg/context"
 	"watchma/pkg/movie"
 	"watchma/web"
 	"watchma/web/features/index/pages"
@@ -52,4 +53,10 @@ func (h *handlers) shuffle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	web.RenderPage(pages.Shuffle(shuffledMovies), "Movies", w, r)
+}
+
+// Shuffle returns a page with a shuffled list of movies, up to the number requested in the query parameters
+func (h *handlers) stats(w http.ResponseWriter, r *http.Request) {
+	user := appctx.GetUserFromRequest(r)
+	web.RenderPage(pages.Stats(user), "Stats", w, r)
 }

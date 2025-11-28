@@ -1,0 +1,8 @@
+package pages
+
+import "watchma/db/sqlcgen"
+
+templ Stats(user *sqlcgen.User) {
+	<div>Stats Page</div>
+	<div>{ user.Username }</div>
+}

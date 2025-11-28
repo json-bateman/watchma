@@ -341,6 +341,9 @@
   .h-96 {
     height: calc(var(--spacing) * 96);
   }
+  .h-\[428px\] {
+    height: 428px;
+  }
   .h-full {
     height: 100%;
   }
@@ -352,6 +355,9 @@
   }
   .min-h-\[60vh\] {
     min-height: 60vh;
+  }
+  .min-h-full {
+    min-height: 100%;
   }
   .\!w-16 {
     width: calc(var(--spacing) * 16) !important;
@@ -881,6 +887,11 @@
   .sm\:flex-row {
     @media (width >= 40rem) {
       flex-direction: row;
+    }
+  }
+  .md\:h-\[572px\] {
+    @media (width >= 48rem) {
+      height: 572px;
     }
   }
   .md\:w-96 {
