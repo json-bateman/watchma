@@ -1,8 +1,61 @@
 package pages
 
-import "watchma/db/sqlcgen"
+import (
+	"fmt"
+	"watchma/db/sqlcgen"
+	"watchma/web/views/common"
+)
 
-templ Stats(user *sqlcgen.User) {
-	<div>Stats Page</div>
-	<div>{ user.Username }</div>
+templ Stats(user *sqlcgen.User, draftedMovies []sqlcgen.GetUserMovieDraftCountsRow,
+	votedMovies []sqlcgen.GetUserMovieVoteCountsRow) {
+	<div class="container mx-auto max-w-4xl">
+		<h1
+			class="text-4xl md:text-6xl font-bold text-primary text-center mb-8
+  text-shadow-hard"
+		>
+			{ common.CapitalizeFirst(user.Username) }'s Stats
+		</h1>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<!-- Drafted Movies -->
+			<div class="border-4 border-primary shadow-brutalist p-6 bg-secondary/10">
+				<h2 class="text-2xl font-bold text-primary mb-4 border-b-2 border-primary pb-2">
+					Movies Drafted
+				</h2>
+				if len(draftedMovies) == 0 {
+					<p class="text-primary/50 italic text-center py-8">No movies drafted yet</p>
+				} else {
+					<div class="space-y-2">
+						for _, movie := range draftedMovies {
+							<div class="flex justify-between items-center py-2 border-b border-primary/20">
+								<span class="font-medium">{ movie.MovieName }</span>
+								<span class="bg-primary text-background px-3 py-1 rounded font-bold">
+									{ fmt.Sprint(movie.NetCount) }
+								</span>
+							</div>
+						}
+					</div>
+				}
+			</div>
+			<!-- Voted Movies -->
+			<div class="border-4 border-primary shadow-brutalist p-6 bg-secondary/10">
+				<h2 class="text-2xl font-bold text-primary mb-4 border-b-2 border-primary pb-2">
+					Movies Voted For
+				</h2>
+				if len(votedMovies) == 0 {
+					<p class="text-primary/50 italic text-center py-8">No movies voted yet</p>
+				} else {
+					<div class="space-y-2">
+						for _, movie := range votedMovies {
+							<div class="flex justify-between items-center py-2 border-b border-primary/20">
+								<span class="font-medium">{ movie.MovieName }</span>
+								<span class="bg-primary text-background px-3 py-1 rounded font-bold">
+									{ fmt.Sprint(movie.NetCount) }
+								</span>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</div>
 }

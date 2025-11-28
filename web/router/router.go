@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"watchma/db/sqlcgen"
 	authPkg "watchma/pkg/auth"
 	"watchma/pkg/movie"
 	"watchma/pkg/openai"
@@ -34,17 +35,19 @@ type WebHandler struct {
 	jfinBaseUrl string
 	jfinApiKey  string
 	services    *WebHandlerServices
+	queries     *sqlcgen.Queries
 	logger      *slog.Logger
 	NATS        *nats.Conn
 }
 
 // NewWebHandler creates a new web handlers instance
-func NewWebHandler(jellyfinBaseUrl string, jellyfinApiKey string, logger *slog.Logger, nc *nats.Conn, services *WebHandlerServices) *WebHandler {
+func NewWebHandler(jellyfinBaseUrl string, jellyfinApiKey string, logger *slog.Logger, nc *nats.Conn, queries *sqlcgen.Queries, services *WebHandlerServices) *WebHandler {
 	return &WebHandler{
 		jfinBaseUrl: jellyfinBaseUrl,
 		jfinApiKey:  jellyfinApiKey,
 		logger:      logger,
 		NATS:        nc,
+		queries:     queries,
 		services:    services,
 	}
 }
@@ -60,7 +63,7 @@ func (h *WebHandler) SetupRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireLogin(h.services.AuthService, h.logger))
 
-		index.SetupRoutes(r, h.services.MovieService)
+		index.SetupRoutes(r, h.services.MovieService, h.queries)
 		debug.SetupRoutes(r, h.services.RoomService, h.logger, h.NATS)
 		// Room Setup
 		rooms.SetupRoutes(r, h.services.RoomService, h.logger, h.NATS)

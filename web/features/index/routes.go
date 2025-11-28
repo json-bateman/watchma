@@ -1,6 +1,7 @@
 package index
 
 import (
+	"watchma/db/sqlcgen"
 	"watchma/pkg/movie"
 
 	"github.com/go-chi/chi/v5"
@@ -9,12 +10,14 @@ import (
 func SetupRoutes(
 	r chi.Router,
 	movieService *movie.Service,
+	queries *sqlcgen.Queries,
 ) error {
-	handlers := newHandlers(movieService)
+	handlers := newHandlers(movieService, queries)
 
 	r.Get("/", handlers.index)
 	r.Get("/shuffle/{number}", handlers.shuffle)
-	r.Get("/stats", handlers.stats)
+	r.Get("/statistics", handlers.stats)
+	r.Get("/top5", handlers.top5)
 
 	return nil
 }

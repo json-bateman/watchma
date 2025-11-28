@@ -7,7 +7,6 @@ package sqlcgen
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createGameParticipant = `-- name: CreateGameParticipant :one
@@ -115,10 +114,10 @@ func (q *Queries) GetGameResultsByUser(ctx context.Context, userID int64) ([]Gam
 
 const getMostPopularWinningMovies = `-- name: GetMostPopularWinningMovies :many
 SELECT
-  winning_movie_id,
-  winning_movie_name,
-  COUNT(*) as win_count,
-  AVG(winning_vote_count) as avg_votes
+    winning_movie_id,
+    winning_movie_name,
+    COUNT(*) as win_count,
+    COALESCE(AVG(winning_vote_count), 0.0) as avg_votes
 FROM game_results
 GROUP BY winning_movie_id, winning_movie_name
 ORDER BY win_count DESC
@@ -126,10 +125,10 @@ LIMIT ?
 `
 
 type GetMostPopularWinningMoviesRow struct {
-	WinningMovieID   string          `json:"winning_movie_id"`
-	WinningMovieName string          `json:"winning_movie_name"`
-	WinCount         int64           `json:"win_count"`
-	AvgVotes         sql.NullFloat64 `json:"avg_votes"`
+	WinningMovieID   string      `json:"winning_movie_id"`
+	WinningMovieName string      `json:"winning_movie_name"`
+	WinCount         int64       `json:"win_count"`
+	AvgVotes         interface{} `json:"avg_votes"`
 }
 
 func (q *Queries) GetMostPopularWinningMovies(ctx context.Context, limit int64) ([]GetMostPopularWinningMoviesRow, error) {

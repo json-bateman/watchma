@@ -9,13 +9,14 @@ templ IndexPage(movieOfTheDay movie.Movie) {
 	<div class="text-7xl md:text-8xl flex flex-wrap gap-3 text-text mt-8 justify-center text-center">
 		<span class="font-bold shadow-dance-text">Watchma</span>
 	</div>
-	<div class="flex justify-center gap-4 my-12">
+	<div class="w-full flex justify-center">
+		<a href="top5" class="btn mt-12">All Time Winners</a>
+	</div>
+	<div class="flex justify-center gap-4 my-4">
 		<a href="host" class="btn-accent">Host Room</a>
 		<a href="join" class="btn-accent">Join Room</a>
 	</div>
-	<div class="flex justify-center">
-		<a href="shuffle/8" class="btn">Shuffle 8</a>
-	</div>
+	<!-- Removed Shuffle 8, not sure I want it -->
 	<div class="flex justify-center mt-12">
 		@common.MovieOfTheDay(movieOfTheDay)
 	</div>

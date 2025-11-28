@@ -16,7 +16,7 @@ type PageContext struct {
 
 templ Layout(pc PageContext) {
 	<html
-		data-signals="{theme: localStorage.getItem('theme') || 'burgundy-light'}"
+		data-signals="{showDropdown: false, theme: localStorage.getItem('theme') || 'burgundy-light'}"
 		data-theme-storage="$theme"
 		data-attr:data-theme="$theme"
 		lang="en"
@@ -57,7 +57,7 @@ templ Layout(pc PageContext) {
 										data-on:click="$showDropdown=!$showDropdown"
 										class="px-2 cursor-pointer py-1 border-3 text-xs tracking-wide border-primary bg-primary/10 shadow-hard"
 									>
-										{ capitalizeFirst(pc.User.Username) }
+										{ CapitalizeFirst(pc.User.Username) }
 									</span>
 									<div class="flex flex-col absolute mt-3 cursor-pointer">
 										<div
@@ -70,7 +70,7 @@ templ Layout(pc PageContext) {
 										<a
 											id="stats"
 											data-show="$showDropdown"
-											href="/stats"
+											href="/statistics"
 											class="absolute mt-6 cursor-pointer"
 										>
 											Stats	
@@ -169,7 +169,7 @@ templ homeIcon() {
 	</a>
 }
 
-func capitalizeFirst(s string) string {
+func CapitalizeFirst(s string) string {
 	if s == "" {
 		return s
 	}

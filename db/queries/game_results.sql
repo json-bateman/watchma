@@ -23,10 +23,10 @@ ORDER BY gr.completed_at DESC;
 
 -- name: GetMostPopularWinningMovies :many
 SELECT
-  winning_movie_id,
-  winning_movie_name,
-  COUNT(*) as win_count,
-  AVG(winning_vote_count) as avg_votes
+    winning_movie_id,
+    winning_movie_name,
+    COUNT(*) as win_count,
+    COALESCE(AVG(winning_vote_count), 0.0) as avg_votes
 FROM game_results
 GROUP BY winning_movie_id, winning_movie_name
 ORDER BY win_count DESC

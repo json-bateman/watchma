@@ -21,6 +21,8 @@ type Querier interface {
 	GetUserBySessionToken(ctx context.Context, token string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserIDByToken(ctx context.Context, token string) (int64, error)
+	GetUserMovieDraftCounts(ctx context.Context, userID int64) ([]GetUserMovieDraftCountsRow, error)
+	GetUserMovieVoteCounts(ctx context.Context, userID int64) ([]GetUserMovieVoteCountsRow, error)
 	GetVoteEventsByUser(ctx context.Context, userID int64) ([]VoteEvent, error)
 }
 

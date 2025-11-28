@@ -49,6 +49,88 @@ func (q *Queries) CreateVoteEvent(ctx context.Context, arg CreateVoteEventParams
 	return i, err
 }
 
+const getUserMovieDraftCounts = `-- name: GetUserMovieDraftCounts :many
+SELECT
+  movie_id,
+  movie_name,
+  COALESCE(SUM(CASE WHEN action = 'selected' THEN 1 ELSE -1 END),0) as net_count
+FROM vote_events
+WHERE user_id = ? AND event_type = 'draft_toggle'
+GROUP BY movie_id, movie_name
+HAVING net_count > 0
+ORDER BY net_count DESC
+`
+
+type GetUserMovieDraftCountsRow struct {
+	MovieID   string      `json:"movie_id"`
+	MovieName string      `json:"movie_name"`
+	NetCount  interface{} `json:"net_count"`
+}
+
+func (q *Queries) GetUserMovieDraftCounts(ctx context.Context, userID int64) ([]GetUserMovieDraftCountsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserMovieDraftCounts, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUserMovieDraftCountsRow{}
+	for rows.Next() {
+		var i GetUserMovieDraftCountsRow
+		if err := rows.Scan(&i.MovieID, &i.MovieName, &i.NetCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserMovieVoteCounts = `-- name: GetUserMovieVoteCounts :many
+SELECT
+  movie_id,
+  movie_name,
+  COALESCE(SUM(CASE WHEN action = 'selected' THEN 1 ELSE -1 END),0) as net_count
+FROM vote_events
+WHERE user_id = ? AND event_type = 'vote_toggle'
+GROUP BY movie_id, movie_name
+HAVING net_count > 0
+ORDER BY net_count DESC
+`
+
+type GetUserMovieVoteCountsRow struct {
+	MovieID   string      `json:"movie_id"`
+	MovieName string      `json:"movie_name"`
+	NetCount  interface{} `json:"net_count"`
+}
+
+func (q *Queries) GetUserMovieVoteCounts(ctx context.Context, userID int64) ([]GetUserMovieVoteCountsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserMovieVoteCounts, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUserMovieVoteCountsRow{}
+	for rows.Next() {
+		var i GetUserMovieVoteCountsRow
+		if err := rows.Scan(&i.MovieID, &i.MovieName, &i.NetCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getVoteEventsByUser = `-- name: GetVoteEventsByUser :many
 SELECT id, user_id, event_type, "action", movie_id, movie_name, created_at FROM vote_events
 WHERE user_id = ?

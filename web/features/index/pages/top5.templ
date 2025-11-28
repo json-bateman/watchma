@@ -1,0 +1,55 @@
+package pages
+
+import (
+	"fmt"
+	"watchma/db/sqlcgen"
+)
+
+templ Top5(topWinners []sqlcgen.GetMostPopularWinningMoviesRow) {
+	<div class="container mx-auto max-w-3xl">
+		<h1
+			class="text-4xl md:text-6xl font-bold text-primary text-center mb-8
+  text-shadow-hard"
+		>
+			All Time Winning Movies
+		</h1>
+		<div class="border-4 border-primary shadow-brutalist p-6 bg-secondary/10">
+			if len(topWinners) == 0 {
+				<p class="text-primary/50 italic text-center py-8">No games completed yet</p>
+			} else {
+				<div class="space-y-3">
+					for i, winner := range topWinners {
+						<div
+							class="flex justify-between items-center p-3 border-2 border-primary/30
+  bg-background/30 hover:bg-primary/5 transition-colors"
+						>
+							<div class="flex items-center gap-4">
+								<div class="text-3xl font-bold text-primary/40">
+									#{ fmt.Sprint(i + 1) }
+								</div>
+								<div>
+									<div class="font-bold text-lg">{ winner.WinningMovieName }</div>
+									<div class="text-sm text-primary/60">
+										{ fmt.Sprint(winner.AvgVotes) } Average Votes
+									</div>
+								</div>
+							</div>
+							<div class="flex flex-col items-end">
+								<div class="text-2xl font-bold text-primary">
+									{ fmt.Sprint(winner.WinCount) }
+								</div>
+								<div class="text-xs text-primary/60 uppercase tracking-wide">
+									if winner.WinCount == 1 {
+										win
+									} else {
+										wins
+									}
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}

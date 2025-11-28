@@ -89,6 +89,7 @@ func (a *App) Initialize() error {
 		a.Settings.JellyfinApiKey,
 		a.Logger,
 		a.NATS,
+		queries,
 		&router.WebHandlerServices{
 			MovieService:   movieService,
 			RoomService:    roomService,
