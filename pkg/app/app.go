@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"watchma/db"
@@ -42,8 +43,13 @@ func (a *App) Initialize() error {
 
 	a.logConfig()
 
+	dbPath := "./watchma.db"
+	if os.Getenv("TEST_MODE") == "true" {
+		dbPath = "./watchma_test.db"
+	}
+
 	// Initialize database with goose migrations
-	db, err := db.New("./watchma.db", a.Logger)
+	db, err := db.New(dbPath, a.Logger)
 	if err != nil {
 		return fmt.Errorf("initialize database: %w", err)
 	}

@@ -72,6 +72,7 @@ export default defineConfig({
       LOG_LEVEL: "WARN",
       IS_DEV: "true",
       OPENAI_API_KEY: "",
+      TEST_MODE: "true",
     },
   },
 });

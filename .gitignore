@@ -8,6 +8,7 @@ __debug
 **/*_templ.go
 **/style.css
 watchma.db
+watchma_test.db
 
 # Playwright
 node_modules/
