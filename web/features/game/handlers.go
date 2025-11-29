@@ -90,8 +90,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if !ok {
 		h.logger.Warn("Room not found on SSE reconnect", "Room", roomName, "Username", user.Username)
-		// Send error and redirect to home
-		if err := sse.ExecuteScript("window.location.href = '/'"); err != nil {
+		if err := sse.Redirect("/"); err != nil {
 			h.logger.Warn("Error redirecting after room not found", "error", err)
 		}
 		return
@@ -101,16 +100,6 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 	userBox := pages.UserBox(myRoom, user.Username)
 	if err := sse.PatchElementTempl(userBox); err != nil {
 		h.logger.Error("Error patching initial user list", "error", err)
-	}
-
-	player, ok := myRoom.GetPlayer(user.Username)
-	if !ok {
-		h.logger.Warn("User not in room", "Username", user.Username, "Room", myRoom.Name)
-		// Send error and redirect to home
-		if err := sse.ExecuteScript("window.location.href = '/'"); err != nil {
-			h.logger.Warn("Error redirecting after player not found", "error", err)
-		}
-		return
 	}
 
 	// Send existing messages to new client
@@ -130,11 +119,6 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Subscribe Failed", http.StatusInternalServerError)
 		return
 	}
-
-	defer func() {
-		sub.Unsubscribe()
-		h.leaveRoom(w, r)
-	}()
 
 	for {
 		msg, err := sub.NextMsgWithContext(r.Context())
@@ -156,32 +140,17 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomStartEvent:
-			h.logger.Info("Received RoomStartEvent in SSE loop", "room", roomName, "user", user.Username)
-			draft := pages.Draft(player, myRoom)
-			if err := sse.PatchElementTempl(draft); err != nil {
-				h.logger.Error("Error patching draft page", "error", err, "room", roomName, "user", user.Username)
-				return
-			}
+			sse.Redirect("/room/" + roomName + "/draft")
 		case room.RoomVotingEvent:
-			movies := pages.Voting(myRoom.Game.VotingMovies, player, myRoom)
-			if err := sse.PatchElementTempl(movies); err != nil {
-				h.logger.Error("Error patching movies", "error", err)
-				return
-			}
+			sse.Redirect("/room/" + roomName + "/voting")
 		case room.RoomAnnounceEvent:
-			movies := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
-			if err := sse.PatchElementTempl(movies); err != nil {
+			streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
+			if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
 				h.logger.Error("Error patching movies", "error", err)
 				return
 			}
 		case room.RoomFinishEvent:
-			movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
-			winnerMovies := getWinnerMovies(movieVotes)
-			finalScreen := pages.ResultsScreen(winnerMovies)
-			if err := sse.PatchElementTempl(finalScreen); err != nil {
-				h.logger.Error("Error patching final screen", "error", err)
-				return
-			}
+			sse.Redirect("/room/" + roomName + "/results")
 
 		default: // discard for now, maybe error?
 		}
@@ -283,6 +252,35 @@ type movieQueryRequest struct {
 	Search string `json:"search"`
 	Genre  string `json:"genre"`
 	Sort   string `json:"sort"`
+}
+
+func (h *handlers) draft(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	user := appctx.GetUserFromRequest(r)
+
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	myRoom, ok := h.roomService.GetRoom(roomName)
+	if !ok {
+		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
+		return
+	}
+
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		http.Error(w, "no player in room", http.StatusUnauthorized)
+		return
+	}
+
+	if myRoom.Game.MaxPlayers <= len(myRoom.Players) {
+		web.RenderPage(pages.RoomFull(), roomName, w, r)
+		return
+	}
+
+	web.RenderPageNoLayout(pages.Draft(player, myRoom), myRoom.Name, w, r)
 }
 
 func (h *handlers) deleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
@@ -442,6 +440,30 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 
 // ============= VOTING HANDLERS =============
 
+func (h *handlers) voting(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	user := appctx.GetUserFromRequest(r)
+
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	myRoom, ok := h.roomService.GetRoom(roomName)
+	if !ok {
+		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
+		return
+	}
+
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		http.Error(w, "no player in room", http.StatusUnauthorized)
+		return
+	}
+
+	web.RenderPageNoLayout(pages.Voting(myRoom.Game.VotingMovies, player, myRoom), myRoom.Name, w, r)
+}
+
 func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	myRoom, ok := h.roomService.GetRoom(roomName)
@@ -539,45 +561,7 @@ func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// sortMoviesByVotes converts a vote map to a sorted slice (descending by votes)
-func sortMoviesByVotes(votes map[*movie.Movie]int) []movie.Vote {
-	movieVotes := make([]movie.Vote, 0, len(votes))
-
-	for m, voteCount := range votes {
-		movieVotes = append(movieVotes, movie.Vote{
-			Movie: m,
-			Votes: voteCount,
-		})
-	}
-
-	sort.Slice(movieVotes, func(i, j int) bool {
-		return movieVotes[i].Votes > movieVotes[j].Votes
-	})
-
-	return movieVotes
-}
-
-// getWinnerMovies returns only movies with the highest vote count
-// Since sortMoviesByVotes is ranging over a map, the selection is random
-func getWinnerMovies(moviesSortedByVote []movie.Vote) []movie.Vote {
-	if len(moviesSortedByVote) == 0 {
-		return []movie.Vote{}
-	}
-
-	maxVotes := moviesSortedByVote[0].Votes
-	var winners []movie.Vote
-
-	for _, movie := range moviesSortedByVote {
-		if movie.Votes == maxVotes {
-			winners = append(winners, movie)
-		}
-	}
-
-	return winners
-}
-
-// ============= ANNOUNCE HANDLERS =============
-func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	myRoom, _ := h.roomService.GetRoom(roomName)
 	user := appctx.GetUserFromRequest(r)
@@ -668,4 +652,66 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(3000 * time.Millisecond)
 
 	h.roomService.FinishGame(roomName)
+}
+
+// ============= RESULT HANDLERS =============
+
+func (h *handlers) results(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	myRoom, ok := h.roomService.GetRoom(roomName)
+	user := appctx.GetUserFromRequest(r)
+
+	if !ok {
+		h.logger.Warn("Not in room")
+		return
+	}
+
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
+	winnerMovies := getWinnerMovies(movieVotes)
+
+	web.RenderPage(pages.ResultsScreen(winnerMovies, myRoom), myRoom.Name, w, r)
+}
+
+// =============== HELPERS ================
+
+// sortMoviesByVotes converts a vote map to a sorted slice (descending by votes)
+func sortMoviesByVotes(votes map[*movie.Movie]int) []movie.Vote {
+	movieVotes := make([]movie.Vote, 0, len(votes))
+
+	for m, voteCount := range votes {
+		movieVotes = append(movieVotes, movie.Vote{
+			Movie: m,
+			Votes: voteCount,
+		})
+	}
+
+	sort.Slice(movieVotes, func(i, j int) bool {
+		return movieVotes[i].Votes > movieVotes[j].Votes
+	})
+
+	return movieVotes
+}
+
+// getWinnerMovies returns only movies with the highest vote count
+// Since sortMoviesByVotes is ranging over a map, the selection is random
+func getWinnerMovies(moviesSortedByVote []movie.Vote) []movie.Vote {
+	if len(moviesSortedByVote) == 0 {
+		return []movie.Vote{}
+	}
+
+	maxVotes := moviesSortedByVote[0].Votes
+	var winners []movie.Vote
+
+	for _, movie := range moviesSortedByVote {
+		if movie.Votes == maxVotes {
+			winners = append(winners, movie)
+		}
+	}
+
+	return winners
 }

@@ -1,6 +1,7 @@
 package pages 
 
 import (
+	"fmt"
 	"github.com/starfederation/datastar-go/datastar"
 	moviePkg "watchma/pkg/movie"
 	roomPkg "watchma/pkg/room"
@@ -9,7 +10,7 @@ import (
 
 templ Draft(player *roomPkg.Player, room *roomPkg.Room) {
 	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
-	<div id="moviesRoom" data-signals={ "{search:'', sort:'', genre:''}" }>
+	<div id="moviesRoom" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) } data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="my-8 flex justify-center">
 			<span class="text-5xl shadow-dance-text">Draft</span>
 		</div>

@@ -1,12 +1,14 @@
 package pages 
 
 import (
+	"fmt"
 	moviePkg "watchma/pkg/movie"
+	"watchma/pkg/room"
 	"watchma/web/views/common"
 )
 
-templ ResultsScreen(winnerMovies []moviePkg.Vote) {
-	<section data-testid="results-screen" id="moviesRoom" class="min-h-full" data-signals:movies>
+templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
+	<section class="w-full" id="moviesRoom" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }>
 		<div class="flex flex-col justify-center items-center">
 			if len(winnerMovies) > 1 {
 				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>

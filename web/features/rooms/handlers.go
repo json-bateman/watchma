@@ -112,7 +112,7 @@ func (h *handlers) hostForm(w http.ResponseWriter, r *http.Request) {
 		Votes:         make(map[*movie.Movie]int),
 	})
 
-	http.Redirect(w, r, fmt.Sprintf("/room/%s", roomName), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/room/%s/lobby", roomName), http.StatusSeeOther)
 }
 
 func atoiField(r *http.Request, key string) (int, error) {

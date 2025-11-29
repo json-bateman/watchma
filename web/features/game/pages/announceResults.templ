@@ -7,7 +7,7 @@ import (
 )
 
 templ AiAnnounce(r *roomPkg.Room, strStream []room.DialogueLine) {
-	<section data-init={ datastar.GetSSE("/announce/%s", r.Name) } id="moviesRoom">
+	<section id="moviesRoom" data-init={ datastar.GetAction("/announce/%s", r.Name) }>
 		for _, str := range strStream {
 			<div class="flex gap-4">
 				<span class="font-serif text-primary text-2xl">{ str.Character }:</span>

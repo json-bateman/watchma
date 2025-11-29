@@ -1,6 +1,7 @@
 package pages 
 
 import (
+	"fmt"
 	"github.com/starfederation/datastar-go/datastar"
 	"watchma/pkg/movie"
 	"watchma/pkg/room"
@@ -8,7 +9,7 @@ import (
 )
 
 templ Voting(votingMovies []movie.Movie, player *room.Player, room *room.Room) {
-	<section class="w-full" id="moviesRoom">
+	<section class="w-full" id="moviesRoom" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }>
 		<div class="flex flex-col w-full justify-center items-center">
 			<div class="my-8 text-center flex flex-col justify-center">
 				<span class="text-5xl shadow-dance-text">Voting</span>

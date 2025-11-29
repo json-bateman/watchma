@@ -58,7 +58,7 @@ templ RoomListBody(rooms map[string]*roomPkg.Room) {
 								Finishing
 							</span>
 						} else {
-							<a class="hover:text-primary" href={ templ.SafeURL("room/" + room.Name) }>
+							<a class="hover:text-primary" href={ templ.SafeURL("room/" + room.Name + "/lobby") }>
 								Join 
 							</a>
 						}

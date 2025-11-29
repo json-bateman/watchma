@@ -20,7 +20,7 @@ export async function createRoom(
   await page.click('button[type="submit"]');
 
   // Wait for redirect to room page
-  await page.waitForURL(`/room/${roomName}`);
+  await page.waitForURL(`/room/${roomName}/lobby`);
 }
 
 /**
@@ -31,8 +31,8 @@ export async function joinRoom(page: Page, roomName: string) {
 
   await page.waitForSelector("text=Join", { timeout: 5000 });
 
-  await page.click(`a[href="room/${roomName}"]`);
-  await page.waitForURL(`/room/${roomName}`);
+  await page.click(`a[href="room/${roomName}/lobby"]`);
+  await page.waitForURL(`/room/${roomName}/lobby`);
 }
 
 /**

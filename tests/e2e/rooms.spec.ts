@@ -13,7 +13,7 @@ test.describe("Room Management", () => {
     await signup(page, username, "ClamCHOWDA32");
     await createRoom(page, roomName, 3, 2);
 
-    await expect(page).toHaveURL(`/room/${roomName}`);
+    await expect(page).toHaveURL(`/room/${roomName}/lobby`);
 
     await page.goto("/join");
 
