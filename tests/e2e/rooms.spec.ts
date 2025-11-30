@@ -15,6 +15,13 @@ test.describe("Room Management", () => {
 
     await expect(page).toHaveURL(`/room/${roomName}/lobby`);
 
+    // Click the leave room button
+    await page.click("text=Leave Room");
+
+    // Should be redirected to home
+    await page.waitForURL("/");
+
+    // Navigate to join page to verify room is gone
     await page.goto("/join");
 
     await page.waitForTimeout(1000);

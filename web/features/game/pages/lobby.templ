@@ -88,6 +88,12 @@ templ UserBox(room *roomPkg.Room, username string) {
 		if username == room.Game.Host {
 			<span class="text-primary flex text-xl">You are the host!</span>
 		}
+		<button
+			class="btn bg-red-600 border-red-700 mb-4 uppercase tracking-wide"
+			data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => window.location.href = '/')", room.Name) }
+		>
+			Leave Room
+		</button>
 		<div class="flex h-28 justify-between bg-background border-4 border-primary p-4 shadow-brutalist">
 			<div class="w-20 text-text text-xl flex flex-col justify-center items-center">
 				<span>READY</span>
@@ -95,7 +101,7 @@ templ UserBox(room *roomPkg.Room, username string) {
 					<span>{ totalReady }/{ len(players) }</span>
 				</div>
 			</div>
-			<div>
+			<div class="flex flex-col gap-2">
 				<button
 					class="btn uppercase gap-2 tracking-wide"
 					data-on:click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }

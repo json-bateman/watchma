@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"watchma/db/sqlcgen"
 	appctx "watchma/pkg/context"
 	"watchma/pkg/movie"
 	"watchma/pkg/openai"
@@ -50,17 +51,13 @@ func newHandlers(
 
 func (h *handlers) singleRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := appctx.GetUserFromRequest(r)
-
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	user, ok := h.getUserFromRequest(w, r)
+	if !ok {
 		return
 	}
 
-	myRoom, ok := h.roomService.GetRoom(roomName)
-
+	myRoom, ok := h.getRoomByName(w, r, roomName)
 	if !ok {
-		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
 		return
 	}
 
@@ -158,30 +155,28 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) leaveRoom(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := appctx.GetUserFromRequest(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	room, ok := h.roomService.GetRoom(roomName)
+	user, ok := h.getUserFromRequest(w, r)
 	if !ok {
-		web.WriteJSONError(w, http.StatusNotFound, "Room not found")
 		return
 	}
 
-	h.roomService.RemovePlayerFromRoom(room.Name, user.Username)
+	myRoom, ok := h.getRoomByName(w, r, roomName)
+	if !ok {
+		return
+	}
 
-	allUsers := room.GetAllPlayers()
+	h.roomService.RemovePlayerFromRoom(myRoom.Name, user.Username)
+
+	allUsers := myRoom.GetAllPlayers()
 	if len(allUsers) == 0 {
-		h.roomService.DeleteRoom(room.Name)
+		h.roomService.DeleteRoom(myRoom.Name)
 		return
 	}
 
-	if room.Game.Host == user.Username {
+	if myRoom.Game.Host == user.Username {
 		// If host leaves transfer to random other user
-		for newHostUsername := range room.Players {
-			h.roomService.TransferHost(room.Name, newHostUsername)
+		for newHostUsername := range myRoom.Players {
+			h.roomService.TransferHost(myRoom.Name, newHostUsername)
 			break
 		}
 	}
@@ -197,30 +192,28 @@ func (h *handlers) publishChatMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := appctx.GetUserFromRequest(r)
-	if user == nil {
-		web.WriteJSONError(w, http.StatusUnauthorized, "Unauthorized")
+	user, ok := h.getUserFromRequest(w, r)
+	if !ok {
 		return
 	}
 
 	req.Username = user.Username
-	room, ok := h.roomService.GetRoom(req.Room)
+	myRoom, ok := h.roomService.GetRoom(req.Room)
 	if ok {
-		h.roomService.AddMessage(room.Name, req)
+		h.roomService.AddMessage(myRoom.Name, req)
 	}
 }
 
 func (h *handlers) ready(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := appctx.GetUserFromRequest(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	user, ok := h.getUserFromRequest(w, r)
+	if !ok {
 		return
 	}
 
-	room, ok := h.roomService.GetRoom(roomName)
+	myRoom, ok := h.roomService.GetRoom(roomName)
 	if ok {
-		h.roomService.TogglePlayerReady(room.Name, user.Username)
+		h.roomService.TogglePlayerReady(myRoom.Name, user.Username)
 	}
 }
 
@@ -255,22 +248,8 @@ type movieQueryRequest struct {
 
 func (h *handlers) draft(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := appctx.GetUserFromRequest(r)
-
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	myRoom, ok := h.roomService.GetRoom(roomName)
+	myRoom, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
-		return
-	}
-
-	player, ok := myRoom.GetPlayer(user.Username)
-	if !ok {
-		http.Error(w, "no player in room", http.StatusUnauthorized)
 		return
 	}
 
@@ -285,7 +264,10 @@ func (h *handlers) draft(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) deleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
-	user := appctx.GetUserFromRequest(r)
+	user, ok := h.getUserFromRequest(w, r)
+	if !ok {
+		return
+	}
 
 	// Use RoomService to handle business logic
 	if !h.roomService.RemoveDraftMovie(roomName, user.Username, movieId) {
@@ -297,13 +279,9 @@ func (h *handlers) deleteFromSelectedMovies(w http.ResponseWriter, r *http.Reque
 
 func (h *handlers) toggleDraftMovie(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
-	user := appctx.GetUserFromRequest(r)
 	roomName := chi.URLParam(r, "roomName")
-	room, _ := h.roomService.GetRoom(roomName)
-
-	player, ok := room.GetPlayer(user.Username)
+	_, user, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		h.logger.Warn("Player not in room")
 		return
 	}
 
@@ -330,19 +308,11 @@ func (h *handlers) queryMovies(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	myRoom, ok := h.roomService.GetRoom(roomName)
-
-	currentUser := appctx.GetUserFromRequest(r)
-	if currentUser == nil {
-		h.logger.Warn("No User found from session cookie")
-		return
-	}
-
-	player, ok := myRoom.GetPlayer(currentUser.Username)
+	myRoom, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		h.logger.Warn("Player not in room")
 		return
 	}
+
 	if len(player.DraftMovies) == 0 {
 		web.SendSSEError(w, r, "Must include at least 1 movie id.", h.logger)
 		return
@@ -364,22 +334,8 @@ func (h *handlers) draftSubmit(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.roomService.GetRoom(roomName)
-
+	myRoom, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		h.logger.Warn("Could not obtain room", "room", roomName)
-		return
-	}
-
-	currentUser := appctx.GetUserFromRequest(r)
-	if currentUser == nil {
-		h.logger.Warn("No User found from session cookie")
-		return
-	}
-
-	player, ok := room.GetPlayer(currentUser.Username)
-	if !ok {
-		h.logger.Warn("Player not in room")
 		return
 	}
 
@@ -431,7 +387,7 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error("Movie Query Error", "Error", err)
 	}
-	draft := pages.Draft(player, room)
+	draft := pages.Draft(player, myRoom)
 	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
 		h.logger.Error("Error Rendering Draft Page", "error", err)
 	}
@@ -441,22 +397,8 @@ func (h *handlers) renderDraftPage(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) voting(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	user := appctx.GetUserFromRequest(r)
-
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	myRoom, ok := h.roomService.GetRoom(roomName)
+	myRoom, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
-		return
-	}
-
-	player, ok := myRoom.GetPlayer(user.Username)
-	if !ok {
-		http.Error(w, "no player in room", http.StatusUnauthorized)
 		return
 	}
 
@@ -465,19 +407,11 @@ func (h *handlers) voting(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	myRoom, ok := h.roomService.GetRoom(roomName)
-
-	currentUser := appctx.GetUserFromRequest(r)
-	if currentUser == nil {
-		h.logger.Warn("No User found from session cookie")
-		return
-	}
-
-	player, ok := myRoom.GetPlayer(currentUser.Username)
+	myRoom, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		h.logger.Warn("Player not in room")
 		return
 	}
+
 	if len(player.VotingMovies) == 0 {
 		web.SendSSEError(w, r, "Must include at least 1 movie id.", h.logger)
 		return
@@ -521,11 +455,13 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) toggleVotingMovie(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
-	user := appctx.GetUserFromRequest(r)
 	roomName := chi.URLParam(r, "roomName")
-	room, _ := h.roomService.GetRoom(roomName)
+	myRoom, user, _, ok := h.getRoomUserAndPlayer(w, r, roomName)
+	if !ok {
+		return
+	}
 
-	movie := room.Game.AllMoviesMap[movieId]
+	movie := myRoom.Game.AllMoviesMap[movieId]
 
 	if !h.roomService.ToggleVotingMovie(roomName, user.Username, *movie) {
 		h.logger.Warn("Failed to toggle steps.Voting movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
@@ -535,28 +471,13 @@ func (h *handlers) toggleVotingMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
-	// Voting page needs all movies, and the room
 	roomName := chi.URLParam(r, "roomName")
-	room, ok := h.roomService.GetRoom(roomName)
-
+	myRoom, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		h.logger.Warn("Could not obtain room", "room", roomName)
 		return
 	}
 
-	currentUser := appctx.GetUserFromRequest(r)
-	if currentUser == nil {
-		h.logger.Warn("No User found from session cookie")
-		return
-	}
-
-	player, ok := room.GetPlayer(currentUser.Username)
-	if !ok {
-		h.logger.Warn("Player not in room")
-		return
-	}
-
-	draft := pages.Voting(room.Game.VotingMovies, player, room)
+	draft := pages.Voting(myRoom.Game.VotingMovies, player, myRoom)
 	if err := datastar.NewSSE(w, r).PatchElementTempl(draft); err != nil {
 		h.logger.Error("Error Rendering Voting Page", "error", err)
 	}
@@ -566,15 +487,8 @@ func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
 
 func (h *handlers) results(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	myRoom, ok := h.roomService.GetRoom(roomName)
+	myRoom, _, _, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
-		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
-		return
-	}
-
-	user := appctx.GetUserFromRequest(r)
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -632,7 +546,7 @@ func (h *handlers) generateAndStreamAnnouncement(roomName string, winnerMovie *m
 
 	// Initial drum roll
 	myRoom.Game.Announcement = []room.DialogueLine{{
-		Character: "Announcer: ",
+		Character: "Announcer ",
 		Dialogue:  "Drum Roll Please",
 	}}
 	h.roomService.StreamAnnouncement(roomName)
@@ -697,4 +611,57 @@ func (h *handlers) generateAndStreamAnnouncement(roomName string, winnerMovie *m
 	time.Sleep(3 * time.Second)
 
 	h.roomService.FinishGame(roomName)
+}
+
+// =============== VALIDATION HELPERS ================
+
+// getUserFromRequest retrieves and validates the user from the request context
+func (h *handlers) getUserFromRequest(w http.ResponseWriter, r *http.Request) (*sqlcgen.User, bool) {
+	user := appctx.GetUserFromRequest(r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return nil, false
+	}
+	return user, true
+}
+
+// getRoomByName retrieves a room by name and handles error response if not found
+func (h *handlers) getRoomByName(w http.ResponseWriter, r *http.Request, roomName string) (*room.Room, bool) {
+	myRoom, ok := h.roomService.GetRoom(roomName)
+	if !ok {
+		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
+		return nil, false
+	}
+	return myRoom, true
+}
+
+// getPlayerInRoom retrieves a player from a room and logs if not found
+func (h *handlers) getPlayerInRoom(myRoom *room.Room, username string) (*room.Player, bool) {
+	player, ok := myRoom.GetPlayer(username)
+	if !ok {
+		h.logger.Warn("Player not in room", "username", username, "room", myRoom.Name)
+		return nil, false
+	}
+	return player, true
+}
+
+// getRoomUserAndPlayer combines all three validation steps for convenience
+func (h *handlers) getRoomUserAndPlayer(w http.ResponseWriter, r *http.Request, roomName string) (*room.Room, *sqlcgen.User, *room.Player, bool) {
+	user, ok := h.getUserFromRequest(w, r)
+	if !ok {
+		return nil, nil, nil, false
+	}
+
+	myRoom, ok := h.getRoomByName(w, r, roomName)
+	if !ok {
+		return nil, nil, nil, false
+	}
+
+	player, ok := h.getPlayerInRoom(myRoom, user.Username)
+	if !ok {
+		http.Error(w, "Player not in room", http.StatusUnauthorized)
+		return nil, nil, nil, false
+	}
+
+	return myRoom, user, player, true
 }

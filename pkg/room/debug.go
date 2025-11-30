@@ -11,7 +11,6 @@ type DebugInfo struct {
 	Host          string
 	PlayerCount   int
 	Players       []PlayerDebug
-	DraftMovies   []movie.Movie
 	VotingMovies  []movie.Movie
 	MaxPlayers    int
 	MaxDraftCount int
@@ -59,7 +58,6 @@ func (rs *Service) GetDebugSnapshot() []DebugInfo {
 			MaxDraftCount: room.Game.MaxDraftCount,
 			Players:       players,
 			VotingMovies:  room.Game.VotingMovies,
-			DraftMovies:   room.Game.VotingMovies,
 		})
 
 		room.mu.RUnlock()

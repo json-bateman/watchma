@@ -27,6 +27,7 @@ func SetupRoutes(
 	r.Post("/message", handlers.publishChatMessage)
 	r.Post("/room/{roomName}/ready", handlers.ready)
 	r.Post("/room/{roomName}/start", handlers.startGame)
+	r.Post("/room/{roomName}/leave", handlers.leaveRoom)
 
 	// Draft
 	r.Get("/room/{roomName}/draft", handlers.draft)

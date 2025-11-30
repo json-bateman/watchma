@@ -104,11 +104,11 @@ templ Debug(roomSnapshot []room.DebugInfo, user *sqlcgen.User) {
 										</div>
 									</div>
 								}
-								if len(room.DraftMovies) > 0 {
+								if len(room.VotingMovies) > 0 {
 									<div class="mt-4">
-										<h4 class="font-bold text-primary mb-2">Draft Movies ({ fmt.Sprint(len(room.DraftMovies)) }):</h4>
+										<h4 class="font-bold text-primary mb-2">Draft Movies ({ fmt.Sprint(len(room.VotingMovies)) }):</h4>
 										<div class="space-y-1 max-h-32 overflow-y-auto">
-											for _, movie := range room.DraftMovies {
+											for _, movie := range room.VotingMovies {
 												<div class="text-sm border-l-2 border-primary pl-2">{ movie.Name }</div>
 											}
 										</div>

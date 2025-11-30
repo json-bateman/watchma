@@ -15,20 +15,24 @@ templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
 			} else {
 				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winner is:</span>
 			}
-			<div class="text-text flex flex-col items-center justify-center">
-				<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
-					for _, movieVote := range winnerMovies {
-						<div class="block glow-border w-72 h-[428px] md:w-96 md:h-[572px]">
-							@common.MovieTitleImage(*movieVote.Movie, common.MovieTitleImageOptions{})
-						</div>
-					}
-				</div>
-				if winnerMovies[0].Votes > 1 {
-					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Votes!</div>
-				} else {
-					<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Vote!</div>
+			<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
+				for _, movieVote := range winnerMovies {
+					<div class="block glow-border w-72 h-[428px] md:w-96 md:h-[572px]">
+						@common.MovieTitleImage(*movieVote.Movie, common.MovieTitleImageOptions{})
+					</div>
 				}
 			</div>
+			if winnerMovies[0].Votes > 1 {
+				<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Votes!</div>
+			} else {
+				<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Vote!</div>
+			}
+			<button
+				class="btn bg-red-600 border-red-700 mt-4 uppercase tracking-wide"
+				data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => window.location.href = '/')", room.Name) }
+			>
+				Back To Home
+			</button>
 		</div>
 	</section>
 }
