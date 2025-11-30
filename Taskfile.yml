@@ -38,6 +38,16 @@ tasks:
       - go build -o ./release/watchma ./cmd/main.go
       - echo "Release built in ./release/"
 
+  docker:build:
+    desc: Build multi-platform Docker image and push to Docker Hub
+    cmds:
+      - ./build-and-push.sh {{.CLI_ARGS}}
+
+  docker:build-local:
+    desc: Build Docker image for local platform only
+    cmds:
+      - docker build -t watchma:local .
+
   # Utility tasks
   clean:
     desc: Clean build artifacts
