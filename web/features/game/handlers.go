@@ -144,7 +144,10 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		case room.RoomVotingEvent:
 			sse.Redirect("/room/" + roomName + "/voting")
 		case room.RoomAnnounceEvent:
-			sse.Redirect("/room/" + roomName + "/announce")
+			streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
+			if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
+				return
+			}
 		case room.RoomFinishEvent:
 			sse.Redirect("/room/" + roomName + "/results")
 
@@ -506,8 +509,10 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 			}
 			h.roomService.MoveToVoting(myRoom.Name)
 		} else {
-			myRoom.Game.Step = room.Results
-			h.roomService.AnnounceWinner(roomName)
+			myRoom.Game.Step = room.Announce
+			// Trigger announcement with AI generation
+			h.generateAndStreamAnnouncement(roomName, tiedMovies[0].Movie)
+			// h.roomService.AnnounceWinner(roomName)
 		}
 	} else {
 		h.renderVotingPage(w, r)
@@ -557,7 +562,9 @@ func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
+// ============= RESULTS HANDLERS =============
+
+func (h *handlers) results(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	myRoom, ok := h.roomService.GetRoom(roomName)
 	if !ok {
@@ -565,123 +572,16 @@ func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	myRoom.Game.Announcement = []room.DialogueLine{
-		{
-			Character: "Announcer: ",
-			Dialogue:  "Drum Roll Please",
-		},
-	}
-
-	web.RenderPageNoLayout(pages.AiAnnounce(myRoom, myRoom.Game.Announcement), myRoom.Name, w, r)
-}
-
-func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-	myRoom, ok := h.roomService.GetRoom(roomName)
-	if !ok {
-		h.logger.Warn("Could not obtain room", "room", roomName)
-		return
-	}
 	user := appctx.GetUserFromRequest(r)
-	player, ok := myRoom.GetPlayer(user.Username)
-	if !ok {
-		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
-	sorted := sortMoviesByVotes(myRoom.Game.Votes)
-	winners := getWinnerMovies(sorted)
-
-	myRoom.Game.Announcement = []room.DialogueLine{}
-
-	buildGptMessage := fmt.Sprintf(`You are writing a reveal scene for: %s
-
-  Write a dialogue-only scene using this EXACT format:
-
-  **[Character Name]:** *"their dialogue"*
-  **[Different Character]:** *"their response"*
-
-  RULES:
-  1. Use 2-4 characters from the movie
-  2. Each character speaks 1-2 times
-  3. Include character catchphrases naturally
-  4. Build suspense without saying the movie title
-  5. NO actor names, NO spoilers, NO narration, NO movie title
-  6. Match the movie's genre/tone
-  7. Keep your responses TERSE
-
-  EXAMPLE (for a different movie):
-  **Morpheus:** *"What if I told you... we're the ones they chose?"*
-  **Trinity:** *"The question isn't how, it's why."*
-
-  NOW write the scene for:`, winners[0].Movie.Name)
-
-	var finalMessage string
-	if h.openAiProvider != nil && player.Username == myRoom.Game.Host {
-		var err error
-		finalMessage, err = h.openAiProvider.FetchAiResponse(buildGptMessage)
-		if err != nil {
-			h.logger.Error("AI request failed", "error", err)
-		}
-	}
-
-	dialogueRegex := regexp.MustCompile(`\*\*\[?([^\]:]+)\]?:\*\*\s*\*"([^"]+)"\*`)
-
-	// Example len() == 3 Match:
-	// ["**[Trinity]:** *"The question isn't how, it's why."*", "Trinity", "The question isn't how, it's why."]
-
-	matches := dialogueRegex.FindAllStringSubmatch(finalMessage, -1)
-	lines := make([]room.DialogueLine, 0, len(matches))
-
-	for _, match := range matches {
-		if len(match) == 3 {
-			lines = append(lines, room.DialogueLine{
-				Character: strings.TrimSpace(match[1]),
-				Dialogue:  strings.TrimSpace(match[2]),
-			})
-		}
-	}
-
-	sse := datastar.NewSSE(w, r)
-	for _, line := range lines {
-		myRoom.Game.Announcement = append(myRoom.Game.Announcement, line)
-		streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
-		if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
-			return
-		}
-
-		time.Sleep(2000 * time.Millisecond)
-	}
-
-	myRoom.Game.Announcement = []room.DialogueLine{{
-		Character: "Announcer",
-		Dialogue:  "And the Winner Is...",
-	}}
-
-	streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
-	if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
-		return
-	}
-	time.Sleep(3000 * time.Millisecond)
-
-	// Finish Game
-	myRoom.Game.Step = room.Results
-	h.logger.Info("Game Finished", "roomName", roomName)
-
-	// Save Game result and participants to DB
-	go func() {
-		if err := h.roomService.SaveGameResult(roomName); err != nil {
-			h.logger.Error("Failed to save game result", "error", err, "room", roomName)
-		}
-	}()
 
 	movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
 	winnerMovies := getWinnerMovies(movieVotes)
 
-	results := pages.ResultsScreen(winnerMovies, myRoom)
-	if err := sse.PatchElementTempl(results); err != nil {
-		return
-	}
+	web.RenderPage(pages.ResultsScreen(winnerMovies, myRoom), myRoom.Name, w, r)
 }
 
 // =============== HELPERS ================
@@ -721,4 +621,80 @@ func getWinnerMovies(moviesSortedByVote []movie.Vote) []movie.Vote {
 	}
 
 	return winners
+}
+
+// generateAndStreamAnnouncement runs AI generation once and streams to all clients via NATS
+func (h *handlers) generateAndStreamAnnouncement(roomName string, winnerMovie *movie.Movie) {
+	myRoom, ok := h.roomService.GetRoom(roomName)
+	if !ok {
+		return
+	}
+
+	// Initial drum roll
+	myRoom.Game.Announcement = []room.DialogueLine{{
+		Character: "Announcer: ",
+		Dialogue:  "Drum Roll Please",
+	}}
+	h.roomService.StreamAnnouncement(roomName)
+	time.Sleep(2 * time.Second)
+
+	// Clear and generate AI dialogue
+	myRoom.Game.Announcement = []room.DialogueLine{}
+
+	buildGptMessage := fmt.Sprintf(`You are writing a reveal scene for: %s
+
+  Write a dialogue-only scene using this EXACT format:
+
+  **[Character Name]:** *"their dialogue"*
+  **[Different Character]:** *"their response"*
+
+  RULES:
+  1. Use 2-4 characters from the movie
+  2. Each character speaks 1-2 times
+  3. Include character catchphrases naturally
+  4. Build suspense without saying the movie title
+  5. NO actor names, NO spoilers, NO narration, NO movie title
+  6. Match the movie's genre/tone
+  7. Keep your responses TERSE
+
+  EXAMPLE (for a different movie):
+  **Morpheus:** *"What if I told you... we're the ones they chose?"*
+  **Trinity:** *"The question isn't how, it's why."*
+
+  NOW write the scene for:`, winnerMovie.Name)
+
+	var finalMessage string
+	if h.openAiProvider != nil {
+		var err error
+		finalMessage, err = h.openAiProvider.FetchAiResponse(buildGptMessage)
+		if err != nil {
+			h.logger.Error("AI request failed", "error", err)
+		}
+	}
+
+	dialogueRegex := regexp.MustCompile(`\*\*\[?([^\]:]+)\]?:\*\*\s*\*"([^"]+)"\*`)
+	matches := dialogueRegex.FindAllStringSubmatch(finalMessage, -1)
+
+	// Stream each dialogue line
+	for _, match := range matches {
+		if len(match) == 3 {
+			line := room.DialogueLine{
+				Character: strings.TrimSpace(match[1]),
+				Dialogue:  strings.TrimSpace(match[2]),
+			}
+			myRoom.Game.Announcement = append(myRoom.Game.Announcement, line)
+			h.roomService.StreamAnnouncement(roomName)
+			time.Sleep(2 * time.Second)
+		}
+	}
+
+	// Final announcement
+	myRoom.Game.Announcement = []room.DialogueLine{{
+		Character: "Announcer",
+		Dialogue:  "And the Winner Is...",
+	}}
+	h.roomService.StreamAnnouncement(roomName)
+	time.Sleep(3 * time.Second)
+
+	h.roomService.FinishGame(roomName)
 }

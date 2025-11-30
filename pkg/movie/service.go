@@ -121,7 +121,7 @@ func sortMovies(movies []Movie, sortBy SortField, descending bool) {
 //
 // Returns an error if fetching movies fails or if no movies are available.
 func (s *Service) GetMovieOfTheDay() (Movie, error) {
-	now := time.Now().UTC()
+	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 
 	if s.cachedDay.Equal(today) {

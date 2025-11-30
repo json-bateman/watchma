@@ -40,9 +40,8 @@ func SetupRoutes(
 	r.Post("/voting/{roomName}/submit", handlers.votingSubmit)
 	r.Patch("/voting/{roomName}/{id}", handlers.toggleVotingMovie)
 
-	// Announce
-	r.Get("/room/{roomName}/announce", handlers.announce)
-	r.Get("/announce/{roomName}", handlers.announceSSE)
+	// Results
+	r.Get("/room/{roomName}/results", handlers.results)
 
 	return nil
 }

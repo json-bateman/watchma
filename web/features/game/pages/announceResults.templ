@@ -1,13 +1,12 @@
 package pages 
 
 import (
-	"fmt"
 	"watchma/pkg/room"
 	roomPkg "watchma/pkg/room"
 )
 
 templ AiAnnounce(r *roomPkg.Room, strStream []room.DialogueLine) {
-	<section id="moviesRoom" data-init={ fmt.Sprintf("@get('/announce/%s')", r.Name) }>
+	<section id="moviesRoom">
 		for _, str := range strStream {
 			<div class="flex gap-4">
 				<span class="font-serif text-primary text-2xl">{ str.Character }:</span>
