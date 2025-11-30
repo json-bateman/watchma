@@ -362,12 +362,6 @@
   .min-h-\[60vh\] {
     min-height: 60vh;
   }
-  .min-h-full {
-    min-height: 100%;
-  }
-  .\!w-16 {
-    width: calc(var(--spacing) * 16) !important;
-  }
   .w-1\/2 {
     width: calc(1/2 * 100%);
   }
@@ -376,6 +370,9 @@
   }
   .w-6 {
     width: calc(var(--spacing) * 6);
+  }
+  .w-16 {
+    width: calc(var(--spacing) * 16);
   }
   .w-20 {
     width: calc(var(--spacing) * 20);

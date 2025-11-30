@@ -1,13 +1,13 @@
 package pages 
 
 import (
-	"github.com/starfederation/datastar-go/datastar"
+	"fmt"
 	"watchma/pkg/room"
 	roomPkg "watchma/pkg/room"
 )
 
 templ AiAnnounce(r *roomPkg.Room, strStream []room.DialogueLine) {
-	<section id="moviesRoom" data-init={ datastar.GetAction("/announce/%s", r.Name) }>
+	<section id="moviesRoom" data-init={ fmt.Sprintf("@get('/announce/%s')", r.Name) }>
 		for _, str := range strStream {
 			<div class="flex gap-4">
 				<span class="font-serif text-primary text-2xl">{ str.Character }:</span>

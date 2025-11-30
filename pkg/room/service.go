@@ -197,10 +197,6 @@ func (rs *Service) AnnounceWinner(roomName string) bool {
 	return true
 }
 
-func (rs *Service) StreamAnnouncement(roomName string) {
-	rs.pub.PublishRoomEvent(roomName, RoomAnnounceEvent)
-}
-
 func (rs *Service) FinishGame(roomName string) bool {
 	room, ok := rs.GetRoom(roomName)
 	if !ok {

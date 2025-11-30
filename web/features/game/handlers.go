@@ -144,11 +144,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		case room.RoomVotingEvent:
 			sse.Redirect("/room/" + roomName + "/voting")
 		case room.RoomAnnounceEvent:
-			streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
-			if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
-				h.logger.Error("Error patching movies", "error", err)
-				return
-			}
+			sse.Redirect("/room/" + roomName + "/announce")
 		case room.RoomFinishEvent:
 			sse.Redirect("/room/" + roomName + "/results")
 
@@ -561,22 +557,11 @@ func (h *handlers) renderVotingPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
+func (h *handlers) announce(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
-	myRoom, _ := h.roomService.GetRoom(roomName)
-	user := appctx.GetUserFromRequest(r)
-	player, ok := myRoom.GetPlayer(user.Username)
-
+	myRoom, ok := h.roomService.GetRoom(roomName)
 	if !ok {
-		h.logger.Warn("Player not in room")
-		return
-	}
-
-	sorted := sortMoviesByVotes(myRoom.Game.Votes)
-	winners := getWinnerMovies(sorted)
-
-	if player.Username != myRoom.Game.Host {
-		// Exit early, only the host generates the GPT response for the room
+		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
 		return
 	}
 
@@ -586,7 +571,27 @@ func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
 			Dialogue:  "Drum Roll Please",
 		},
 	}
-	h.roomService.StreamAnnouncement(roomName)
+
+	web.RenderPageNoLayout(pages.AiAnnounce(myRoom, myRoom.Game.Announcement), myRoom.Name, w, r)
+}
+
+func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
+	roomName := chi.URLParam(r, "roomName")
+	myRoom, ok := h.roomService.GetRoom(roomName)
+	if !ok {
+		h.logger.Warn("Could not obtain room", "room", roomName)
+		return
+	}
+	user := appctx.GetUserFromRequest(r)
+	player, ok := myRoom.GetPlayer(user.Username)
+	if !ok {
+		web.RenderPage(pages.NoRoom(roomName), roomName, w, r)
+		return
+	}
+
+	sorted := sortMoviesByVotes(myRoom.Game.Votes)
+	winners := getWinnerMovies(sorted)
+
 	myRoom.Game.Announcement = []room.DialogueLine{}
 
 	buildGptMessage := fmt.Sprintf(`You are writing a reveal scene for: %s
@@ -612,7 +617,7 @@ func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
   NOW write the scene for:`, winners[0].Movie.Name)
 
 	var finalMessage string
-	if h.openAiProvider != nil {
+	if h.openAiProvider != nil && player.Username == myRoom.Game.Host {
 		var err error
 		finalMessage, err = h.openAiProvider.FetchAiResponse(buildGptMessage)
 		if err != nil {
@@ -637,9 +642,14 @@ func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	sse := datastar.NewSSE(w, r)
 	for _, line := range lines {
 		myRoom.Game.Announcement = append(myRoom.Game.Announcement, line)
-		h.roomService.StreamAnnouncement(roomName)
+		streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
+		if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
+			return
+		}
+
 		time.Sleep(2000 * time.Millisecond)
 	}
 
@@ -648,33 +658,30 @@ func (h *handlers) announceSSE(w http.ResponseWriter, r *http.Request) {
 		Dialogue:  "And the Winner Is...",
 	}}
 
-	h.roomService.StreamAnnouncement(roomName)
+	streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
+	if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
+		return
+	}
 	time.Sleep(3000 * time.Millisecond)
 
-	h.roomService.FinishGame(roomName)
-}
+	// Finish Game
+	myRoom.Game.Step = room.Results
+	h.logger.Info("Game Finished", "roomName", roomName)
 
-// ============= RESULT HANDLERS =============
-
-func (h *handlers) results(w http.ResponseWriter, r *http.Request) {
-	roomName := chi.URLParam(r, "roomName")
-	myRoom, ok := h.roomService.GetRoom(roomName)
-	user := appctx.GetUserFromRequest(r)
-
-	if !ok {
-		h.logger.Warn("Not in room")
-		return
-	}
-
-	if user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	// Save Game result and participants to DB
+	go func() {
+		if err := h.roomService.SaveGameResult(roomName); err != nil {
+			h.logger.Error("Failed to save game result", "error", err, "room", roomName)
+		}
+	}()
 
 	movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
 	winnerMovies := getWinnerMovies(movieVotes)
 
-	web.RenderPage(pages.ResultsScreen(winnerMovies, myRoom), myRoom.Name, w, r)
+	results := pages.ResultsScreen(winnerMovies, myRoom)
+	if err := sse.PatchElementTempl(results); err != nil {
+		return
+	}
 }
 
 // =============== HELPERS ================
