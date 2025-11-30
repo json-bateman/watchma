@@ -253,11 +253,6 @@ func (h *handlers) draft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if myRoom.Game.MaxPlayers <= len(myRoom.Players) {
-		web.RenderPage(pages.RoomFull(), roomName, w, r)
-		return
-	}
-
 	web.RenderPageNoLayout(pages.Draft(player, myRoom), myRoom.Name, w, r)
 }
 

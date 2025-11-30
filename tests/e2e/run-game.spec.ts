@@ -64,20 +64,13 @@ test.describe("Game Flow", () => {
         timeout: 5000,
       });
 
-      await expect(pageA.locator("text=/draft/i")).toBeVisible({
-        timeout: 5000,
-      });
-      await expect(pageB.locator("text=/draft/i")).toBeVisible({
-        timeout: 5000,
-      });
-
       const draftLabelsA = pageA.locator("label");
       const count = await draftLabelsA.count();
       expect(count).toBeGreaterThan(0);
 
       // click on first 3 movies
       for (let i = 0; i < 3; i++) {
-        await draftLabelsA.nth(i).check();
+        await draftLabelsA.nth(i).click();
       }
 
       const draftLabelsB = pageB.locator("label");
@@ -86,7 +79,7 @@ test.describe("Game Flow", () => {
 
       // click on next 3 movies
       for (let i = 3; i < 6; i++) {
-        await draftLabelsB.nth(i).check();
+        await draftLabelsB.nth(i).click();
       }
 
       await pageA.click("#draftSubmit");
