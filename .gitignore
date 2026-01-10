@@ -7,8 +7,7 @@ __debug
 .sqlfluff
 **/*_templ.go
 **/style.css
-watchma.db
-watchma_test.db
+data/
 
 # Playwright
 node_modules/

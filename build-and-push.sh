@@ -3,7 +3,7 @@
 # Exit on error
 set -e
 
-DOCKER_USERNAME="jsonbateman"
+DOCKER_USERNAME=${DOCKER_USERNAME:-"jsonbateman"}
 IMAGE_NAME="watchma"
 VERSION=${1:-latest}
 

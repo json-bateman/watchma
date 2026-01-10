@@ -48,6 +48,12 @@ WORKDIR /app
 COPY --from=builder /app/watchma .
 COPY --from=builder /app/public ./public
 
+# Create data directory for database
+RUN mkdir -p /app/data
+
+# Declare volume for persistent data
+VOLUME ["/app/data"]
+
 EXPOSE 58008
 
 CMD ["./watchma"]

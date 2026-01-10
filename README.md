@@ -50,3 +50,30 @@ Testing is put in place on push to prevent regression, if your git client is giv
 detailed errors.
 
 **NOTE:** You cannot have the app running when you run playwright tests, full e2e tests mean it needs the ports for NATS and the app itself
+
+## Deployment
+
+### Building and Pushing Docker Image
+Build and push multi-platform Docker images (linux/amd64 and linux/arm64) to Docker Hub:
+
+```bash
+# Build and push latest
+./build-and-push.sh
+
+# Build and push specific version
+./build-and-push.sh v1.2.3
+```
+
+**Note:** Make sure you're logged in to Docker Hub first:
+```bash
+docker login
+```
+
+To use your own Docker Hub username, set the `DOCKER_USERNAME` environment variable:
+```bash
+DOCKER_USERNAME=yourusername ./build-and-push.sh
+```
+
+## Support
+
+If you *really* enjoy using Watchma, [I'm a simple man, I like money](https://ko-fi.com/jsonbateman). But mainly, thanks for trying it out!

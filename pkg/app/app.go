@@ -43,9 +43,14 @@ func (a *App) Initialize() error {
 
 	a.logConfig()
 
-	dbPath := "./watchma.db"
+	dbPath := "./data/watchma.db"
 	if os.Getenv("TEST_MODE") == "true" {
-		dbPath = "./watchma_test.db"
+		dbPath = "./data/watchma_test.db"
+	}
+
+	// Ensure data directory exists
+	if err := os.MkdirAll("./data", 0755); err != nil {
+		return fmt.Errorf("create data directory: %w", err)
 	}
 
 	// Initialize database with goose migrations
