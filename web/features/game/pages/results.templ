@@ -35,4 +35,20 @@ templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
 			</button>
 		</div>
 	</section>
+	<script>
+		(function() {
+			var leaveUrl = '/room/' + {{ room.Name }} + '/leave';
+			var hasLeft = false;
+
+			function leaveRoom() {
+				if (!hasLeft) {
+					hasLeft = true;
+					navigator.sendBeacon(leaveUrl);
+				}
+			}
+
+			// pagehide fires when user actually leaves (refresh, close, navigate away)
+			window.addEventListener('pagehide', leaveRoom);
+		})();
+	</script>
 }

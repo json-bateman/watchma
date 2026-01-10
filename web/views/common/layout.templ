@@ -11,7 +11,6 @@ type PageContext struct {
 	User         *sqlcgen.User
 	HeaderFooter bool
 	Content      templ.Component
-	IsDev        bool
 }
 
 templ Layout(pc PageContext) {

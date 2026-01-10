@@ -436,6 +436,7 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 				p.VotingMovies = []movie.Movie{}
 				p.HasFinishedVoting = false
 			}
+			h.logger.Info("Tie detected, moving to revote", "roomName", roomName, "tiedMovies", len(tiedMovies), "votes", tiedMovies[0].Votes)
 			h.roomService.MoveToVoting(myRoom.Name)
 		} else {
 			myRoom.Game.Step = room.Announce

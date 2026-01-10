@@ -19,13 +19,18 @@ The voting system is influenced by the young CGP Grey. [Everyone Should Vote Mor
 - [tailwindcss](https://github.com/tailwindlabs/tailwindcss/) - Download from Releases
 
 ### Setting .env variables
-Must have a Jellyfin server with API key in your `.env` for this to run properly. For a fun message that plays before the end of the game, you can include an `OPENAI_API_KEY`, it only uses one small token request at the end of each game. 100 games has cost me ~ $0.01. If you don't define `OPENAI_API_KEY` that's ok, the app will still run just fine.
+Copy `.env.example` to `.env` and fill in your values:
+```bash
+cp .env.example .env
+```
 
-`JELLYFIN_API_KEY`  
-`JELLYFIN_BASE_URL`  
-`OPENAI_API_KEY`  
-`PORT`  (to run the app on)  
-`LOG_LEVEL` (DEBUG | INFO | WARN | ERROR)  
+**Optional:** Configure Jellyfin credentials to fetch real movie data. Without these, the app will use dummy data for testing:
+- `JELLYFIN_API_KEY`
+- `JELLYFIN_BASE_URL`
+
+**Optional:** Add `OPENAI_API_KEY` for AI-generated game messages. Uses ~$0.01 per 100 games.
+
+See `.env.example` for all available configuration options including `PORT`, `LOG_LEVEL`, and `IS_DEV`.  
 
 ### Using Bruno (basically offline postman)
 I have some of the api endpoints saved in the _bruno folder [install bruno](https://www.usebruno.com/) if you want to use these endpoints. Make sure to copy your `.env` file in the root of the `_bruno` directory so the endpoints can use the environment variables in their requests. Jellyfin requires an API key in each of it's requests. [here's](https://docs.usebruno.com/secrets-management/dotenv-file) some info on how to store bruno secrets.
@@ -40,6 +45,8 @@ I have this project split into distinct layers to keep things organized.
 
 ### Testing
 
-Right now I have basic clickthrough testing setup using playwright, `npm test` or `npm run test:ui` for detailed results
+Right now I have basic clickthrough testing setup using playwright, `npm test` or `npm run test:ui` for detailed results.
 Testing is put in place on push to prevent regression, if your git client is giving you an error, try running `npm test` to see more
 detailed errors.
+
+**NOTE:** You cannot have the app running when you run playwright tests, full e2e tests mean it needs the ports for NATS and the app itself

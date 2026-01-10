@@ -15,7 +15,7 @@ templ Voting(votingMovies []movie.Movie, player *room.Player, room *room.Room) {
 				<span class="text-5xl shadow-dance-text">Voting</span>
 				if room.Game.VotingNumber > 0 {
 					<div class="mt-4">
-						There was a&nbsp; 
+						There was a&nbsp;
 						<span class="text-2xl text-primary">Tie Vote</span>&nbsp;
 						with&nbsp;
 						<span class="text-primary text-2xl">{ room.Game.VotingNumber } votes!</span>
@@ -34,6 +34,31 @@ templ Voting(votingMovies []movie.Movie, player *room.Player, room *room.Room) {
 			</div>
 		</div>
 	</section>
+	<script>
+		(function() {
+			var leaveUrl = '/room/' + {{ room.Name }} + '/leave';
+			var hasLeft = false;
+
+			function leaveRoom() {
+				if (!hasLeft) {
+					hasLeft = true;
+					navigator.sendBeacon(leaveUrl);
+				}
+			}
+
+			// Custom modal for back button
+			window.history.pushState(null, null, window.location.href);
+			window.addEventListener('popstate', function(event) {
+				if (confirm('Leaving this page will remove you from the game. Are you sure?')) {
+					leaveRoom();
+					window.history.back();
+				} else {
+					// Stay on page
+					window.history.pushState(null, null, window.location.href);
+				}
+			});
+		})();
+	</script>
 }
 
 templ VotingGrid(movies []movie.Movie, selectedMovies []movie.Movie, room *room.Room) {

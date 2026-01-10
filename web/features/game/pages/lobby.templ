@@ -60,6 +60,31 @@ templ Lobby(room *roomPkg.Room, username string) {
 			</div>
 		</div>
 	</section>
+	<script>
+		(function() {
+			var leaveUrl = '/room/' + {{ room.Name }} + '/leave';
+			var hasLeft = false;
+
+			function leaveRoom() {
+				if (!hasLeft) {
+					hasLeft = true;
+					navigator.sendBeacon(leaveUrl);
+				}
+			}
+
+			// Custom modal for back button
+			window.history.pushState(null, null, window.location.href);
+			window.addEventListener('popstate', function(event) {
+				if (confirm('Leaving this page will remove you from the room. Are you sure?')) {
+					leaveRoom();
+					window.history.back();
+				} else {
+					// Stay on page
+					window.history.pushState(null, null, window.location.href);
+				}
+			});
+		})();
+	</script>
 }
 
 templ ChatBox(messages []roomPkg.Message) {

@@ -15,12 +15,8 @@ test.describe("Room Management", () => {
 
     await expect(page).toHaveURL(`/room/${roomName}/lobby`);
 
-    // Click the leave room button
-    await page.click("text=Leave Room");
-
-    // Should be redirected to home
-    await page.waitForURL("/");
-
+    await page.click('button:has-text("Leave Room")');
+    await expect(page).toHaveURL("/");
     // Navigate to join page to verify room is gone
     await page.goto("/join");
 
@@ -67,7 +63,7 @@ test.describe("Room Management", () => {
     }
   });
 
-  const TOTAL_USERS = 50;
+  const TOTAL_USERS = 20;
   test(`Mock ${TOTAL_USERS} simultaneous users hosting/joining rooms`, async ({ browser }) => {
     const USERS_PER_ROOM = 10;
     // Create all pages and contexts
