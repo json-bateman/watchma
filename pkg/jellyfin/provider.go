@@ -57,9 +57,19 @@ func (p *JellyfinMovieProvider) FetchMovies() ([]movie.Movie, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		p.logger.Error("Jellyfin returned error status",
+			"status_code", resp.StatusCode,
+			"status", resp.Status,
+			"baseUrl", p.baseUrl,
+			"reqUri", req.RequestURI,
+		)
+		return nil, fmt.Errorf("jellyfin returned status %d: %s (check API key and URL)", resp.StatusCode, resp.Status)
+	}
+
 	var result jellyfinResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		p.logger.Error("Error decoding jellyfin movies", "error", err)
+		p.logger.Error("Error decoding jellyfin movies", "error", err, "status_code", resp.StatusCode)
 		return nil, err
 	}
 

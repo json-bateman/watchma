@@ -43,7 +43,7 @@ templ Layout(pc PageContext) {
 			<title>{ pc.Title }</title>
 		</head>
 		<body class="bg-background h-svh font-serif">
-			<main class="text-text h-full flex flex-col p-4">
+			<main class="text-text h-full flex flex-col p-2 sm:p-4 mb-4">
 				if pc.HeaderFooter {
 					<header class="mb-12 flex justify-between">
 						<div class="flex items-center gap-4">
@@ -88,7 +88,7 @@ templ Layout(pc PageContext) {
 					@pc.Content
 				</div>
 				if pc.HeaderFooter {
-					<footer class="border-t-3  text-shadow-hard pt-2 mt-8 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
+					<footer class="border-t-3  text-shadow-hard pt-2 mt-8 pb-2 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
 						<span>JsonB { time.Now().Year() } </span>
 						<a href="https://github.com/json-bateman" class="w-6 h-6">
 							<img src="/public/github-logo.svg"/>

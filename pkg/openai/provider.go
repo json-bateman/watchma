@@ -98,8 +98,21 @@ func (o *Provider) FetchAiResponse(contentToSend string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		o.logger.Error("OpenAI API returned non-200 status", "status", resp.StatusCode)
-		return "", fmt.Errorf("OpenAI API returned status %d", resp.StatusCode)
+		var errorBody map[string]any
+		if err := json.NewDecoder(resp.Body).Decode(&errorBody); err == nil {
+			o.logger.Error("OpenAI API returned error",
+				"status_code", resp.StatusCode,
+				"status", resp.Status,
+				"error", errorBody,
+			)
+			return "", fmt.Errorf("OpenAI API error %d: %s", resp.StatusCode, resp.Status)
+		}
+
+		o.logger.Error("OpenAI API returned error",
+			"status_code", resp.StatusCode,
+			"status", resp.Status,
+		)
+		return "", fmt.Errorf("OpenAI API returned status %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	var result ChatCompletionResponse

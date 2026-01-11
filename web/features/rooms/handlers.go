@@ -90,6 +90,11 @@ func (h *handlers) hostForm(w http.ResponseWriter, r *http.Request) {
 
 	roomName := r.FormValue("roomName")
 
+	if !isValidRoomName(roomName) {
+		http.Error(w, "Room name can only contain letters, numbers, hyphens, and underscores", http.StatusBadRequest)
+		return
+	}
+
 	movies, err := atoiField(r, "draftNumber")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -125,4 +130,20 @@ func atoiField(r *http.Request, key string) (int, error) {
 		return 0, fmt.Errorf("invalid %s: %w", key, err)
 	}
 	return i, nil
+}
+
+func isValidRoomName(name string) bool {
+	if name == "" {
+		return false
+	}
+	// Only allow alphanumeric characters, hyphens, and underscores
+	for _, char := range name {
+		if !((char >= 'a' && char <= 'z') ||
+			(char >= 'A' && char <= 'Z') ||
+			(char >= '0' && char <= '9') ||
+			char == '-' || char == '_') {
+			return false
+		}
+	}
+	return true
 }

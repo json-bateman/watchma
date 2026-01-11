@@ -36,9 +36,9 @@ templ Lobby(room *roomPkg.Room, username string) {
 			</div>
 			<!-- Chatbox -->
 			<div>
-				<div class="flex gap-2">
+				<div class="flex flex-wrap mb-2 gap-2">
 					<input
-						class="input mb-2"
+						class="input"
 						placeholder="chat message..."
 						data-bind:message
 						data-on:keydown="if (evt.key !== 'Enter' || !$message.trim().length) return; @post('/message');$message = '';"
@@ -51,7 +51,7 @@ templ Lobby(room *roomPkg.Room, username string) {
 					</button>
 				</div>
 				<div
-					id="container"
+					id="container mb-4"
 					class="shadow-brutalist border-primary border-4"
 					data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }
 				>

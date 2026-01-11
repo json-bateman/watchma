@@ -6,7 +6,16 @@ templ HostPage() {
 		<form action="/host" method="POST" class="flex flex-col gap-2">
 			<div class="flex flex-col [&>*:nth-child(odd)]:mb-1 [&>*:nth-child(even)]:mb-4 max-w-52">
 				<label class="label" for="room-name">Room name</label>
-				<input id="room-name" class="input" name="roomName" required placeholder="Room Name..." spellcheck="false"/>
+				<input
+					id="room-name"
+					class="input"
+					name="roomName"
+					required
+					pattern="[A-Za-z0-9_-]+"
+					title="Only letters, numbers, hyphens, and underscores allowed"
+					placeholder="Room Name..."
+					spellcheck="false"
+				/>
 				<label class="label" for="draftNumber">Max movie draft number</label>
 				<select id="draftNumber" name="draftNumber" class="select">
 					<option value="1">1</option>

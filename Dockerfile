@@ -40,7 +40,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -o watchma ./cmd/main.go
 # ============
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y ca-certificates sqlite3 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates sqlite3 curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
