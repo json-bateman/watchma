@@ -1,0 +1,42 @@
+package http_error
+
+templ JellyfinUnauthorized() {
+	<section class="flex flex-col items-center justify-center min-h-[60vh] px-4">
+		<div class="text-center mb-8">
+			<div class="text-primary text-8xl md:text-9xl font-bold mb-4 text-shadow-hard">
+				401
+			</div>
+			<div class="text-text text-2xl md:text-3xl tracking-wide mb-2">
+				ACCESS DENIED
+			</div>
+			<div class="text-text/70 text-lg tracking-wider mb-8">
+				Likely a problem with your Jellyfin credentials
+			</div>
+		</div>
+		<div class="bg-background border-4 border-primary p-6 shadow-brutalist max-w-2xl mb-8">
+			<div class="text-text text-xl mb-4 font-bold">
+				What went wrong?
+			</div>
+			<div class="text-text/80 mb-4">
+				Watchma couldn't connect to your Jellyfin server. This usually means:
+			</div>
+			<ul class="text-text/70 list-disc list-inside space-y-2 mb-6">
+				<li>Your Jellyfin API key is invalid or expired</li>
+				<li>Your Jellyfin URL is incorrect</li>
+				<li>Your Jellyfin server is unreachable</li>
+			</ul>
+			<div class="text-text text-xl mb-4 font-bold">
+				How to fix it:
+			</div>
+			<ol class="text-text/70 list-decimal list-inside space-y-2">
+				<li>Check your Jellyfin server is running and accessible</li>
+				<li>Verify your API key in Jellyfin Dashboard → API Keys</li>
+				<li>Update your environment variables (JELLYFIN_API_KEY, JELLYFIN_BASE_URL)</li>
+				<li>Restart the Watchma container</li>
+			</ol>
+		</div>
+		<div class="mt-12 text-text/50 text-sm tracking-wide">
+			Still having trouble? Check the container logs for more details.
+		</div>
+	</section>
+}

@@ -8,6 +8,17 @@ import (
 	"watchma/pkg/movie"
 )
 
+// HTTPError represents an HTTP error with status code
+type HTTPError struct {
+	StatusCode int
+	Status     string
+	Message    string
+}
+
+func (e *HTTPError) Error() string {
+	return e.Message
+}
+
 type jellyfinItem struct {
 	Name            string  `json:"Name"`
 	Id              string  `json:"Id"`
@@ -61,10 +72,13 @@ func (p *JellyfinMovieProvider) FetchMovies() ([]movie.Movie, error) {
 		p.logger.Error("Jellyfin returned error status",
 			"status_code", resp.StatusCode,
 			"status", resp.Status,
-			"baseUrl", p.baseUrl,
-			"reqUri", req.RequestURI,
+			"reqUrl", req.URL,
 		)
-		return nil, fmt.Errorf("jellyfin returned status %d: %s (check API key and URL)", resp.StatusCode, resp.Status)
+		return nil, &HTTPError{
+			StatusCode: resp.StatusCode,
+			Status:     resp.Status,
+			Message:    fmt.Sprintf("jellyfin returned status %d: %s (check API key and URL)", resp.StatusCode, resp.Status),
+		}
 	}
 
 	var result jellyfinResponse

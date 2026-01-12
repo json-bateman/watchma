@@ -1,25 +1,10 @@
-# Watchma - Watchma movies hit yo screen. 🎬
+# Watchma
 
-Stop arguing about what to watch. Watchma is a fun, interactive movie voting system for groups. Connect to your Jellyfin server and let everyone vote on what to watch - no more endless scrolling!
+Stop arguing about what to watch. Watchma is an interactive movie voting system for groups. Connect to your Jellyfin server and let everyone vote and then Watchma movies hit yo screen. 🎬
 
 The voting system is influenced by the young CGP Grey. [Everyone Should Vote More Than Once](https://www.youtube.com/watch?v=orybDrUj4vA)
 
-
-## Quick Start
-
-The fastest way to get started:
-
-```bash
-docker run -d \
-  --name watchma \
-  -p 58008:58008 \
-  -v ./watchma-data:/data \
-  jsonbateman/watchma:latest
-```
-
-Then open http://localhost:58008 in your browser!
-
-## Docker Compose (Recommended)
+## Setup: Docker Compose (Recommended)
 
 Create a `docker-compose.yml` file:
 
@@ -68,7 +53,7 @@ docker compose up -d
 4. Name it "Watchma" and copy the key
 
 
-**Note:** Watchma works without Jellyfin! However, It'll use dummy movie data for testing. Jellyfin url gives the full experience. 
+**Note:** Watchma works without Jellyfin. However, It'll use dummy movie data for testing. Jellyfin url and api key gives the full experience. 
 
 ### Volumes
 
@@ -76,7 +61,7 @@ docker compose up -d
 |----------------|---------|----------|
 | `/data` | Database and persistent data | Yes |
 
-**Important:** Make sure to mount `/data` to persist your users, game history, and settings!
+**Important:** Make sure to mount `/data` to persist your users, game history, and settings.
 
 ## Unraid Installation
 
@@ -97,7 +82,7 @@ Docker will automatically pull the correct architecture for your system.
 1. **Create a Room** - One person creates a room and shares the room name
 2. **Draft Movies** - Everyone picks their favorite movies from your library
 3. **Vote** - The system combines all drafts and everyone votes
-4. **Watch!** - The winner is revealed with a fun announcement
+4. **Watchma** - The winner is revealed with a fun announcement
 
 ## Healthcheck
 

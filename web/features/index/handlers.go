@@ -3,14 +3,17 @@ package index
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
 	"watchma/db/sqlcgen"
 	appctx "watchma/pkg/context"
+	"watchma/pkg/jellyfin"
 	"watchma/pkg/movie"
 	"watchma/web"
 	"watchma/web/features/index/pages"
+	"watchma/web/views/http_error"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -31,7 +34,13 @@ func (h *handlers) index(w http.ResponseWriter, r *http.Request) {
 	movieOfTheDay, err := h.movieService.GetMovieOfTheDay()
 
 	if err != nil {
-		// TODO: handle case where no movie of the day was found...
+		// Check if it's an HTTP error from Jellyfin
+		var httpErr *jellyfin.HTTPError
+		if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusUnauthorized {
+			web.RenderPage(http_error.JellyfinUnauthorized(), "Jellyfin Unauthorized", w, r)
+			return
+		}
+		http.Error(w, "Failed to load movie of the day", http.StatusInternalServerError)
 		return
 	}
 

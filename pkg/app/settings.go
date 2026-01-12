@@ -40,7 +40,7 @@ func LoadSettings() *Settings {
 	config := &Settings{
 		// Once again, don't log the api keys!
 		JellyfinApiKey:  os.Getenv(JELLYFIN_API_KEY),
-		JellyfinBaseURL: os.Getenv(JELLYFIN_BASE_URL),
+		JellyfinBaseURL: strings.TrimSuffix(os.Getenv(JELLYFIN_BASE_URL), "/"),
 		UseDummyData:    os.Getenv(JELLYFIN_API_KEY) == "" || os.Getenv(JELLYFIN_BASE_URL) == "",
 		LogLevel:        parseLogLevel(os.Getenv(LOG_LEVEL)),
 

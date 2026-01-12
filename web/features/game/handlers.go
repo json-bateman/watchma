@@ -183,6 +183,7 @@ func (h *handlers) leaveRoom(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (h *handlers) publishChatMessage(w http.ResponseWriter, r *http.Request) {
