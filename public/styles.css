@@ -962,6 +962,11 @@
       flex-direction: row;
     }
   }
+  .sm\:p-4 {
+    @media (width >= 40rem) {
+      padding: calc(var(--spacing) * 4);
+    }
+  }
   .md\:h-\[572px\] {
     @media (width >= 48rem) {
       height: 572px;

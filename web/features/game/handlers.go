@@ -137,8 +137,10 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomStartEvent:
+			sse.ExecuteScript("window.allowNavigation()")
 			sse.Redirect("/room/" + roomName + "/draft")
 		case room.RoomVotingEvent:
+			sse.ExecuteScript("window.allowNavigation()")
 			sse.Redirect("/room/" + roomName + "/voting")
 		case room.RoomAnnounceEvent:
 			streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
@@ -146,6 +148,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomFinishEvent:
+			sse.ExecuteScript("window.allowNavigation()")
 			sse.Redirect("/room/" + roomName + "/results")
 
 		default: // discard for now, maybe error?

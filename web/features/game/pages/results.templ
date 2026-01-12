@@ -37,8 +37,8 @@ templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
 	</section>
 	<script>
 		(function() {
-			var leaveUrl = '/room/' + {{ room.Name }} + '/leave';
-			var hasLeft = false;
+			const leaveUrl = '/room/' + {{ room.Name }} + '/leave';
+			let hasLeft = false;
 
 			function leaveRoom() {
 				if (!hasLeft) {
@@ -47,7 +47,7 @@ templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
 				}
 			}
 
-			// pagehide fires when user actually leaves (refresh, close, navigate away)
+			// Always leave room on any navigation (no confirmation)
 			window.addEventListener('pagehide', leaveRoom);
 		})();
 	</script>

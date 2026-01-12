@@ -42,19 +42,19 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y ca-certificates sqlite3 curl && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /
 
 # Copy binary and assets from the builder
-COPY --from=builder /app/watchma .
+COPY --from=builder /app/watchma ./watchma
 COPY --from=builder /app/public ./public
 
 # Create data directory for database
-RUN mkdir -p /app/data
+RUN mkdir -p /data
 
 # Declare volume for persistent data
-VOLUME ["/app/data"]
+VOLUME ["/data"]
 
 EXPOSE 58008
 
-CMD ["./watchma"]
+CMD ["/watchma"]
 

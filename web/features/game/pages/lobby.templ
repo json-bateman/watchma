@@ -62,8 +62,9 @@ templ Lobby(room *roomPkg.Room, username string) {
 	</section>
 	<script>
 		(function() {
-			var leaveUrl = '/room/' + {{ room.Name }} + '/leave';
-			var hasLeft = false;
+			const leaveUrl = '/room/' + {{ room.Name }} + '/leave';
+			let hasLeft = false;
+			let allowNavigation = false;
 
 			function leaveRoom() {
 				if (!hasLeft) {
@@ -72,15 +73,22 @@ templ Lobby(room *roomPkg.Room, username string) {
 				}
 			}
 
-			// Custom modal for back button
-			window.history.pushState(null, null, window.location.href);
-			window.addEventListener('popstate', function(event) {
-				if (confirm('Leaving this page will remove you from the room. Are you sure?')) {
+			// Expose function to allow navigation (called before legitimate page transitions)
+			window.allowNavigation = function() {
+				allowNavigation = true;
+			};
+
+			window.addEventListener('beforeunload', function(event) {
+				if (!allowNavigation) {
+					event.preventDefault();
+					event.returnValue = ''; // Required for Chrome
+				}
+			});
+
+			// Actually leave the room when page unloads (unless it's allowed navigation)
+			window.addEventListener('pagehide', function() {
+				if (!allowNavigation) {
 					leaveRoom();
-					window.history.back();
-				} else {
-					// Stay on page
-					window.history.pushState(null, null, window.location.href);
 				}
 			});
 		})();
@@ -115,7 +123,7 @@ templ UserBox(room *roomPkg.Room, username string) {
 		}
 		<button
 			class="btn bg-red-600 border-red-700 mb-4 uppercase tracking-wide"
-			data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => window.location.href = '/')", room.Name) }
+			data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => { allowNavigation(); window.location.href = '/'; })", room.Name) }
 		>
 			Leave Room
 		</button>

@@ -23,7 +23,7 @@
   <DonateLink>https://ko-fi.com/jsonbateman</DonateLink>
   <Requires/>
   <Config Name="WebUI Port" Target="58008" Default="58008" Mode="tcp" Description="Web interface port" Type="Port" Display="always" Required="true" Mask="false">58008</Config>
-  <Config Name="Data Directory" Target="/app/data" Default="/mnt/user/appdata/watchma" Mode="rw" Description="Directory for database and persistent data" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/watchma</Config>
+  <Config Name="Data Directory" Target="/data" Default="/mnt/user/appdata/watchma" Mode="rw" Description="Directory for database and persistent data" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/watchma</Config>
   <Config Name="Jellyfin API Key" Target="JELLYFIN_API_KEY" Default="" Mode="" Description="Your Jellyfin API key (optional - uses dummy data if not provided)" Type="Variable" Display="always" Required="false" Mask="true"/>
   <Config Name="Jellyfin Base URL" Target="JELLYFIN_BASE_URL" Default="" Mode="" Description="Your Jellyfin server URL (e.g., https://jellyfin.example.com)" Type="Variable" Display="always" Required="false" Mask="false"/>
   <Config Name="OpenAI API Key" Target="OPENAI_API_KEY" Default="" Mode="" Description="OpenAI API key for AI-generated game messages (optional)" Type="Variable" Display="always" Required="false" Mask="true"/>

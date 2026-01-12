@@ -13,5 +13,5 @@ services:
       - IS_DEV=false
 
     volumes:
-      - ./data:/app/data
+      - ./data:/data
     restart: unless-stopped
