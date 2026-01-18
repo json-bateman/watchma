@@ -127,15 +127,15 @@ test.describe("Game Flow", () => {
       await pageB.click("#votingSubmit");
 
       // --Announcement---
-      // NOTE: Announcement message pauses for 3 seconds
-      await pageA.waitForTimeout(4_000);
-      await pageB.waitForTimeout(4_000);
+      // NOTE: Announcement message pauses for 2 seconds
+      await pageA.waitForTimeout(3_000);
+      await pageB.waitForTimeout(3_000);
 
       // --Results---
-      await expect(pageA.locator("text=/and the winner is/i")).toBeVisible({
+      await expect(pageA.locator("text=/back to home/i")).toBeVisible({
         timeout: 5000,
       });
-      await expect(pageB.locator("text=/and the winner is/i")).toBeVisible({
+      await expect(pageB.locator("text=/back to home/i")).toBeVisible({
         timeout: 5000,
       });
     } finally {
