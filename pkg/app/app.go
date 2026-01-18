@@ -10,6 +10,7 @@ import (
 	"watchma/db"
 	"watchma/db/sqlcgen"
 	"watchma/pkg/auth"
+	"watchma/pkg/buildinfo"
 	"watchma/pkg/jellyfin"
 	"watchma/pkg/movie"
 	"watchma/pkg/openai"
@@ -133,14 +134,12 @@ func (a *App) Run() error {
 			a.Logger.Info("NATS client connection closed")
 		}
 
-		// Shutdown embedded NATS server
 		if a.NATSServer != nil {
 			a.NATSServer.Shutdown()
 			a.NATSServer.WaitForShutdown()
 			a.Logger.Info("Embedded NATS server shutdown")
 		}
 
-		// Close database
 		if a.DB != nil {
 			a.DB.Close()
 			a.Logger.Info("Database closed")
@@ -168,5 +167,11 @@ func (a *App) logConfig() {
 	a.Logger.Info("PORT", "port", a.Settings.Port)
 	a.Logger.Info("LOG_LEVEL", "level", a.Settings.LogLevel)
 	a.Logger.Info("IS_DEV", "isDev", a.Settings.IsDev)
+	fmt.Println("~~~~~Build~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+	a.Logger.Info("HOST", "value", buildinfo.Hostname())
+	a.Logger.Info("VERSION", "value", buildinfo.Version)
+	a.Logger.Info("COMMIT", "value", buildinfo.Commit)
+	a.Logger.Info("BUILD_TIME", "value", buildinfo.BuildTime)
+	a.Logger.Info("GO_VERSION", "value", buildinfo.GoVersion())
 	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 }

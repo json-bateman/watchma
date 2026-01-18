@@ -6,6 +6,8 @@ set -e
 DOCKER_USERNAME=${DOCKER_USERNAME:-"jsonbateman"}
 IMAGE_NAME="watchma"
 VERSION=${1:-latest}
+COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 echo "Building multi-platform Docker image for $DOCKER_USERNAME/$IMAGE_NAME:$VERSION"
 
@@ -23,6 +25,9 @@ fi
 echo "Building and pushing for linux/amd64 and linux/arm64..."
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
+    --build-arg VERSION=$VERSION \
+    --build-arg COMMIT=$COMMIT \
+    --build-arg BUILD_TIME=$BUILD_TIME \
     -t $DOCKER_USERNAME/$IMAGE_NAME:$VERSION \
     -t $DOCKER_USERNAME/$IMAGE_NAME:latest \
     --push \

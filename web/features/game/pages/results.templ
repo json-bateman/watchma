@@ -7,25 +7,18 @@ import (
 	"watchma/web/views/common"
 )
 
-templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
-	<div class="w-full" id="roomContent">
-		<div class="flex flex-col justify-center items-center">
-			if len(winnerMovies) > 1 {
-				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>
-			} else {
-				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winner is:</span>
-			}
+templ ResultsScreen(winnerMovie moviePkg.Vote, room *room.Room) {
+	<div class="w-full h-full" id="roomContent">
+		<div class="flex flex-col h-full justify-center items-center">
 			<div id="movieContainer" class="flex justify-center flex-wrap gap-2 md:gap-4 mt-6">
-				for _, movieVote := range winnerMovies {
-					<div class="block glow-border w-72 h-[428px] md:w-96 md:h-[572px]">
-						@common.MovieTitleImage(*movieVote.Movie, common.MovieTitleImageOptions{})
-					</div>
-				}
+				<div class="block glow-border w-72 h-[428px] md:w-96 md:h-[572px]">
+					@common.MovieTitleImage(*winnerMovie.Movie, common.MovieTitleImageOptions{})
+				</div>
 			</div>
-			if winnerMovies[0].Votes > 1 {
-				<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Votes!</div>
+			if winnerMovie.Votes > 1 {
+				<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovie.Votes } Votes!</div>
 			} else {
-				<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovies[0].Votes } Vote!</div>
+				<div class="mt-6 text-3xl md:text-5xl text-primary text-shadow-hard">With { winnerMovie.Votes } Vote!</div>
 			}
 			<button
 				class="btn bg-red-600 border-red-700 mt-4 uppercase tracking-wide"

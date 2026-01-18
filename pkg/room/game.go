@@ -22,6 +22,7 @@ type Session struct {
 	Announcement  []DialogueLine
 	Votes         map[*movie.Movie]int // Movie -> vote count
 	VotingNumber  int
+	Ties          int
 	Step          Step
 }
 

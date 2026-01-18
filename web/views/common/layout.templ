@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 	"watchma/db/sqlcgen"
+	"watchma/pkg/buildinfo"
 )
 
 type PageContext struct {
@@ -88,11 +89,20 @@ templ Layout(pc PageContext) {
 					@pc.Content
 				</div>
 				if pc.HeaderFooter {
-					<footer class="border-t-3  text-shadow-hard pt-2 mt-8 pb-2 gap-3 border-primary flex justify-center items-center text-center text-lg text-primary">
-						<span>JsonB { time.Now().Year() } </span>
-						<a href="https://github.com/json-bateman" class="w-6 h-6">
-							<img src="/public/github-logo.svg"/>
-						</a>
+					<footer class="border-t-3 pt-2 mt-8 pb-2 border-primary flex flex-col items-center text-center text-lg text-primary">
+						<div class="flex justify-center gap-3 items-center">
+							<span class="text-shadow-hard">JsonB { time.Now().Year() } </span>
+							<a href="https://github.com/json-bateman" class="w-6 h-6">
+								<img src="/public/github-logo.svg"/>
+							</a>
+						</div>
+						<div>
+							<span class="text-sm opacity-75">
+								{ buildinfo.Hostname() } &bull;
+								{ buildinfo.Version } &bull;
+								{ shortenStrToLen(buildinfo.Commit, 7) }
+							</span>
+						</div>
 					</footer>
 				}
 			</main>
@@ -176,4 +186,11 @@ func CapitalizeFirst(s string) string {
 	runes := []rune(s)
 	runes[0] = []rune(strings.ToUpper(string(runes[0])))[0]
 	return string(runes)
+}
+
+func shortenStrToLen(str string, length int) string {
+	if len(str) > length {
+		return str[:length]
+	}
+	return str
 }

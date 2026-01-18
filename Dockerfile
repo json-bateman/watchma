@@ -3,6 +3,10 @@
 # ===========
 FROM golang:1.24 AS builder
 
+ARG VERSION=dev
+ARG COMMIT=unknown
+ARG BUILD_TIME=unknown
+
 # Install build dependencies and Node.js
 RUN apt-get update && apt-get install -y wget ca-certificates curl && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
@@ -31,8 +35,10 @@ RUN templ generate
 # Ensure web/input.css uses:  @import "tailwindcss";
 RUN npx @tailwindcss/cli@latest -i ./web/input.css -o ./public/style.css --minify
 
-# Build the Go application
-RUN CGO_ENABLED=1 GOOS=linux go build -o watchma ./cmd/main.go
+# Build the Go application with version info
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -ldflags "-X watchma/pkg/buildinfo.Version=${VERSION} -X watchma/pkg/buildinfo.Commit=${COMMIT} -X watchma/pkg/buildinfo.BuildTime=${BUILD_TIME}" \
+    -o watchma ./cmd/main.go
 
 
 # ============

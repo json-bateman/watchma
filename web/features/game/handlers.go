@@ -176,7 +176,7 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 		case room.RoomFinishEvent:
 			movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
 			winnerMovies := getWinnerMovies(movieVotes)
-			resultsPage := pages.ResultsScreen(winnerMovies, myRoom)
+			resultsPage := pages.ResultsScreen(winnerMovies[0], myRoom)
 			if err := sse.PatchElementTempl(resultsPage); err != nil {
 				h.logger.Error("Error patching results page", "error", err)
 				return
@@ -471,8 +471,13 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 		tiedMovies := getWinnerMovies(movieVotes)
 		myRoom.Game.VotingNumber = tiedMovies[0].Votes
 		if len(tiedMovies) > 1 {
-			// If there's a tie, find number of votes and reset players
-			// so they can vote again
+			myRoom.Game.Ties++
+			// Cap number of ties at 3, choose randomly after
+			if myRoom.Game.Ties >= 3 {
+				myRoom.Game.Step = room.Announce
+				h.generateAndStreamAnnouncement(roomName, tiedMovies[0].Movie)
+				return
+			}
 			tied := make([]movie.Movie, 0, len(tiedMovies))
 			for _, m := range tiedMovies {
 				tied = append(tied, *m.Movie)
@@ -488,9 +493,7 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 			h.roomService.MoveToVoting(myRoom.Name)
 		} else {
 			myRoom.Game.Step = room.Announce
-			// Trigger announcement with AI generation
 			h.generateAndStreamAnnouncement(roomName, tiedMovies[0].Movie)
-			// h.roomService.AnnounceWinner(roomName)
 		}
 	} else {
 		h.renderVotingPage(w, r)
@@ -546,7 +549,7 @@ func (h *handlers) results(w http.ResponseWriter, r *http.Request) {
 	movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
 	winnerMovies := getWinnerMovies(movieVotes)
 
-	web.RenderPage(pages.ResultsScreen(winnerMovies, myRoom), myRoom.Name, w, r)
+	web.RenderPage(pages.ResultsScreen(winnerMovies[0], myRoom), myRoom.Name, w, r)
 }
 
 // =============== HELPERS ================
