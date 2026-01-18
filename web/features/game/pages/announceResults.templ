@@ -6,12 +6,12 @@ import (
 )
 
 templ AiAnnounce(r *roomPkg.Room, strStream []room.DialogueLine) {
-	<section id="moviesRoom">
+	<div id="roomContent">
 		for _, str := range strStream {
 			<div class="flex gap-4">
 				<span class="font-serif text-primary text-2xl">{ str.Character }:</span>
 				<span class="font-serif text-text text-2xl">{ str.Dialogue }</span>
 			</div>
 		}
-	</section>
+	</div>
 }

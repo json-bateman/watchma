@@ -61,6 +61,18 @@ func (h *handlers) singleRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if game has already started
+	if myRoom.Game.Step != room.Lobby {
+		// Game in progress - check if player is already in the room
+		_, playerInRoom := myRoom.GetPlayer(user.Username)
+		if !playerInRoom {
+			// Player not in room and game started - redirect to home
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+		// Player is in room - let them reconnect (fall through)
+	}
+
 	if myRoom.Game.MaxPlayers <= len(myRoom.Players) {
 		web.RenderPage(pages.RoomFull(), roomName, w, r)
 		return
@@ -137,19 +149,38 @@ func (h *handlers) singleRoomSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case room.RoomStartEvent:
-			sse.ExecuteScript("window.allowNavigation()")
-			sse.Redirect("/room/" + roomName + "/draft")
+			player, ok := h.getPlayerInRoom(myRoom, user.Username)
+			if !ok {
+				return
+			}
+			draftPage := pages.Draft(player, myRoom)
+			if err := sse.PatchElementTempl(draftPage); err != nil {
+				h.logger.Error("Error patching draft page", "error", err)
+				return
+			}
 		case room.RoomVotingEvent:
-			sse.ExecuteScript("window.allowNavigation()")
-			sse.Redirect("/room/" + roomName + "/voting")
+			player, ok := h.getPlayerInRoom(myRoom, user.Username)
+			if !ok {
+				return
+			}
+			votingPage := pages.Voting(myRoom.Game.VotingMovies, player, myRoom)
+			if err := sse.PatchElementTempl(votingPage); err != nil {
+				h.logger.Error("Error patching voting page", "error", err)
+				return
+			}
 		case room.RoomAnnounceEvent:
 			streamedMessagePage := pages.AiAnnounce(myRoom, myRoom.Game.Announcement)
 			if err := sse.PatchElementTempl(streamedMessagePage); err != nil {
 				return
 			}
 		case room.RoomFinishEvent:
-			sse.ExecuteScript("window.allowNavigation()")
-			sse.Redirect("/room/" + roomName + "/results")
+			movieVotes := sortMoviesByVotes(myRoom.Game.Votes)
+			winnerMovies := getWinnerMovies(movieVotes)
+			resultsPage := pages.ResultsScreen(winnerMovies, myRoom)
+			if err := sse.PatchElementTempl(resultsPage); err != nil {
+				h.logger.Error("Error patching results page", "error", err)
+				return
+			}
 
 		default: // discard for now, maybe error?
 		}
@@ -262,14 +293,21 @@ func (h *handlers) draft(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) deleteFromSelectedMovies(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	movieId := chi.URLParam(r, "id")
-	user, ok := h.getUserFromRequest(w, r)
+	_, _, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
 		return
 	}
 
+	// Prevent changes if already submitted
+	if player.HasFinishedDraft {
+		h.logger.Warn("Cannot modify draft after submission", "Room", roomName, "Username", player.Username)
+		h.renderDraftPage(w, r)
+		return
+	}
+
 	// Use RoomService to handle business logic
-	if !h.roomService.RemoveDraftMovie(roomName, user.Username, movieId) {
-		h.logger.Warn("Failed to remove draft movie", "Room", roomName, "Username", user.Username, "MovieId", movieId)
+	if !h.roomService.RemoveDraftMovie(roomName, player.Username, movieId) {
+		h.logger.Warn("Failed to remove draft movie", "Room", roomName, "Username", player.Username, "MovieId", movieId)
 	}
 
 	h.renderDraftPage(w, r)
@@ -280,6 +318,13 @@ func (h *handlers) toggleDraftMovie(w http.ResponseWriter, r *http.Request) {
 	roomName := chi.URLParam(r, "roomName")
 	_, user, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
+		return
+	}
+
+	// Prevent changes if already submitted
+	if player.HasFinishedDraft {
+		h.logger.Warn("Cannot modify draft after submission", "Room", roomName, "Username", user.Username)
+		h.renderDraftPage(w, r)
 		return
 	}
 
@@ -455,8 +500,15 @@ func (h *handlers) votingSubmit(w http.ResponseWriter, r *http.Request) {
 func (h *handlers) toggleVotingMovie(w http.ResponseWriter, r *http.Request) {
 	movieId := chi.URLParam(r, "id")
 	roomName := chi.URLParam(r, "roomName")
-	myRoom, user, _, ok := h.getRoomUserAndPlayer(w, r, roomName)
+	myRoom, user, player, ok := h.getRoomUserAndPlayer(w, r, roomName)
 	if !ok {
+		return
+	}
+
+	// Prevent changes if already submitted
+	if player.HasFinishedVoting {
+		h.logger.Warn("Cannot modify votes after submission", "Room", roomName, "Username", user.Username)
+		h.renderVotingPage(w, r)
 		return
 	}
 
@@ -607,7 +659,7 @@ func (h *handlers) generateAndStreamAnnouncement(roomName string, winnerMovie *m
 		Dialogue:  "And the Winner Is...",
 	}}
 	h.roomService.StreamAnnouncement(roomName)
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	h.roomService.FinishGame(roomName)
 }

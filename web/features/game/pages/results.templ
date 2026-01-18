@@ -8,7 +8,7 @@ import (
 )
 
 templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
-	<section class="w-full" id="moviesRoom" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }>
+	<div class="w-full" id="roomContent">
 		<div class="flex flex-col justify-center items-center">
 			if len(winnerMovies) > 1 {
 				<span class="text-4xl md:text-6xl text-shadow-hard">And the Winners are:</span>
@@ -29,26 +29,10 @@ templ ResultsScreen(winnerMovies []moviePkg.Vote, room *room.Room) {
 			}
 			<button
 				class="btn bg-red-600 border-red-700 mt-4 uppercase tracking-wide"
-				data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => window.location.href = '/')", room.Name) }
+				data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => { window.allowNavigation = true; window.location.href = '/'; })", room.Name) }
 			>
 				Back To Home
 			</button>
 		</div>
-	</section>
-	<script>
-		(function() {
-			const leaveUrl = '/room/' + {{ room.Name }} + '/leave';
-			let hasLeft = false;
-
-			function leaveRoom() {
-				if (!hasLeft) {
-					hasLeft = true;
-					navigator.sendBeacon(leaveUrl);
-				}
-			}
-
-			// Always leave room on any navigation (no confirmation)
-			window.addEventListener('pagehide', leaveRoom);
-		})();
-	</script>
+	</div>
 }

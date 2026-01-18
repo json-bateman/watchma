@@ -5,7 +5,7 @@
 ### Why I made this
 How many times have you thought "Man there's nothing to watch"? But then you actually have hundreds of movies at your disposal and you're simply overwhelmed by choices and your friends can't actually decide on what to watch so you just end up scrolling Jellyfin and arguing?
 
-Ok maybe this is a specific me problem, but if it's not, that's why I made this site, hopefully to make the process of picking a movie more fun, as of now it's a basic voting system with lobbies. But if I'm feeling ambitious I'd like to make this jackbox style one day.
+Ok maybe this is a specific me problem, but if it's not, that's why I made this site, hopefully to make the process of picking a movie more fun.
 
 The voting system is influenced by the young CGP Grey. [Everyone Should Vote More Than Once](https://www.youtube.com/watch?v=orybDrUj4vA)
 

@@ -13,6 +13,7 @@ type MovieGridOptions struct {
 	MaxCardWidth     string
 	MakeOnClickMovie func(movieId string) string
 	Selectable       bool
+	Disabled         bool
 	ShowOverlay      bool
 }
 
@@ -57,10 +58,16 @@ templ SelectableMovieCard(movie moviePkg.Movie, selectedMovies []moviePkg.Movie,
 			return m.Id == movie.Id
 		})
 
-		labelClass := "aspect-[2/3] cursor-pointer relative group box-border max-w-[var(--card-max)]"
+		labelClass := "aspect-[2/3] relative group box-border max-w-[var(--card-max)]"
+
+		if !opts.Disabled {
+			labelClass += " cursor-pointer"
+		} else {
+			labelClass += " opacity-70 cursor-not-allowed"
+		}
 
 		if selected {
-			labelClass += "border-2 border-orange-500 ring-4 ring-orange-500 shadow-brutalist"
+			labelClass += " border-2 border-orange-500 ring-4 ring-orange-500 shadow-brutalist"
 		}
 	}}
 	<label
@@ -73,7 +80,12 @@ templ SelectableMovieCard(movie moviePkg.Movie, selectedMovies []moviePkg.Movie,
 			class="hidden"
 			type="checkbox"
 			value={ movie.Id }
-			data-on:click={ opts.MakeOnClickMovie(movie.Id) }
+			if !opts.Disabled {
+				data-on:click={ opts.MakeOnClickMovie(movie.Id) }
+			}
+			if opts.Disabled {
+				disabled
+			}
 			aria-label={ movie.Name }
 		/>
 		@MovieTitleImage(movie, MovieTitleImageOptions{

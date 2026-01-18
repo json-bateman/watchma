@@ -9,10 +9,18 @@ import (
 )
 
 templ Voting(votingMovies []movie.Movie, player *room.Player, room *room.Room) {
-	<section class="w-full" id="moviesRoom" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }>
+	<div class="w-full" id="roomContent">
 		<div class="flex flex-col w-full justify-center items-center">
 			<div class="my-8 text-center flex flex-col justify-center">
 				<span class="text-5xl shadow-dance-text">Voting</span>
+				<div class="flex justify-center my-4">
+					<button
+						class="btn uppercase tracking-wide"
+						data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => { window.allowNavigation = true; window.location.href = '/'; })", room.Name) }
+					>
+						Leave Room
+					</button>
+				</div>
 				if room.Game.VotingNumber > 0 {
 					<div class="mt-4">
 						There was a&nbsp;
@@ -23,56 +31,26 @@ templ Voting(votingMovies []movie.Movie, player *room.Player, room *room.Room) {
 					<div>Vote Again!</div>
 				}
 			</div>
-			<div class="text-text w-full flex flex-col items-center justify-center">
-				@submitVoting(player, room)
+			<div class="text-text w-full flex flex-col justify-center">
+				<div class="flex flex-wrap flex-col gap-2 mb-4">
+					@submitVoting(player, room)
+				</div>
 				@common.Error("")
 				<div class="w-full flex justify-center">
 					<section class="mt-4 w-full">
-						@VotingGrid(votingMovies, player.VotingMovies, room)
+						@VotingGrid(votingMovies, player.VotingMovies, room, player.HasFinishedVoting)
 					</section>
 				</div>
 			</div>
 		</div>
-	</section>
-	<script>
-		(function() {
-			const leaveUrl = '/room/' + {{ room.Name }} + '/leave';
-			let hasLeft = false;
-			let allowNavigation = false;
-
-			function leaveRoom() {
-				if (!hasLeft) {
-					hasLeft = true;
-					navigator.sendBeacon(leaveUrl);
-				}
-			}
-
-			// Expose function to allow navigation (called before legitimate page transitions)
-			window.allowNavigation = function() {
-				allowNavigation = true;
-			};
-
-			window.addEventListener('beforeunload', function(event) {
-				if (!allowNavigation) {
-					event.preventDefault();
-					event.returnValue = ''; // Required for Chrome
-				}
-			});
-
-			// Actually leave the room when page unloads (unless it's allowed navigation)
-			window.addEventListener('pagehide', function() {
-				if (!allowNavigation) {
-					leaveRoom();
-				}
-			});
-		})();
-	</script>
+	</div>
 }
 
-templ VotingGrid(movies []movie.Movie, selectedMovies []movie.Movie, room *room.Room) {
+templ VotingGrid(movies []movie.Movie, selectedMovies []movie.Movie, room *room.Room, disabled bool) {
 	{{
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true
+		gridOptions.Disabled = disabled
 		gridOptions.MaxCardWidth = "225px"
 		gridOptions.MinCardWidth = "160px"
 		gridOptions.MakeOnClickMovie = func(movieId string) string {
@@ -87,7 +65,7 @@ templ submitVoting(player *room.Player, room *room.Room) {
 		selectedCount := len(player.VotingMovies)
 		disabled := selectedCount == 0
 	}}
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-wrap flex-col items-center mt-4 gap-2">
 		if selectedCount == 1 {
 			<span>Selected { selectedCount } movie</span>
 		} else {

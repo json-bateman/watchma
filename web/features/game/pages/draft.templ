@@ -10,63 +10,38 @@ import (
 
 templ Draft(player *roomPkg.Player, room *roomPkg.Room) {
 	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
-	<div id="moviesRoom" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) } data-signals={ "{search:'', sort:'', genre:''}" }>
+	<div id="roomContent" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="my-8 flex justify-center">
 			<span class="text-5xl shadow-dance-text">Draft</span>
 		</div>
-		<div class="w-full flex-wrap gap-4 flex justify-between items-center">
+		<div class="flex justify-center my-4">
+			<button
+				class="btn uppercase tracking-wide"
+				data-on:click={ fmt.Sprintf("@post('/room/%s/leave').then(() => { window.allowNavigation = true; window.location.href = '/'; })", room.Name) }
+			>
+				Leave Room
+			</button>
+		</div>
+		<div class="w-full flex-wrap gap-4 flex justify-between">
 			<section class="flex gap-4 flex-wrap">
 				@search(room)
 				<div class="flex gap-4 flex-wrap">
 					@filters(room)
 				</div>
 			</section>
-			<section>
-				@submit(player, room)
-				@common.Error("")
-			</section>
 		</div>
+		<section class="flex flex-col flex-wrap gap-2">
+			@submit(player, room)
+			@common.Error("")
+		</section>
 		if showSelectedMovies {
 			<section class="mt-4">
-				@selectedMovies(player.AvailableMovies, player.DraftMovies, room)
+				@selectedMovies(player.AvailableMovies, player.DraftMovies, room, player.HasFinishedDraft)
 			</section>
 		}
 		<section class="mt-4">
-			@DraftGrid(player.AvailableMovies, player.DraftMovies, room)
+			@DraftGrid(player.AvailableMovies, player.DraftMovies, room, player.HasFinishedDraft)
 		</section>
-		<script>
-		(function() {
-			const leaveUrl = '/room/' + {{ room.Name }} + '/leave';
-			let hasLeft = false;
-			let allowNavigation = false;
-
-			function leaveRoom() {
-				if (!hasLeft) {
-					hasLeft = true;
-					navigator.sendBeacon(leaveUrl);
-				}
-			}
-
-			// Expose function to allow navigation (called before legitimate page transitions)
-			window.allowNavigation = function() {
-				allowNavigation = true;
-			};
-
-			window.addEventListener('beforeunload', function(event) {
-				if (!allowNavigation) {
-					event.preventDefault();
-					event.returnValue = ''; // Required for Chrome
-				}
-			});
-
-			// Actually leave the room when page unloads (unless it's allowed navigation)
-			window.addEventListener('pagehide', function() {
-				if (!allowNavigation) {
-					leaveRoom();
-				}
-			});
-		})();
-	</script>
 	</div>
 }
 
@@ -136,7 +111,7 @@ templ submit(player *roomPkg.Player, room *roomPkg.Room) {
 		selectedCount := len(player.DraftMovies)
 		disabled := selectedCount == 0
 	}}
-	<div class="flex flex-wrap items-center gap-2">
+	<div class="flex flex-col mt-4 flex-wrap gap-2">
 		<span>Selected { selectedCount } of { room.Game.MaxDraftCount } movies</span>
 		if player.HasFinishedDraft {
 			<button disabled class="btn-success">Movies Submitted!</button>
@@ -159,30 +134,33 @@ templ submit(player *roomPkg.Player, room *roomPkg.Room) {
 	</div>
 }
 
-templ selectedMovies(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room) {
+templ selectedMovies(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room, disabled bool) {
 	<div class="flex flex-wrap gap-2">
 		for _, movie := range selectedMovies {
-			<div class="inline-flex items-center pl-3 py-1 bg-primary tracking-wide text-sm text-text">
+			<div class="inline-flex items-center px-3 py-1 bg-primary tracking-wide text-sm text-text">
 				{ movie.Name }
-				<button
-					type="button"
-					class="pl-2 pr-3 cursor-pointer"
-					data-on:click={ datastar.DeleteSSE("/draft/%s/%s", room.Name, movie.Id) }
-				>
-					<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-					</svg>
-					<span class="sr-only">Remove tag</span>
-				</button>
+				if !disabled {
+					<button
+						type="button"
+						class="pl-2 cursor-pointer"
+						data-on:click={ datastar.DeleteSSE("/draft/%s/%s", room.Name, movie.Id) }
+					>
+						<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+						<span class="sr-only">Remove tag</span>
+					</button>
+				}
 			</div>
 		}
 	</div>
 }
 
-templ DraftGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room) {
+templ DraftGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room, disabled bool) {
 	{{
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true
+		gridOptions.Disabled = disabled
 		gridOptions.MakeOnClickMovie = func(movieId string) string {
 			return datastar.PatchSSE("/draft/%s/%s", room.Name, movieId)
 		}
