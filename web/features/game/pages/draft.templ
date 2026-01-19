@@ -10,7 +10,7 @@ import (
 
 templ Draft(player *roomPkg.Player, room *roomPkg.Room) {
 	{{ showSelectedMovies := len(player.DraftMovies) > 0 }}
-	<div id="roomContent" data-signals={ "{search:'', sort:'', genre:''}" }>
+	<div id="roomContent" class="w-full" data-signals={ "{search:'', sort:'', genre:''}" }>
 		<div class="my-8 flex justify-center">
 			<span class="text-5xl shadow-dance-text">Draft</span>
 		</div>
@@ -22,7 +22,7 @@ templ Draft(player *roomPkg.Player, room *roomPkg.Room) {
 				Leave Room
 			</button>
 		</div>
-		<div class="w-full flex-wrap gap-4 flex justify-between">
+		<div class="w-full flex-wrap gap-4 flex justify-center">
 			<section class="flex gap-4 flex-wrap">
 				@search(room)
 				<div class="flex gap-4 flex-wrap">
@@ -30,16 +30,16 @@ templ Draft(player *roomPkg.Player, room *roomPkg.Room) {
 				</div>
 			</section>
 		</div>
-		<section class="flex flex-col flex-wrap gap-2">
+		<section class="flex flex-col items-center flex-wrap gap-2">
 			@submit(player, room)
 			@common.Error("")
 		</section>
 		if showSelectedMovies {
-			<section class="mt-4">
+			<section class="mt-4 items-center">
 				@selectedMovies(player.AvailableMovies, player.DraftMovies, room, player.HasFinishedDraft)
 			</section>
 		}
-		<section class="mt-4">
+		<section class="mt-4 w-full">
 			@DraftGrid(player.AvailableMovies, player.DraftMovies, room, player.HasFinishedDraft)
 		</section>
 	</div>
@@ -111,7 +111,7 @@ templ submit(player *roomPkg.Player, room *roomPkg.Room) {
 		selectedCount := len(player.DraftMovies)
 		disabled := selectedCount == 0
 	}}
-	<div class="flex flex-col mt-4 flex-wrap gap-2">
+	<div class="flex flex-col items-center mt-4 flex-wrap gap-2">
 		<span>Selected { selectedCount } of { room.Game.MaxDraftCount } movies</span>
 		if player.HasFinishedDraft {
 			<button disabled class="btn-success">Movies Submitted!</button>
@@ -135,7 +135,7 @@ templ submit(player *roomPkg.Player, room *roomPkg.Room) {
 }
 
 templ selectedMovies(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, room *roomPkg.Room, disabled bool) {
-	<div class="flex flex-wrap gap-2">
+	<div class="flex flex-wrap justify-center gap-2">
 		for _, movie := range selectedMovies {
 			<div class="inline-flex items-center px-3 py-1 bg-primary tracking-wide text-sm text-text">
 				{ movie.Name }

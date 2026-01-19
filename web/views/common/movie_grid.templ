@@ -9,8 +9,6 @@ import (
 type MovieGridOptions struct {
 	EmptyMessage     string
 	Gap              string
-	MinCardWidth     string
-	MaxCardWidth     string
 	MakeOnClickMovie func(movieId string) string
 	Selectable       bool
 	Disabled         bool
@@ -19,8 +17,6 @@ type MovieGridOptions struct {
 
 func DefaultGridOptions() MovieGridOptions {
 	return MovieGridOptions{
-		MinCardWidth: "140px",
-		MaxCardWidth: "180px",
 		Gap:          "1rem",
 		Selectable:   false,
 		ShowOverlay:  true,
@@ -31,8 +27,8 @@ func DefaultGridOptions() MovieGridOptions {
 templ MovieGrid(movies []moviePkg.Movie, selectedMovies []moviePkg.Movie, opts MovieGridOptions) {
 	<div
 		id="moviegrid"
-		class="grid grid-cols-[repeat(auto-fill,minmax(var(--card-min),1fr))] gap-(--gap)"
-		style={ fmt.Sprintf("--card-min:%s; --gap:%s;", opts.MinCardWidth, opts.Gap) }
+		class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-(--gap)"
+		style={ fmt.Sprintf("--gap:%s;", opts.Gap) }
 	>
 		if len(movies) == 0 {
 			@EmptyState(opts.EmptyMessage)
@@ -58,7 +54,7 @@ templ SelectableMovieCard(movie moviePkg.Movie, selectedMovies []moviePkg.Movie,
 			return m.Id == movie.Id
 		})
 
-		labelClass := "aspect-[2/3] relative group box-border max-w-[var(--card-max)]"
+		labelClass := "aspect-[2/3] relative group box-border max-w-[140px] sm:max-w-[240px]"
 
 		if !opts.Disabled {
 			labelClass += " cursor-pointer"
@@ -73,7 +69,6 @@ templ SelectableMovieCard(movie moviePkg.Movie, selectedMovies []moviePkg.Movie,
 	<label
 		id={ movie.Id }
 		class={ labelClass }
-		style={ fmt.Sprintf("--card-max:%s;", opts.MaxCardWidth) }
 	>
 		<input
 			id={ movie.Id }

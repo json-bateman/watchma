@@ -85,11 +85,11 @@ templ Layout(pc PageContext) {
 				<!-- Display all signals delete in prod -->
 				<!-- <pre data-json-signals></pre> -->
 				<!-- Here's where the pages are injected -->
-				<div class="grow flex flex-col text-text ">
+				<div class="w-full grow max-w-3xl flex flex-col self-center items-center text-text ">
 					@pc.Content
 				</div>
 				if pc.HeaderFooter {
-					<footer class="border-t-3 pt-2 mt-8 pb-2 border-primary flex flex-col items-center text-center text-lg text-primary">
+					<footer class="border-t-3 pt-2 mt-8 border-primary flex flex-col items-center text-center text-lg text-primary">
 						<div class="flex justify-center gap-3 items-center">
 							<span class="text-shadow-hard">JsonB { time.Now().Year() } </span>
 							<a href="https://github.com/json-bateman" class="w-6 h-6">

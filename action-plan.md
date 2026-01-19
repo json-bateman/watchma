@@ -39,7 +39,7 @@
 
 - Deploy
     - [X] Deploy this as a docker container
-    - [ ] Figure out how people can use this docker container with their Jellyfin servers
+    - [X] Figure out how people can use this docker container with their Jellyfin servers
     - [ ] Figure out how to set env variables and upload stuff to dockerhub for unRAID
 
 - Side quests
@@ -49,8 +49,8 @@
 
 - Stretch goals
     - [X] let individual users log in
-    - [ ] create DB to store results of finished games (Have DB need to make table and save it)
-    - [ ] save users selections over time in the DB
+    - [X] create DB to store results of finished games (Have DB need to make table and save it)
+    - [X] save users selections over time in the DB
     - [ ] Veto round
     - [ ] Somehow lock users to current game, if they accidentally navigate away they can rejoin. 
     - [ ] Ending alternative, Host presses play, SSE event pushes everyone to a playing session of the movie in a 
@@ -58,7 +58,7 @@
     `GET/POST ---  http://localhost/Items/{itemId}/PlaybackInfo` this might be the api call
 
 - Stretchier goals
-    - [ ] Generate LLM prompt or use a preconfigured one, that makes the LLM a host for the game
     - [X] Have the LLM say something funny or witty in-betwixt rounds, deliver with SSE???
+    - [ ] Generate LLM prompt or use a preconfigured one, that makes the LLM a host for the game
     - [ ] Generate a tournament bracket?
     - [ ] People vote on the faceoffs 1 at a time

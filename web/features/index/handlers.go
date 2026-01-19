@@ -14,8 +14,6 @@ import (
 	"watchma/web"
 	"watchma/web/features/index/pages"
 	"watchma/web/views/http_error"
-
-	"github.com/go-chi/chi/v5"
 )
 
 type handlers struct {
@@ -49,12 +47,15 @@ func (h *handlers) index(w http.ResponseWriter, r *http.Request) {
 
 // Shuffle returns a page with a shuffled list of movies, up to the number requested in the query parameters
 func (h *handlers) shuffle(w http.ResponseWriter, r *http.Request) {
-	number := chi.URLParam(r, "number")
-
-	numberOfMovies, err := strconv.Atoi(number)
-	if err != nil {
-		http.Error(w, "param must be a number", http.StatusBadRequest)
-		return
+	moviesParam := r.URL.Query().Get("movies")
+	numberOfMovies := 9 // default
+	if moviesParam != "" {
+		n, err := strconv.Atoi(moviesParam)
+		if err != nil {
+			http.Error(w, "movies param must be a number", http.StatusBadRequest)
+			return
+		}
+		numberOfMovies = n
 	}
 
 	shuffledMovies, err := h.movieService.GetShuffledMovies()
@@ -67,7 +68,7 @@ func (h *handlers) shuffle(w http.ResponseWriter, r *http.Request) {
 		shuffledMovies = shuffledMovies[:numberOfMovies]
 	}
 
-	web.RenderPage(pages.Shuffle(shuffledMovies), "Movies", w, r)
+	web.RenderPage(pages.Shuffle(shuffledMovies, numberOfMovies), "Movies", w, r)
 }
 
 // Top5 returns a page with the top5 winning movies across all games played

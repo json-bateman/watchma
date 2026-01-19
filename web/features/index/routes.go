@@ -15,7 +15,7 @@ func SetupRoutes(
 	handlers := newHandlers(movieService, queries)
 
 	r.Get("/", handlers.index)
-	r.Get("/shuffle/{number}", handlers.shuffle)
+	r.Get("/shuffle", handlers.shuffle)
 	r.Get("/statistics", handlers.stats)
 	r.Get("/top5", handlers.top5)
 

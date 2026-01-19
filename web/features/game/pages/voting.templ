@@ -53,8 +53,6 @@ templ VotingGrid(movies []movie.Movie, selectedMovies []movie.Movie, room *room.
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = true
 		gridOptions.Disabled = disabled
-		gridOptions.MaxCardWidth = "225px"
-		gridOptions.MinCardWidth = "160px"
 		gridOptions.MakeOnClickMovie = func(movieId string) string {
 			return datastar.PatchSSE("/voting/%s/%s", room.Name, movieId)
 		}

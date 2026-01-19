@@ -1,18 +1,29 @@
 package pages 
 
 import (
+	"strconv"
 	"watchma/pkg/movie"
 	"watchma/web/views/common"
 )
 
-templ Shuffle(movies []movie.Movie) {
+templ Shuffle(movies []movie.Movie, count int) {
 	{{
 		gridOptions := common.DefaultGridOptions()
 		gridOptions.Selectable = false
 	}}
-	<section class="flex flex-col justify-center items-center mb-6">
+	<section class="flex flex-col max-w-3xl justify-center w-full items-center mb-6">
 		<span class="text-3xl mb-4">Shuffled Movies</span>
-		<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 md:gap-4">
+		<form method="GET" action="/shuffle" class="flex w-full justify-center items-center gap-2 mb-4">
+			<label for="movies" class="text-sm">Movies:</label>
+			<input
+				id="movies"
+				name="movies"
+				type="number"
+				value={ strconv.Itoa(count) }
+				class="w-16 px-2 py-1 border-2 border-primary bg-background text-text text-center"
+			/>
+		</form>
+		<div id="moviesSubmit" class="flex justify-center flex-wrap gap-2 w-full md:gap-4">
 			@common.MovieGrid(movies, movies, gridOptions)
 		</div>
 	</section>

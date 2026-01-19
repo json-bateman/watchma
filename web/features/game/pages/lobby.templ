@@ -33,9 +33,9 @@ templ Lobby(room *roomPkg.Room, username string) {
 			});
 		})();
 	</script>
-	<section id="moviesRoom" class="flex justify-center grow" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }>
+	<section id="lobbyPage" class="flex justify-center w-full grow" data-init={ fmt.Sprintf("@get('/sse/%s')", room.Name) }>
 		<span class="hidden" data-signals={ fmt.Sprintf("{room: '%s'}", room.Name) }></span>
-		<div id="roomContent" class="flex max-w-[800px] flex-col justify-between grow">
+		<div id="roomContent" class="flex max-w-[800px] w-full flex-col justify-between grow">
 			<div>
 				<div class="bg-background border-4 border-primary p-6 shadow-brutalist mb-6">
 					<div class="text-text flex flex-wrap justify-between items-center  uppercase mb-4 border-b-4 border-white pb-2">
@@ -123,7 +123,7 @@ templ UserBox(room *roomPkg.Room, username string) {
 					<span>{ totalReady }/{ len(players) }</span>
 				</div>
 			</div>
-			<div class="flex flex-col gap-2">
+			<div class="flex flex-col gap-2 w-full items-end">
 				<button
 					class="btn uppercase gap-2 tracking-wide"
 					data-on:click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
@@ -165,33 +165,6 @@ templ UserBox(room *roomPkg.Room, username string) {
 						<span>{ p.Username }</span>
 					</div>
 				}
-			}
-		</div>
-	</div>
-}
-
-templ Button(room *roomPkg.Room) {
-	<div class="flex flex-col">
-		<div class="flex justify-between bg-background border-4 border-primary p-4 shadow-brutalist mb-4">
-			<div class="text-text text-xl  uppercase tracking-wider">
-				<span>Players:&nbsp</span>
-				<span class="text-2xl">{ len(room.Players) }</span>
-			</div>
-			<button
-				class="btn"
-				data-on:click={ fmt.Sprintf("@post('/room/%s/ready')", room.Name) }
-			>
-				Ready Up!
-			</button>
-		</div>
-		<div class="flex flex-wrap gap-4">
-			for _, p := range room.Players {
-				<div
-					class="text-white text-xl shadow-hard-text border-4 border-text justify-center items-center max-w-48 overflow-ellipsis p-4 flex"
-					style={ getUserColor(p.Username, "background-color") }
-				>
-					<span>{ p.Username }</span>
-				</div>
 			}
 		</div>
 	</div>
